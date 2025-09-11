@@ -64,13 +64,14 @@ class TwilightClient {
         } catch (error) {
             console.error('Failed to fetch twilight times:', error);
             
-            // Return fallback data
+            // Return fallback data with more specific error info
             return {
-                dawn: 'N/A',
-                dusk: 'N/A',
-                sunrise: 'N/A',
-                sunset: 'N/A',
-                error: error.message
+                dawn: 'API Error',
+                dusk: 'API Error', 
+                sunrise: 'API Error',
+                sunset: 'API Error',
+                error: error.message,
+                fallback: true
             };
         }
     }

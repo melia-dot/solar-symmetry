@@ -103,10 +103,12 @@ class SolarSymmetryApp {
 
         this.updateMonthDisplay();
         
-        // Show loading only when actually fetching data
-        this.showLoading();
-        await this.loadMonthData();
-        this.hideLoading();
+        // Only show loading if we have a location to fetch data for
+        if (this.currentLocation) {
+            this.showLoading();
+            await this.loadMonthData();
+            this.hideLoading();
+        }
     }
 
     /**
@@ -143,6 +145,8 @@ class SolarSymmetryApp {
                 if (this.selectedLocationIndex >= 0) {
                     this.selectLocation(this.currentLocations[this.selectedLocationIndex]);
                 }
+                // Always blur the input when Enter is pressed
+                this.elements.locationInput.blur();
                 break;
                 
             case 'Escape':
@@ -230,6 +234,7 @@ class SolarSymmetryApp {
      */
     async selectLocation(location) {
         this.elements.locationInput.value = location.name;
+        this.elements.locationInput.blur(); // Remove focus from input
         this.setCurrentLocation(location);
         this.hideLocationDropdown();
         
