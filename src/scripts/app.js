@@ -32,6 +32,10 @@ class SolarSymmetryApp {
             mirroredDates: document.getElementById('mirroredDates'),
             loadingIndicator: document.getElementById('loadingIndicator')
         };
+        
+        // Add keyboard navigation state
+        this.selectedLocationIndex = -1;
+        this.currentLocations = [];
     }
 
     /**
@@ -41,6 +45,11 @@ class SolarSymmetryApp {
         // Location search
         this.elements.locationInput.addEventListener('input', (e) => {
             this.handleLocationSearch(e.target.value);
+        });
+        
+        // Location input keyboard navigation
+        this.elements.locationInput.addEventListener('keydown', (e) => {
+            this.handleLocationKeydown(e);
         });
 
         // Click outside to close dropdown
@@ -60,8 +69,10 @@ class SolarSymmetryApp {
             this.navigateToNextMonth();
         });
 
-        // Keyboard navigation
+        // Keyboard navigation for months (only when not focused on location input)
         document.addEventListener('keydown', (e) => {
+            if (e.target === this.elements.locationInput) return; // Don't interfere with location search
+            
             if (e.key === 'ArrowLeft' && this.dateCalc.canGoToPreviousMonth(this.currentMonth)) {
                 this.navigateToPreviousMonth();
             } else if (e.key === 'ArrowRight' && this.dateCalc.canGoToNextMonth(this.currentMonth)) {
@@ -76,7 +87,6 @@ class SolarSymmetryApp {
     async initializeApp() {
         try {
             // Try to get user's current location
-            this.showLoading();
             const location = await this.geocoding.getCurrentLocation();
             this.setCurrentLocation(location);
             this.elements.locationInput.value = location.name;
@@ -92,8 +102,69 @@ class SolarSymmetryApp {
         }
 
         this.updateMonthDisplay();
+        
+        // Show loading only when actually fetching data
+        this.showLoading();
         await this.loadMonthData();
         this.hideLoading();
+    }
+
+    /**
+     * Handle keyboard navigation in location input
+     */
+    handleLocationKeydown(e) {
+        const dropdown = this.elements.locationDropdown;
+        
+        if (dropdown.classList.contains('hidden') || this.currentLocations.length === 0) {
+            return;
+        }
+        
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                this.selectedLocationIndex = Math.min(
+                    this.selectedLocationIndex + 1, 
+                    this.currentLocations.length - 1
+                );
+                this.updateLocationSelection();
+                break;
+                
+            case 'ArrowUp':
+                e.preventDefault();
+                this.selectedLocationIndex = Math.max(
+                    this.selectedLocationIndex - 1, 
+                    -1
+                );
+                this.updateLocationSelection();
+                break;
+                
+            case 'Enter':
+                e.preventDefault();
+                if (this.selectedLocationIndex >= 0) {
+                    this.selectLocation(this.currentLocations[this.selectedLocationIndex]);
+                }
+                break;
+                
+            case 'Escape':
+                this.hideLocationDropdown();
+                break;
+        }
+    }
+
+    /**
+     * Update visual selection in location dropdown
+     */
+    updateLocationSelection() {
+        const options = this.elements.locationDropdown.querySelectorAll('.location-option');
+        
+        options.forEach((option, index) => {
+            if (index === this.selectedLocationIndex) {
+                option.classList.add('selected');
+                option.scrollIntoView({ block: 'nearest' });
+            } else {
+                option.classList.remove('selected');
+            }
+        });
     }
 
     /**
@@ -116,17 +187,28 @@ class SolarSymmetryApp {
     showLocationDropdown(locations) {
         const dropdown = this.elements.locationDropdown;
         dropdown.innerHTML = '';
+        
+        // Reset selection state
+        this.selectedLocationIndex = -1;
+        this.currentLocations = locations;
 
         if (locations.length === 0) {
             dropdown.innerHTML = '<div class="location-option">No locations found</div>';
         } else {
-            locations.forEach(location => {
+            locations.forEach((location, index) => {
                 const option = document.createElement('div');
                 option.className = 'location-option';
                 option.textContent = location.name;
                 option.addEventListener('click', () => {
                     this.selectLocation(location);
                 });
+                
+                // Add mouse hover to update selection
+                option.addEventListener('mouseenter', () => {
+                    this.selectedLocationIndex = index;
+                    this.updateLocationSelection();
+                });
+                
                 dropdown.appendChild(option);
             });
         }
@@ -139,6 +221,8 @@ class SolarSymmetryApp {
      */
     hideLocationDropdown() {
         this.elements.locationDropdown.classList.add('hidden');
+        this.selectedLocationIndex = -1;
+        this.currentLocations = [];
     }
 
     /**

@@ -82,8 +82,15 @@ body {
     transition: background-color 0.2s ease;
 }
 
-.location-option:hover {
+.location-option:hover,
+.location-option.selected {
     background-color: #f8fafc;
+}
+
+.location-option.selected {
+    background-color: #e0e7ff;
+    color: #4338ca;
+    font-weight: 500;
 }
 
 .location-option:last-child {

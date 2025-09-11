@@ -40,6 +40,9 @@ class TwilightClient {
             const response = await fetch(url.toString());
 
             if (!response.ok) {
+                if (response.status === 429) {
+                    throw new Error('API rate limit reached - please wait a few minutes');
+                }
                 throw new Error(`HTTP error! status: ${response.status}`);
             }
 
@@ -105,7 +108,7 @@ class TwilightClient {
         try {
             // Process unique dates with rate limiting
             const results = [];
-            const batchSize = 3; // Limit concurrent requests
+            const batchSize = 2; // Reduce to 2 concurrent requests
             
             for (let i = 0; i < uniqueDates.length; i += batchSize) {
                 const batch = uniqueDates.slice(i, i + batchSize);
@@ -116,9 +119,9 @@ class TwilightClient {
                 const batchResults = await Promise.all(batchPromises);
                 results.push(...batchResults);
                 
-                // Small delay between batches to be API-friendly
+                // Longer delay between batches to be extra API-friendly
                 if (i + batchSize < uniqueDates.length) {
-                    await new Promise(resolve => setTimeout(resolve, 50));
+                    await new Promise(resolve => setTimeout(resolve, 200));
                 }
             }
             
