@@ -73,19 +73,70 @@ class TwilightClient {
     }
 
     /**
-     * Get twilight times for multiple dates (batch processing)
+     * Get twilight times for multiple dates (batch processing with intelligent deduplication)
      * @param {Array<Date>} dates - Array of dates
      * @param {number} lat - Latitude
      * @param {number} lng - Longitude
      * @returns {Promise<Array>} - Array of twilight data objects
      */
     async getBatchTwilightTimes(dates, lat, lng) {
-        const promises = dates.map(date => 
-            this.getTwilightTimes(date, lat, lng)
-        );
+        if (dates.length === 0) return [];
+        
+        // Deduplicate dates to avoid unnecessary API calls
+        const uniqueDateMap = new Map();
+        const dateKeys = [];
+        
+        dates.forEach((date, index) => {
+            const key = this.formatDateForAPI(date);
+            dateKeys.push(key);
+            
+            if (!uniqueDateMap.has(key)) {
+                uniqueDateMap.set(key, {
+                    date: date,
+                    indices: []
+                });
+            }
+            uniqueDateMap.get(key).indices.push(index);
+        });
+        
+        const uniqueDates = Array.from(uniqueDateMap.values()).map(item => item.date);
+        console.log(`Batch request: ${dates.length} dates → ${uniqueDates.length} unique API calls`);
         
         try {
-            return await Promise.all(promises);
+            // Process unique dates with rate limiting
+            const results = [];
+            const batchSize = 3; // Limit concurrent requests
+            
+            for (let i = 0; i < uniqueDates.length; i += batchSize) {
+                const batch = uniqueDates.slice(i, i + batchSize);
+                const batchPromises = batch.map(date => 
+                    this.getTwilightTimes(date, lat, lng)
+                );
+                
+                const batchResults = await Promise.all(batchPromises);
+                results.push(...batchResults);
+                
+                // Small delay between batches to be API-friendly
+                if (i + batchSize < uniqueDates.length) {
+                    await new Promise(resolve => setTimeout(resolve, 50));
+                }
+            }
+            
+            // Map results back to original order
+            const finalResults = new Array(dates.length);
+            const uniqueKeys = Array.from(uniqueDateMap.keys());
+            
+            uniqueKeys.forEach((key, resultIndex) => {
+                const dateInfo = uniqueDateMap.get(key);
+                const twilightData = results[resultIndex];
+                
+                dateInfo.indices.forEach(originalIndex => {
+                    finalResults[originalIndex] = twilightData;
+                });
+            });
+            
+            return finalResults;
+            
         } catch (error) {
             console.error('Batch twilight fetch failed:', error);
             // Return array of fallback data

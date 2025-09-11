@@ -209,7 +209,7 @@ class SolarSymmetryApp {
     }
 
     /**
-     * Load month data with twilight times
+     * Load month data with optimized twilight fetching
      */
     async loadMonthData() {
         if (!this.currentLocation) return;
@@ -220,29 +220,77 @@ class SolarSymmetryApp {
         // Get all dates for the month with their mirrors
         const monthData = this.dateCalc.getMonthWithMirrors(year, month);
         
-        // Extract all unique dates (current + mirrored) for batch API call
-        const allDates = [];
-        monthData.forEach(item => {
-            allDates.push(item.current);
-            allDates.push(item.mirrored);
-        });
-
+        // Render immediately with loading placeholders
+        this.renderMonthData(monthData);
+        
         try {
-            // Fetch twilight times for all dates
-            const twilightData = await this.twilight.getBatchTwilightTimes(
-                allDates, 
-                this.currentLocation.lat, 
-                this.currentLocation.lng
-            );
-
-            // Combine date data with twilight data
-            const enrichedData = monthData.map((item, index) => ({
-                ...item,
-                currentTwilight: twilightData[index * 2],
-                mirroredTwilight: twilightData[index * 2 + 1]
-            }));
-
-            this.renderMonthData(enrichedData);
+            // Process in smaller chunks to show progress
+            const chunkSize = 5; // Process 5 dates at a time
+            const chunks = [];
+            
+            for (let i = 0; i < monthData.length; i += chunkSize) {
+                chunks.push(monthData.slice(i, i + chunkSize));
+            }
+            
+            // Process each chunk sequentially
+            for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
+                const chunk = chunks[chunkIndex];
+                
+                // Get unique dates for this chunk
+                const uniqueDates = new Set();
+                const dateMap = new Map();
+                
+                chunk.forEach((item, localIndex) => {
+                    const globalIndex = chunkIndex * chunkSize + localIndex;
+                    
+                    // Add current date
+                    const currentKey = this.formatDateKey(item.current);
+                    if (!uniqueDates.has(currentKey)) {
+                        uniqueDates.add(currentKey);
+                        dateMap.set(currentKey, { date: item.current, indices: [] });
+                    }
+                    dateMap.get(currentKey).indices.push({ type: 'current', index: globalIndex });
+                    
+                    // Add mirrored date
+                    const mirroredKey = this.formatDateKey(item.mirrored);
+                    if (!uniqueDates.has(mirroredKey)) {
+                        uniqueDates.add(mirroredKey);
+                        dateMap.set(mirroredKey, { date: item.mirrored, indices: [] });
+                    }
+                    dateMap.get(mirroredKey).indices.push({ type: 'mirrored', index: globalIndex });
+                });
+                
+                // Fetch twilight data for unique dates only
+                const uniqueDateArray = Array.from(dateMap.values()).map(item => item.date);
+                const twilightResults = await this.twilight.getBatchTwilightTimes(
+                    uniqueDateArray,
+                    this.currentLocation.lat,
+                    this.currentLocation.lng
+                );
+                
+                // Map results back to original positions
+                const uniqueKeys = Array.from(uniqueDates);
+                uniqueKeys.forEach((key, resultIndex) => {
+                    const twilightData = twilightResults[resultIndex];
+                    const dateInfo = dateMap.get(key);
+                    
+                    dateInfo.indices.forEach(({ type, index }) => {
+                        if (type === 'current') {
+                            monthData[index].currentTwilight = twilightData;
+                        } else {
+                            monthData[index].mirroredTwilight = twilightData;
+                        }
+                    });
+                });
+                
+                // Re-render with updated data
+                this.renderMonthData(monthData);
+                
+                // Small delay to show progress
+                if (chunkIndex < chunks.length - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            }
         } catch (error) {
             console.error('Failed to load twilight data:', error);
             this.renderMonthData(monthData); // Render without twilight data
@@ -362,6 +410,13 @@ class SolarSymmetryApp {
         element.appendChild(twilightTimes);
 
         return element;
+    }
+
+    /**
+     * Format date as key for deduplication
+     */
+    formatDateKey(date) {
+        return date.toISOString().split('T')[0];
     }
 
     /**
