@@ -85,30 +85,13 @@ class SolarSymmetryApp {
      * Initialize the application
      */
     async initializeApp() {
-        try {
-            // Try to get user's current location
-            const location = await this.geocoding.getCurrentLocation();
-            this.setCurrentLocation(location);
-            this.elements.locationInput.value = location.name;
-        } catch (error) {
-            console.log('Could not get current location:', error.message);
-            // Set a default location (London)
-            this.setCurrentLocation({
-                lat: 51.5074,
-                lng: -0.1278,
-                name: 'London, England, United Kingdom'
-            });
-            this.elements.locationInput.placeholder = 'Enter your city...';
-        }
-
         this.updateMonthDisplay();
         
-        // Only show loading if we have a location to fetch data for
-        if (this.currentLocation) {
-            this.showLoading();
-            await this.loadMonthData();
-            this.hideLoading();
-        }
+        // Don't auto-detect location - let user choose
+        this.elements.locationInput.placeholder = 'Enter your city to see solar symmetry...';
+        
+        // Render empty state without data
+        this.renderEmptyState();
     }
 
     /**
@@ -295,6 +278,27 @@ class SolarSymmetryApp {
     updateNavigationButtons() {
         this.elements.prevMonth.disabled = !this.dateCalc.canGoToPreviousMonth(this.currentMonth);
         this.elements.nextMonth.disabled = !this.dateCalc.canGoToNextMonth(this.currentMonth);
+    }
+
+    /**
+     * Render empty state without data
+     */
+    renderEmptyState() {
+        const currentContainer = this.elements.currentDates;
+        const mirroredContainer = this.elements.mirroredDates;
+        
+        const emptyMessage = document.createElement('div');
+        emptyMessage.className = 'empty-state';
+        emptyMessage.innerHTML = `
+            <div class="empty-icon">🌅</div>
+            <p>Search for your city above to discover solar symmetry patterns</p>
+            <small>See how dates mirror around solstices with identical twilight times</small>
+        `;
+        
+        currentContainer.innerHTML = '';
+        mirroredContainer.innerHTML = '';
+        currentContainer.appendChild(emptyMessage.cloneNode(true));
+        mirroredContainer.appendChild(emptyMessage);
     }
 
     /**
@@ -528,4 +532,4 @@ class SolarSymmetryApp {
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.solarApp = new SolarSymmetryApp();
-});console.log('debug');
+});
