@@ -528,4 +528,4 @@ class SolarSymmetryApp {
 // Initialize the app when DOM is loaded
 document.addEventListener('DOMContentLoaded', () => {
     window.solarApp = new SolarSymmetryApp();
-});
+});console.log('debug');
