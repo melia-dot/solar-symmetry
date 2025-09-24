@@ -11,10 +11,32 @@
     <div class="app-container">
         <!-- Fixed Location Header -->
         <header class="location-header">
-            <div class="location-selector">
+            <!-- View Toggle -->
+            <div class="view-toggle">
+                <button id="symmetryViewBtn" class="view-btn active">⚖️ Symmetry</button>
+                <button id="citiesViewBtn" class="view-btn">🌍 Compare Cities</button>
+            </div>
+
+            <!-- Symmetry View Location Selector -->
+            <div id="symmetryLocationSelector" class="location-selector">
                 <div class="location-icon">📍</div>
                 <input type="text" id="locationInput" placeholder="Enter your city..." autocomplete="off">
                 <div id="locationDropdown" class="location-dropdown hidden"></div>
+            </div>
+
+            <!-- Cities Compare View Location Selectors -->
+            <div id="citiesLocationSelector" class="cities-selector hidden">
+                <div class="city-selector">
+                    <div class="location-icon">📍</div>
+                    <input type="text" id="city1Input" placeholder="Enter first city..." autocomplete="off">
+                    <div id="city1Dropdown" class="location-dropdown hidden"></div>
+                </div>
+                <div class="vs-divider">VS</div>
+                <div class="city-selector">
+                    <div class="location-icon">📍</div>
+                    <input type="text" id="city2Input" placeholder="Enter second city..." autocomplete="off">
+                    <div id="city2Dropdown" class="location-dropdown hidden"></div>
+                </div>
             </div>
         </header>
 
@@ -27,8 +49,8 @@
                 <button id="nextMonth" class="nav-button" aria-label="Next month">›</button>
             </div>
 
-            <!-- Date Comparison Container -->
-            <div class="comparison-container">
+            <!-- Symmetry View Container -->
+            <div id="symmetryContainer" class="comparison-container">
                 <div class="dates-grid">
                     <!-- Current Month Column -->
                     <div class="column current-column">
@@ -43,6 +65,27 @@
                         <h2 class="column-header">Mirrored Dates</h2>
                         <div id="mirroredDates" class="dates-list">
                             <!-- Mirrored dates will be populated here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Cities Compare View Container -->
+            <div id="citiesContainer" class="comparison-container hidden">
+                <div class="dates-grid">
+                    <!-- City 1 Column -->
+                    <div class="column city1-column">
+                        <h2 id="city1Header" class="column-header">Select First City</h2>
+                        <div id="city1Dates" class="dates-list">
+                            <!-- City 1 dates will be populated here -->
+                        </div>
+                    </div>
+
+                    <!-- City 2 Column -->
+                    <div class="column city2-column">
+                        <h2 id="city2Header" class="column-header">Select Second City</h2>
+                        <div id="city2Dates" class="dates-list">
+                            <!-- City 2 dates will be populated here -->
                         </div>
                     </div>
                 </div>

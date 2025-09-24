@@ -13,6 +13,13 @@ class SolarSymmetryApp {
         this.currentLocation = null;
         this.isLoading = false;
         
+        // View mode: 'symmetry' or 'cities'
+        this.currentView = 'symmetry';
+        
+        // Cities view data
+        this.city1 = null;
+        this.city2 = null;
+        
         this.initializeElements();
         this.bindEvents();
         this.initializeApp();
@@ -22,41 +29,108 @@ class SolarSymmetryApp {
      * Initialize DOM element references
      */
     initializeElements() {
+        // View toggle elements
         this.elements = {
+            // View toggle buttons
+            symmetryViewBtn: document.getElementById('symmetryViewBtn'),
+            citiesViewBtn: document.getElementById('citiesViewBtn'),
+            
+            // Symmetry view elements
+            symmetryLocationSelector: document.getElementById('symmetryLocationSelector'),
             locationInput: document.getElementById('locationInput'),
             locationDropdown: document.getElementById('locationDropdown'),
+            symmetryContainer: document.getElementById('symmetryContainer'),
+            currentDates: document.getElementById('currentDates'),
+            mirroredDates: document.getElementById('mirroredDates'),
+            
+            // Cities view elements
+            citiesLocationSelector: document.getElementById('citiesLocationSelector'),
+            city1Input: document.getElementById('city1Input'),
+            city1Dropdown: document.getElementById('city1Dropdown'),
+            city2Input: document.getElementById('city2Input'),
+            city2Dropdown: document.getElementById('city2Dropdown'),
+            citiesContainer: document.getElementById('citiesContainer'),
+            city1Header: document.getElementById('city1Header'),
+            city2Header: document.getElementById('city2Header'),
+            city1Dates: document.getElementById('city1Dates'),
+            city2Dates: document.getElementById('city2Dates'),
+            
+            // Shared elements
             currentMonth: document.getElementById('currentMonth'),
             prevMonth: document.getElementById('prevMonth'),
             nextMonth: document.getElementById('nextMonth'),
-            currentDates: document.getElementById('currentDates'),
-            mirroredDates: document.getElementById('mirroredDates'),
             loadingIndicator: document.getElementById('loadingIndicator')
         };
         
         // Add keyboard navigation state
         this.selectedLocationIndex = -1;
         this.currentLocations = [];
+        
+        // City search states
+        this.city1SelectedIndex = -1;
+        this.city1Locations = [];
+        this.city2SelectedIndex = -1;
+        this.city2Locations = [];
     }
 
     /**
      * Bind event listeners
      */
     bindEvents() {
-        // Location search
+        // View toggle buttons
+        this.elements.symmetryViewBtn.addEventListener('click', () => {
+            this.switchToView('symmetry');
+        });
+        
+        this.elements.citiesViewBtn.addEventListener('click', () => {
+            this.switchToView('cities');
+        });
+        
+        // Symmetry view - Location search
         this.elements.locationInput.addEventListener('input', (e) => {
             this.handleLocationSearch(e.target.value);
         });
         
-        // Location input keyboard navigation
         this.elements.locationInput.addEventListener('keydown', (e) => {
             this.handleLocationKeydown(e);
         });
 
-        // Click outside to close dropdown
+        // Cities view - City 1 search
+        this.elements.city1Input.addEventListener('input', (e) => {
+            this.handleCitySearch(e.target.value, 1);
+        });
+        
+        this.elements.city1Input.addEventListener('keydown', (e) => {
+            this.handleCityKeydown(e, 1);
+        });
+        
+        // Cities view - City 2 search
+        this.elements.city2Input.addEventListener('input', (e) => {
+            this.handleCitySearch(e.target.value, 2);
+        });
+        
+        this.elements.city2Input.addEventListener('keydown', (e) => {
+            this.handleCityKeydown(e, 2);
+        });
+
+        // Click outside to close dropdowns
         document.addEventListener('click', (e) => {
+            // Close symmetry dropdown
             if (!this.elements.locationInput.contains(e.target) && 
                 !this.elements.locationDropdown.contains(e.target)) {
                 this.hideLocationDropdown();
+            }
+            
+            // Close city 1 dropdown
+            if (!this.elements.city1Input.contains(e.target) && 
+                !this.elements.city1Dropdown.contains(e.target)) {
+                this.hideCityDropdown(1);
+            }
+            
+            // Close city 2 dropdown
+            if (!this.elements.city2Input.contains(e.target) && 
+                !this.elements.city2Dropdown.contains(e.target)) {
+                this.hideCityDropdown(2);
             }
         });
 
@@ -69,9 +143,10 @@ class SolarSymmetryApp {
             this.navigateToNextMonth();
         });
 
-        // Keyboard navigation for months (only when not focused on location input)
+        // Keyboard navigation for months
         document.addEventListener('keydown', (e) => {
-            if (e.target === this.elements.locationInput) return; // Don't interfere with location search
+            // Don't interfere with text input
+            if (e.target.tagName === 'INPUT') return;
             
             if (e.key === 'ArrowLeft' && this.dateCalc.canGoToPreviousMonth(this.currentMonth)) {
                 this.navigateToPreviousMonth();
@@ -82,20 +157,64 @@ class SolarSymmetryApp {
     }
 
     /**
+     * Switch between views
+     */
+    switchToView(view) {
+        this.currentView = view;
+        
+        if (view === 'symmetry') {
+            // Update button states
+            this.elements.symmetryViewBtn.classList.add('active');
+            this.elements.citiesViewBtn.classList.remove('active');
+            
+            // Show/hide UI elements
+            this.elements.symmetryLocationSelector.classList.remove('hidden');
+            this.elements.citiesLocationSelector.classList.add('hidden');
+            this.elements.symmetryContainer.classList.remove('hidden');
+            this.elements.citiesContainer.classList.add('hidden');
+            
+            // Load data if location is set
+            if (this.currentLocation) {
+                this.loadMonthData();
+            } else {
+                this.renderSymmetryEmptyState();
+            }
+        } else {
+            // Update button states
+            this.elements.citiesViewBtn.classList.add('active');
+            this.elements.symmetryViewBtn.classList.remove('active');
+            
+            // Show/hide UI elements
+            this.elements.citiesLocationSelector.classList.remove('hidden');
+            this.elements.symmetryLocationSelector.classList.add('hidden');
+            this.elements.citiesContainer.classList.remove('hidden');
+            this.elements.symmetryContainer.classList.add('hidden');
+            
+            // Load data if cities are set
+            if (this.city1 && this.city2) {
+                this.loadMonthData();
+            } else {
+                this.renderCitiesEmptyState();
+            }
+        }
+    }
+
+    /**
      * Initialize the application
      */
     async initializeApp() {
         this.updateMonthDisplay();
         
-        // Don't auto-detect location - let user choose
-        this.elements.locationInput.placeholder = 'Enter your city to see solar symmetry...';
-        
-        // Render empty state without data
-        this.renderEmptyState();
+        // Start in symmetry view
+        this.switchToView('symmetry');
     }
 
+    // =================================================================
+    // LOCATION SEARCH METHODS (SYMMETRY VIEW)
+    // =================================================================
+
     /**
-     * Handle keyboard navigation in location input
+     * Handle keyboard navigation in symmetry location input
      */
     handleLocationKeydown(e) {
         const dropdown = this.elements.locationDropdown;
@@ -128,7 +247,6 @@ class SolarSymmetryApp {
                 if (this.selectedLocationIndex >= 0) {
                     this.selectLocation(this.currentLocations[this.selectedLocationIndex]);
                 }
-                // Always blur the input when Enter is pressed
                 this.elements.locationInput.blur();
                 break;
                 
@@ -175,7 +293,6 @@ class SolarSymmetryApp {
         const dropdown = this.elements.locationDropdown;
         dropdown.innerHTML = '';
         
-        // Reset selection state
         this.selectedLocationIndex = -1;
         this.currentLocations = locations;
 
@@ -190,7 +307,6 @@ class SolarSymmetryApp {
                     this.selectLocation(location);
                 });
                 
-                // Add mouse hover to update selection
                 option.addEventListener('mouseenter', () => {
                     this.selectedLocationIndex = index;
                     this.updateLocationSelection();
@@ -217,8 +333,8 @@ class SolarSymmetryApp {
      */
     async selectLocation(location) {
         this.elements.locationInput.value = location.name;
-        this.elements.locationInput.blur(); // Remove focus from input
-        this.setCurrentLocation(location);
+        this.elements.locationInput.blur();
+        this.currentLocation = location;
         this.hideLocationDropdown();
         
         this.showLoading();
@@ -226,12 +342,179 @@ class SolarSymmetryApp {
         this.hideLoading();
     }
 
+    // =================================================================
+    // CITY SEARCH METHODS (CITIES VIEW)
+    // =================================================================
+
     /**
-     * Set the current location
+     * Handle city search input
      */
-    setCurrentLocation(location) {
-        this.currentLocation = location;
+    handleCitySearch(query, cityNumber) {
+        if (query.length < 2) {
+            this.hideCityDropdown(cityNumber);
+            return;
+        }
+
+        this.geocoding.searchWithDebounce(query, (results) => {
+            this.showCityDropdown(results, cityNumber);
+        });
     }
+
+    /**
+     * Handle keyboard navigation in city inputs
+     */
+    handleCityKeydown(e, cityNumber) {
+        const dropdown = cityNumber === 1 ? this.elements.city1Dropdown : this.elements.city2Dropdown;
+        const selectedIndex = cityNumber === 1 ? this.city1SelectedIndex : this.city2SelectedIndex;
+        const locations = cityNumber === 1 ? this.city1Locations : this.city2Locations;
+        
+        if (dropdown.classList.contains('hidden') || locations.length === 0) {
+            return;
+        }
+        
+        switch (e.key) {
+            case 'ArrowDown':
+                e.preventDefault();
+                const newDownIndex = Math.min(selectedIndex + 1, locations.length - 1);
+                this.setCitySelectedIndex(cityNumber, newDownIndex);
+                this.updateCitySelection(cityNumber);
+                break;
+                
+            case 'ArrowUp':
+                e.preventDefault();
+                const newUpIndex = Math.max(selectedIndex - 1, -1);
+                this.setCitySelectedIndex(cityNumber, newUpIndex);
+                this.updateCitySelection(cityNumber);
+                break;
+                
+            case 'Enter':
+                e.preventDefault();
+                if (selectedIndex >= 0) {
+                    this.selectCity(locations[selectedIndex], cityNumber);
+                }
+                const input = cityNumber === 1 ? this.elements.city1Input : this.elements.city2Input;
+                input.blur();
+                break;
+                
+            case 'Escape':
+                this.hideCityDropdown(cityNumber);
+                break;
+        }
+    }
+
+    /**
+     * Set selected index for city dropdown
+     */
+    setCitySelectedIndex(cityNumber, index) {
+        if (cityNumber === 1) {
+            this.city1SelectedIndex = index;
+        } else {
+            this.city2SelectedIndex = index;
+        }
+    }
+
+    /**
+     * Update visual selection in city dropdown
+     */
+    updateCitySelection(cityNumber) {
+        const dropdown = cityNumber === 1 ? this.elements.city1Dropdown : this.elements.city2Dropdown;
+        const selectedIndex = cityNumber === 1 ? this.city1SelectedIndex : this.city2SelectedIndex;
+        const options = dropdown.querySelectorAll('.location-option');
+        
+        options.forEach((option, index) => {
+            if (index === selectedIndex) {
+                option.classList.add('selected');
+                option.scrollIntoView({ block: 'nearest' });
+            } else {
+                option.classList.remove('selected');
+            }
+        });
+    }
+
+    /**
+     * Show city search dropdown
+     */
+    showCityDropdown(locations, cityNumber) {
+        const dropdown = cityNumber === 1 ? this.elements.city1Dropdown : this.elements.city2Dropdown;
+        dropdown.innerHTML = '';
+        
+        this.setCitySelectedIndex(cityNumber, -1);
+        
+        if (cityNumber === 1) {
+            this.city1Locations = locations;
+        } else {
+            this.city2Locations = locations;
+        }
+
+        if (locations.length === 0) {
+            dropdown.innerHTML = '<div class="location-option">No locations found</div>';
+        } else {
+            locations.forEach((location, index) => {
+                const option = document.createElement('div');
+                option.className = 'location-option';
+                option.textContent = location.name;
+                option.addEventListener('click', () => {
+                    this.selectCity(location, cityNumber);
+                });
+                
+                option.addEventListener('mouseenter', () => {
+                    this.setCitySelectedIndex(cityNumber, index);
+                    this.updateCitySelection(cityNumber);
+                });
+                
+                dropdown.appendChild(option);
+            });
+        }
+
+        dropdown.classList.remove('hidden');
+    }
+
+    /**
+     * Hide city dropdown
+     */
+    hideCityDropdown(cityNumber) {
+        const dropdown = cityNumber === 1 ? this.elements.city1Dropdown : this.elements.city2Dropdown;
+        dropdown.classList.add('hidden');
+        
+        this.setCitySelectedIndex(cityNumber, -1);
+        
+        if (cityNumber === 1) {
+            this.city1Locations = [];
+        } else {
+            this.city2Locations = [];
+        }
+    }
+
+    /**
+     * Select a city from search results
+     */
+    async selectCity(location, cityNumber) {
+        const input = cityNumber === 1 ? this.elements.city1Input : this.elements.city2Input;
+        const header = cityNumber === 1 ? this.elements.city1Header : this.elements.city2Header;
+        
+        input.value = location.name;
+        input.blur();
+        header.textContent = location.name;
+        
+        if (cityNumber === 1) {
+            this.city1 = location;
+        } else {
+            this.city2 = location;
+        }
+        
+        this.hideCityDropdown(cityNumber);
+        
+        // Load data if both cities are selected
+        if (this.city1 && this.city2) {
+            this.showLoading();
+            await this.loadMonthData();
+            this.hideLoading();
+        }
+    }
+
+    // =================================================================
+    // MONTH NAVIGATION
+    // =================================================================
 
     /**
      * Navigate to previous month
@@ -280,63 +563,50 @@ class SolarSymmetryApp {
         this.elements.nextMonth.disabled = !this.dateCalc.canGoToNextMonth(this.currentMonth);
     }
 
+    // =================================================================
+    // DATA LOADING
+    // =================================================================
+
     /**
-     * Render empty state without data
+     * Load month data based on current view
      */
-    renderEmptyState() {
-        const currentContainer = this.elements.currentDates;
-        const mirroredContainer = this.elements.mirroredDates;
-        
-        const emptyMessage = document.createElement('div');
-        emptyMessage.className = 'empty-state';
-        emptyMessage.innerHTML = `
-            <div class="empty-icon">🌅</div>
-            <p>Search for your city above to discover solar symmetry patterns</p>
-            <small>See how dates mirror around solstices with identical twilight times</small>
-        `;
-        
-        currentContainer.innerHTML = '';
-        mirroredContainer.innerHTML = '';
-        currentContainer.appendChild(emptyMessage.cloneNode(true));
-        mirroredContainer.appendChild(emptyMessage);
+    async loadMonthData() {
+        if (this.currentView === 'symmetry') {
+            await this.loadSymmetryData();
+        } else {
+            await this.loadCitiesData();
+        }
     }
 
     /**
-     * Load month data with optimized twilight fetching
+     * Load symmetry view data
      */
-    async loadMonthData() {
+    async loadSymmetryData() {
         if (!this.currentLocation) return;
 
         const year = this.currentMonth.getFullYear();
         const month = this.currentMonth.getMonth() + 1;
         
-        // Get all dates for the month with their mirrors
         const monthData = this.dateCalc.getMonthWithMirrors(year, month);
-        
-        // Render immediately with loading placeholders
-        this.renderMonthData(monthData);
+        this.renderSymmetryData(monthData);
         
         try {
-            // Process in smaller chunks to show progress
-            const chunkSize = 5; // Process 5 dates at a time
+            const chunkSize = 5;
             const chunks = [];
             
             for (let i = 0; i < monthData.length; i += chunkSize) {
                 chunks.push(monthData.slice(i, i + chunkSize));
             }
             
-            // Process each chunk sequentially
             for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
                 const chunk = chunks[chunkIndex];
                 
-                // Get unique dates for this chunk
                 const uniqueDates = new Set();
                 const dateMap = new Map();
                 
                 chunk.forEach((item, localIndex) => {
                     const globalIndex = chunkIndex * chunkSize + localIndex;
                     
-                    // Add current date
                     const currentKey = this.formatDateKey(item.current);
                     if (!uniqueDates.has(currentKey)) {
                         uniqueDates.add(currentKey);
@@ -344,7 +614,6 @@ class SolarSymmetryApp {
                     }
                     dateMap.get(currentKey).indices.push({ type: 'current', index: globalIndex });
                     
-                    // Add mirrored date
                     const mirroredKey = this.formatDateKey(item.mirrored);
                     if (!uniqueDates.has(mirroredKey)) {
                         uniqueDates.add(mirroredKey);
@@ -353,7 +622,6 @@ class SolarSymmetryApp {
                     dateMap.get(mirroredKey).indices.push({ type: 'mirrored', index: globalIndex });
                 });
                 
-                // Fetch twilight data for unique dates only
                 const uniqueDateArray = Array.from(dateMap.values()).map(item => item.date);
                 const twilightResults = await this.twilight.getBatchTwilightTimes(
                     uniqueDateArray,
@@ -361,7 +629,6 @@ class SolarSymmetryApp {
                     this.currentLocation.lng
                 );
                 
-                // Map results back to original positions
                 const uniqueKeys = Array.from(uniqueDates);
                 uniqueKeys.forEach((key, resultIndex) => {
                     const twilightData = twilightResults[resultIndex];
@@ -376,30 +643,99 @@ class SolarSymmetryApp {
                     });
                 });
                 
-                // Re-render with updated data
-                this.renderMonthData(monthData);
+                this.renderSymmetryData(monthData);
                 
-                // Small delay to show progress
                 if (chunkIndex < chunks.length - 1) {
                     await new Promise(resolve => setTimeout(resolve, 100));
                 }
             }
         } catch (error) {
             console.error('Failed to load twilight data:', error);
-            this.renderMonthData(monthData); // Render without twilight data
+            this.renderSymmetryData(monthData);
         }
     }
 
     /**
-     * Render month data to the UI
+     * Load cities comparison data
      */
-    renderMonthData(monthData) {
+    async loadCitiesData() {
+        if (!this.city1 || !this.city2) return;
+
+        const year = this.currentMonth.getFullYear();
+        const month = this.currentMonth.getMonth() + 1;
+        
+        // Get all dates for the month (no mirroring for cities view)
+        const monthDates = this.dateCalc.getMonthDates(year, month);
+        
+        // Initialize data structure
+        const citiesData = monthDates.map(date => ({
+            date: date,
+            city1Twilight: null,
+            city2Twilight: null,
+            isToday: this.dateCalc.isToday(date)
+        }));
+        
+        this.renderCitiesData(citiesData);
+        
+        try {
+            const chunkSize = 10; // Can process more since we're not dealing with mirrors
+            const chunks = [];
+            
+            for (let i = 0; i < citiesData.length; i += chunkSize) {
+                chunks.push(citiesData.slice(i, i + chunkSize));
+            }
+            
+            for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
+                const chunk = chunks[chunkIndex];
+                const dates = chunk.map(item => item.date);
+                
+                // Fetch data for both cities in parallel
+                const [city1Results, city2Results] = await Promise.all([
+                    this.twilight.getBatchTwilightTimes(dates, this.city1.lat, this.city1.lng),
+                    this.twilight.getBatchTwilightTimes(dates, this.city2.lat, this.city2.lng)
+                ]);
+                
+                // Map results back
+                chunk.forEach((item, localIndex) => {
+                    const globalIndex = chunkIndex * chunkSize + localIndex;
+                    citiesData[globalIndex].city1Twilight = city1Results[localIndex];
+                    citiesData[globalIndex].city2Twilight = city2Results[localIndex];
+                });
+                
+                this.renderCitiesData(citiesData);
+                
+                if (chunkIndex < chunks.length - 1) {
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+            }
+        } catch (error) {
+            console.error('Failed to load cities twilight data:', error);
+            this.renderCitiesData(citiesData);
+        }
+    }
+
+    // =================================================================
+    // RENDERING METHODS
+    // =================================================================
+
+    /**
+     * Render symmetry view data
+     */
+    renderSymmetryData(monthData) {
         this.renderCurrentColumn(monthData);
         this.renderMirroredColumn(monthData);
     }
 
     /**
-     * Render current month column
+     * Render cities view data
+     */
+    renderCitiesData(citiesData) {
+        this.renderCity1Column(citiesData);
+        this.renderCity2Column(citiesData);
+    }
+
+    /**
+     * Render current month column (symmetry view)
      */
     renderCurrentColumn(monthData) {
         const container = this.elements.currentDates;
@@ -416,7 +752,7 @@ class SolarSymmetryApp {
     }
 
     /**
-     * Render mirrored dates column
+     * Render mirrored dates column (symmetry view)
      */
     renderMirroredColumn(monthData) {
         const container = this.elements.mirroredDates;
@@ -427,6 +763,40 @@ class SolarSymmetryApp {
                 item.mirrored, 
                 item.mirroredTwilight, 
                 false
+            );
+            container.appendChild(dateElement);
+        });
+    }
+
+    /**
+     * Render city 1 column (cities view)
+     */
+    renderCity1Column(citiesData) {
+        const container = this.elements.city1Dates;
+        container.innerHTML = '';
+
+        citiesData.forEach(item => {
+            const dateElement = this.createDateElement(
+                item.date, 
+                item.city1Twilight, 
+                item.isToday
+            );
+            container.appendChild(dateElement);
+        });
+    }
+
+    /**
+     * Render city 2 column (cities view)
+     */
+    renderCity2Column(citiesData) {
+        const container = this.elements.city2Dates;
+        container.innerHTML = '';
+
+        citiesData.forEach(item => {
+            const dateElement = this.createDateElement(
+                item.date, 
+                item.city2Twilight, 
+                item.isToday
             );
             container.appendChild(dateElement);
         });
@@ -495,6 +865,8 @@ class SolarSymmetryApp {
             twilightTimes.appendChild(sunriseTime);
             twilightTimes.appendChild(sunsetTime);
             twilightTimes.appendChild(duskTime);
+        } else if (twilightData && twilightData.error) {
+            twilightTimes.innerHTML = '<div class="twilight-time error">API Error</div>';
         } else {
             twilightTimes.innerHTML = '<div class="twilight-time">Loading...</div>';
         }
@@ -504,6 +876,64 @@ class SolarSymmetryApp {
 
         return element;
     }
+
+    // =================================================================
+    // EMPTY STATE RENDERING
+    // =================================================================
+
+    /**
+     * Render symmetry view empty state
+     */
+    renderSymmetryEmptyState() {
+        const currentContainer = this.elements.currentDates;
+        const mirroredContainer = this.elements.mirroredDates;
+        
+        const emptyMessage = document.createElement('div');
+        emptyMessage.className = 'empty-state';
+        emptyMessage.innerHTML = `
+            <div class="empty-icon">🌅</div>
+            <p>Search for your city above to discover solar symmetry patterns</p>
+            <small>See how dates mirror around solstices with identical twilight times</small>
+        `;
+        
+        currentContainer.innerHTML = '';
+        mirroredContainer.innerHTML = '';
+        currentContainer.appendChild(emptyMessage.cloneNode(true));
+        mirroredContainer.appendChild(emptyMessage);
+    }
+
+    /**
+     * Render cities view empty state
+     */
+    renderCitiesEmptyState() {
+        const city1Container = this.elements.city1Dates;
+        const city2Container = this.elements.city2Dates;
+        
+        const city1Empty = document.createElement('div');
+        city1Empty.className = 'empty-state';
+        city1Empty.innerHTML = `
+            <div class="empty-icon">🌍</div>
+            <p>Select your first city above</p>
+            <small>Choose any city worldwide</small>
+        `;
+        
+        const city2Empty = document.createElement('div');
+        city2Empty.className = 'empty-state';
+        city2Empty.innerHTML = `
+            <div class="empty-icon">🏙️</div>
+            <p>Select your second city above</p>
+            <small>Compare sun times side by side</small>
+        `;
+        
+        city1Container.innerHTML = '';
+        city2Container.innerHTML = '';
+        city1Container.appendChild(city1Empty);
+        city2Container.appendChild(city2Empty);
+    }
+
+    // =================================================================
+    // UTILITY METHODS
+    // =================================================================
 
     /**
      * Format date as key for deduplication

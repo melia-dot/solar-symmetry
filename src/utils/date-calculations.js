@@ -63,6 +63,23 @@ class DateCalculations {
     }
 
     /**
+     * Get all dates for a given month (for cities comparison)
+     * @param {number} year - The year
+     * @param {number} month - The month (1-12)
+     * @returns {Array} - Array of Date objects for all days in the month
+     */
+    getMonthDates(year, month) {
+        const dates = [];
+        const daysInMonth = new Date(year, month, 0).getDate();
+        
+        for (let day = 1; day <= daysInMonth; day++) {
+            dates.push(new Date(year, month - 1, day));
+        }
+        
+        return dates;
+    }
+
+    /**
      * Get all dates for a given month with their mirrored counterparts
      * @param {number} year - The year
      * @param {number} month - The month (1-12)
