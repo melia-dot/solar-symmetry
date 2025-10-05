@@ -644,3 +644,161 @@ body {
         font-size: 1.25rem;
     }
 }
+
+/* Golden Hour Toggle */
+.golden-hour-toggle {
+    text-align: center;
+    margin: -1rem 0 1.5rem 0;
+}
+
+.toggle-btn {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    padding: 0.75rem 1.5rem;
+    font-size: 1rem;
+    font-weight: 500;
+    color: #6b7280;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.toggle-btn:hover {
+    background: #f9fafb;
+    border-color: #4338ca;
+    color: #4338ca;
+    transform: translateY(-2px);
+    box-shadow: 0 4px 6px rgba(67, 56, 202, 0.1);
+}
+
+.toggle-btn.active {
+    background: linear-gradient(135deg, #fbbf24 0%, #f59e0b 100%);
+    border-color: #f59e0b;
+    color: white;
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.toggle-btn.active:hover {
+    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(245, 158, 11, 0.4);
+}
+
+.toggle-icon {
+    font-size: 1.25rem;
+}
+
+/* Golden Hour Times Styling */
+.twilight-time.golden-hour {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    border-left: 4px solid #f59e0b;
+}
+
+.twilight-time.golden-hour .time-label {
+    color: #92400e;
+    font-weight: 600;
+}
+
+.twilight-time.golden-hour:hover {
+    background: linear-gradient(135deg, #fde68a 0%, #fcd34d 100%);
+    transform: translateX(4px);
+    box-shadow: 0 4px 8px rgba(245, 158, 11, 0.2);
+}
+
+/* Light After Work Card */
+.light-after-work-card {
+    max-width: 600px;
+    margin: 0 auto 2rem auto;
+    background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+    border-radius: 16px;
+    padding: 1.5rem;
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.2);
+    transition: all 0.3s ease;
+}
+
+.light-after-work-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 8px 20px rgba(59, 130, 246, 0.3);
+}
+
+.light-after-work-card.has-light {
+    background: linear-gradient(135deg, #fef3c7 0%, #fde68a 100%);
+    box-shadow: 0 4px 12px rgba(245, 158, 11, 0.3);
+}
+
+.light-after-work-card.has-light:hover {
+    box-shadow: 0 8px 20px rgba(245, 158, 11, 0.4);
+}
+
+.card-content {
+    display: flex;
+    align-items: center;
+    gap: 1.5rem;
+}
+
+.card-icon {
+    font-size: 3rem;
+    flex-shrink: 0;
+}
+
+.card-text {
+    flex: 1;
+}
+
+.card-text h3 {
+    margin: 0 0 0.5rem 0;
+    color: #1e3a8a;
+    font-size: 1.5rem;
+    font-weight: 700;
+}
+
+.light-after-work-card.has-light h3 {
+    color: #92400e;
+}
+
+.countdown-message {
+    color: #1e40af;
+    font-size: 1rem;
+    margin-bottom: 0.75rem;
+}
+
+.light-after-work-card.has-light .countdown-message {
+    color: #b45309;
+}
+
+.countdown-value {
+    font-size: 2rem;
+    font-weight: 800;
+    color: #1e3a8a;
+    text-shadow: 0 2px 4px rgba(30, 58, 138, 0.1);
+}
+
+.light-after-work-card.has-light .countdown-value {
+    color: #92400e;
+    text-shadow: 0 2px 4px rgba(146, 64, 14, 0.1);
+}
+
+@media (max-width: 768px) {
+    .light-after-work-card {
+        padding: 1rem;
+    }
+    
+    .card-content {
+        gap: 1rem;
+    }
+    
+    .card-icon {
+        font-size: 2rem;
+    }
+    
+    .card-text h3 {
+        font-size: 1.25rem;
+    }
+    
+    .countdown-value {
+        font-size: 1.5rem;
+    }
+}

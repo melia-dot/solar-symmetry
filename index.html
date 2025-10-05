@@ -54,6 +54,26 @@
                 <h1 id="currentMonth" class="month-title">September 2025</h1>
                 <button id="nextMonth" class="nav-button" aria-label="Next month">›</button>
             </div>
+            
+            <!-- Golden Hour Toggle -->
+            <div class="golden-hour-toggle">
+                <button id="goldenHourToggle" class="toggle-btn">
+                    <span class="toggle-icon">📷</span>
+                    <span class="toggle-text">Show Photography Times</span>
+                </button>
+            </div>
+            
+            <!-- Light After Work Timer -->
+            <div id="lightAfterWorkCard" class="light-after-work-card hidden">
+                <div class="card-content">
+                    <div class="card-icon">🌆</div>
+                    <div class="card-text">
+                        <h3 id="lightAfterWorkTitle">Light After Work</h3>
+                        <div id="lightAfterWorkMessage" class="countdown-message"></div>
+                        <div id="lightAfterWorkCountdown" class="countdown-value"></div>
+                    </div>
+                </div>
+            </div>
 
             <!-- Symmetry View Container -->
             <div id="symmetryContainer" class="comparison-container">
@@ -161,6 +181,7 @@
     </div>
 
     <!-- Scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/animejs/3.2.2/anime.min.js"></script>
     <script src="src/utils/date-calculations.js"></script>
     <script src="src/clients/geocoding.js"></script>
     <script src="src/clients/twilight.js"></script>

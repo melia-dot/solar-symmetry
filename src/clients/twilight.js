@@ -173,11 +173,22 @@ class TwilightClient {
             // Get the timezone for this location
             const timezone = this.getTimezoneForCoordinates(lat, lng);
 
+            // Calculate golden hour times
+            const goldenHourMorningStart = new Date(sunrise.getTime());
+            const goldenHourMorningEnd = new Date(sunrise.getTime() + (60 * 60 * 1000)); // 1 hour after sunrise
+            
+            const goldenHourEveningStart = new Date(sunset.getTime() - (60 * 60 * 1000)); // 1 hour before sunset
+            const goldenHourEveningEnd = new Date(sunset.getTime());
+
             return {
                 dawn: this.formatTimeForTimezone(dawn, timezone),
                 dusk: this.formatTimeForTimezone(dusk, timezone),
                 sunrise: this.formatTimeForTimezone(sunrise, timezone),
                 sunset: this.formatTimeForTimezone(sunset, timezone),
+                goldenHourMorningStart: this.formatTimeForTimezone(goldenHourMorningStart, timezone),
+                goldenHourMorningEnd: this.formatTimeForTimezone(goldenHourMorningEnd, timezone),
+                goldenHourEveningStart: this.formatTimeForTimezone(goldenHourEveningStart, timezone),
+                goldenHourEveningEnd: this.formatTimeForTimezone(goldenHourEveningEnd, timezone),
                 dawnISO: dawn.toISOString(),
                 duskISO: dusk.toISOString(),
                 sunriseISO: sunrise.toISOString(),

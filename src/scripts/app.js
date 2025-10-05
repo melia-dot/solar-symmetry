@@ -12,6 +12,7 @@ class SolarSymmetryApp {
         this.currentMonth = new Date();
         this.currentLocation = null;
         this.isLoading = false;
+        this.showGoldenHour = false; // Golden hour toggle state
         
         // View mode: 'symmetry', 'cities', or 'mobileApp'
         this.currentView = 'symmetry';
@@ -63,6 +64,11 @@ class SolarSymmetryApp {
             currentMonth: document.getElementById('currentMonth'),
             prevMonth: document.getElementById('prevMonth'),
             nextMonth: document.getElementById('nextMonth'),
+            goldenHourToggle: document.getElementById('goldenHourToggle'),
+            lightAfterWorkCard: document.getElementById('lightAfterWorkCard'),
+            lightAfterWorkTitle: document.getElementById('lightAfterWorkTitle'),
+            lightAfterWorkMessage: document.getElementById('lightAfterWorkMessage'),
+            lightAfterWorkCountdown: document.getElementById('lightAfterWorkCountdown'),
             loadingIndicator: document.getElementById('loadingIndicator')
         };
         
@@ -149,6 +155,11 @@ class SolarSymmetryApp {
 
         this.elements.nextMonth.addEventListener('click', () => {
             this.navigateToNextMonth();
+        });
+        
+        // Golden hour toggle
+        this.elements.goldenHourToggle.addEventListener('click', () => {
+            this.toggleGoldenHour();
         });
 
         // Keyboard navigation for months
@@ -247,6 +258,7 @@ class SolarSymmetryApp {
                 this.currentLocation = JSON.parse(savedLocation);
                 this.elements.locationInput.value = this.currentLocation.name;
                 this.loadMonthData();
+                this.updateLightAfterWorkTimer();
             }
             
             // Load city 1
@@ -419,6 +431,7 @@ class SolarSymmetryApp {
         
         this.showLoading();
         await this.loadMonthData();
+        await this.updateLightAfterWorkTimer();
         this.hideLoading();
     }
 
@@ -643,6 +656,144 @@ class SolarSymmetryApp {
     updateNavigationButtons() {
         this.elements.prevMonth.disabled = !this.dateCalc.canGoToPreviousMonth(this.currentMonth);
         this.elements.nextMonth.disabled = !this.dateCalc.canGoToNextMonth(this.currentMonth);
+    }
+    
+    /**
+     * Toggle golden hour display
+     */
+    toggleGoldenHour() {
+        this.showGoldenHour = !this.showGoldenHour;
+        
+        // Update button appearance
+        if (this.showGoldenHour) {
+            this.elements.goldenHourToggle.classList.add('active');
+        } else {
+            this.elements.goldenHourToggle.classList.remove('active');
+        }
+        
+        // Re-render with animation
+        if (this.currentView === 'symmetry' && this.currentLocation) {
+            this.loadMonthData();
+        } else if (this.currentView === 'cities' && this.city1 && this.city2) {
+            this.loadMonthData();
+        }
+    }
+    
+    /**
+     * Calculate and display light after work countdown
+     */
+    async updateLightAfterWorkTimer() {
+        if (!this.currentLocation) {
+            this.elements.lightAfterWorkCard.classList.add('hidden');
+            return;
+        }
+        
+        const today = new Date();
+        const targetTime = '17:00'; // 5pm
+        
+        try {
+            // Get today's sunset
+            const todayData = await this.twilight.getTwilightTimes(
+                today,
+                this.currentLocation.lat,
+                this.currentLocation.lng
+            );
+            
+            const todaySunsetTime = todayData.sunset;
+            
+            // Check if we currently have light after 5pm
+            const sunsetHour = parseInt(todaySunsetTime.split(':')[0]);
+            const sunsetMinute = parseInt(todaySunsetTime.split(':')[1]);
+            const sunsetTotalMinutes = sunsetHour * 60 + sunsetMinute;
+            const targetMinutes = 17 * 60; // 5pm
+            
+            if (sunsetTotalMinutes > targetMinutes) {
+                // We currently have light after work!
+                this.showLightAfterWorkCountdown(today, todayData, true);
+            } else {
+                // Find when light returns after work
+                this.findWhenLightReturns(targetMinutes);
+            }
+            
+        } catch (error) {
+            console.error('Failed to calculate light after work:', error);
+            this.elements.lightAfterWorkCard.classList.add('hidden');
+        }
+    }
+    
+    /**
+     * Find when sunset will be after target time
+     */
+    async findWhenLightReturns(targetMinutes) {
+        const today = new Date();
+        const searchLimit = 365; // Search up to 1 year ahead
+        
+        for (let daysAhead = 1; daysAhead < searchLimit; daysAhead++) {
+            const futureDate = new Date(today);
+            futureDate.setDate(today.getDate() + daysAhead);
+            
+            const futureData = await this.twilight.getTwilightTimes(
+                futureDate,
+                this.currentLocation.lat,
+                this.currentLocation.lng
+            );
+            
+            const sunsetTime = futureData.sunset;
+            const sunsetHour = parseInt(sunsetTime.split(':')[0]);
+            const sunsetMinute = parseInt(sunsetTime.split(':')[1]);
+            const sunsetTotalMinutes = sunsetHour * 60 + sunsetMinute;
+            
+            if (sunsetTotalMinutes > targetMinutes) {
+                // Found it!
+                this.showLightAfterWorkCountdown(futureDate, futureData, false);
+                return;
+            }
+            
+            // Check every 7 days for efficiency
+            if (daysAhead < 30) {
+                daysAhead += 6; // Will increment by 1 in loop, so effectively +7
+            } else {
+                daysAhead += 13; // Check every 2 weeks after a month
+            }
+        }
+        
+        // If we didn't find it, hide the card
+        this.elements.lightAfterWorkCard.classList.add('hidden');
+    }
+    
+    /**
+     * Display light after work countdown
+     */
+    showLightAfterWorkCountdown(targetDate, twilightData, hasLightNow) {
+        this.elements.lightAfterWorkCard.classList.remove('hidden');
+        
+        if (hasLightNow) {
+            // Currently have light
+            this.elements.lightAfterWorkTitle.textContent = '☀️ Light After Work!';
+            this.elements.lightAfterWorkMessage.textContent = 'Sunset today at ' + twilightData.sunset;
+            this.elements.lightAfterWorkCountdown.textContent = 'Enjoy the daylight! 🌆';
+            this.elements.lightAfterWorkCard.classList.add('has-light');
+        } else {
+            // Countdown to light return
+            const today = new Date();
+            const daysUntil = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
+            
+            this.elements.lightAfterWorkTitle.textContent = '🌆 Light Returns After Work';
+            this.elements.lightAfterWorkMessage.textContent = 'Sunset will be after 5pm on ' + this.dateCalc.formatDate(targetDate);
+            this.elements.lightAfterWorkCountdown.textContent = daysUntil + ' days to go!';
+            this.elements.lightAfterWorkCard.classList.remove('has-light');
+            
+            // Animate countdown
+            if (window.anime) {
+                anime({
+                    targets: this.elements.lightAfterWorkCountdown,
+                    scale: [1.1, 1],
+                    opacity: [0, 1],
+                    duration: 800,
+                    easing: 'easeOutElastic(1, .6)'
+                });
+            }
+        }
     }
 
     // =================================================================
@@ -890,6 +1041,8 @@ class SolarSymmetryApp {
     createDateElement(date, twilightData, isToday = false) {
         const element = document.createElement('div');
         element.className = `date-item ${isToday ? 'today' : ''}`;
+        element.style.opacity = '0';
+        element.style.transform = 'translateY(20px)';
 
         const dateHeader = document.createElement('div');
         dateHeader.className = 'date-header';
@@ -907,6 +1060,17 @@ class SolarSymmetryApp {
                 <div>
                     <div class="time-label">Dawn</div>
                     <div>${twilightData.dawn}</div>
+                </div>
+            `;
+            
+            // Golden Hour Morning (if enabled)
+            const goldenHourMorning = document.createElement('div');
+            goldenHourMorning.className = `twilight-time golden-hour ${this.showGoldenHour ? '' : 'hidden'}`;
+            goldenHourMorning.innerHTML = `
+                <span class="time-icon">🌅</span> 
+                <div>
+                    <div class="time-label">Golden Hour AM</div>
+                    <div>${twilightData.goldenHourMorningStart || 'N/A'} - ${twilightData.goldenHourMorningEnd || 'N/A'}</div>
                 </div>
             `;
 
@@ -931,6 +1095,17 @@ class SolarSymmetryApp {
                     <div>${twilightData.sunset}</div>
                 </div>
             `;
+            
+            // Golden Hour Evening (if enabled)
+            const goldenHourEvening = document.createElement('div');
+            goldenHourEvening.className = `twilight-time golden-hour ${this.showGoldenHour ? '' : 'hidden'}`;
+            goldenHourEvening.innerHTML = `
+                <span class="time-icon">🌄</span> 
+                <div>
+                    <div class="time-label">Golden Hour PM</div>
+                    <div>${twilightData.goldenHourEveningStart || 'N/A'} - ${twilightData.goldenHourEveningEnd || 'N/A'}</div>
+                </div>
+            `;
 
             // Dusk (Civil Twilight End)
             const duskTime = document.createElement('div');
@@ -944,8 +1119,10 @@ class SolarSymmetryApp {
             `;
 
             twilightTimes.appendChild(dawnTime);
+            twilightTimes.appendChild(goldenHourMorning);
             twilightTimes.appendChild(sunriseTime);
             twilightTimes.appendChild(sunsetTime);
+            twilightTimes.appendChild(goldenHourEvening);
             twilightTimes.appendChild(duskTime);
         } else if (twilightData && twilightData.error) {
             twilightTimes.innerHTML = '<div class="twilight-time error">API Error</div>';
@@ -955,6 +1132,23 @@ class SolarSymmetryApp {
 
         element.appendChild(dateHeader);
         element.appendChild(twilightTimes);
+        
+        // Animate card entrance with anime.js
+        setTimeout(() => {
+            if (window.anime) {
+                window.anime({
+                    targets: element,
+                    opacity: [0, 1],
+                    translateY: [20, 0],
+                    duration: 600,
+                    easing: 'easeOutCubic',
+                    delay: Math.random() * 100 // Slight random delay for stagger effect
+                });
+            } else {
+                element.style.opacity = '1';
+                element.style.transform = 'translateY(0)';
+            }
+        }, 10);
 
         return element;
     }
