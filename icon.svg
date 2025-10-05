@@ -1,0 +1,19 @@
+<svg width="512" height="512" viewBox="0 0 512 512" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle -->
+  <circle cx="256" cy="256" r="256" fill="#4338ca"/>
+  
+  <!-- Sun circle -->
+  <circle cx="256" cy="256" r="120" fill="#ffffff"/>
+  
+  <!-- Sun rays -->
+  <g stroke="#ffffff" stroke-width="24" stroke-linecap="round">
+    <path d="M256 40 V120"/>
+    <path d="M256 392 V472"/>
+    <path d="M472 256 H392"/>
+    <path d="M120 256 H40"/>
+    <path d="M403 109 L347 165"/>
+    <path d="M165 347 L109 403"/>
+    <path d="M403 403 L347 347"/>
+    <path d="M165 165 L109 109"/>
+  </g>
+</svg>

@@ -13,7 +13,7 @@ class SolarSymmetryApp {
         this.currentLocation = null;
         this.isLoading = false;
         
-        // View mode: 'symmetry' or 'cities'
+        // View mode: 'symmetry', 'cities', or 'mobileApp'
         this.currentView = 'symmetry';
         
         // Cities view data
@@ -34,6 +34,7 @@ class SolarSymmetryApp {
             // View toggle buttons
             symmetryViewBtn: document.getElementById('symmetryViewBtn'),
             citiesViewBtn: document.getElementById('citiesViewBtn'),
+            mobileAppBtn: document.getElementById('mobileAppBtn'),
             
             // Symmetry view elements
             symmetryLocationSelector: document.getElementById('symmetryLocationSelector'),
@@ -54,6 +55,9 @@ class SolarSymmetryApp {
             city2Header: document.getElementById('city2Header'),
             city1Dates: document.getElementById('city1Dates'),
             city2Dates: document.getElementById('city2Dates'),
+            
+            // Mobile app view elements
+            mobileAppContainer: document.getElementById('mobileAppContainer'),
             
             // Shared elements
             currentMonth: document.getElementById('currentMonth'),
@@ -84,6 +88,10 @@ class SolarSymmetryApp {
         
         this.elements.citiesViewBtn.addEventListener('click', () => {
             this.switchToView('cities');
+        });
+        
+        this.elements.mobileAppBtn.addEventListener('click', () => {
+            this.switchToView('mobileApp');
         });
         
         // Symmetry view - Location search
@@ -166,12 +174,14 @@ class SolarSymmetryApp {
             // Update button states
             this.elements.symmetryViewBtn.classList.add('active');
             this.elements.citiesViewBtn.classList.remove('active');
+            this.elements.mobileAppBtn.classList.remove('active');
             
             // Show/hide UI elements
             this.elements.symmetryLocationSelector.classList.remove('hidden');
             this.elements.citiesLocationSelector.classList.add('hidden');
             this.elements.symmetryContainer.classList.remove('hidden');
             this.elements.citiesContainer.classList.add('hidden');
+            this.elements.mobileAppContainer.classList.add('hidden');
             
             // Load data if location is set
             if (this.currentLocation) {
@@ -179,16 +189,18 @@ class SolarSymmetryApp {
             } else {
                 this.renderSymmetryEmptyState();
             }
-        } else {
+        } else if (view === 'cities') {
             // Update button states
             this.elements.citiesViewBtn.classList.add('active');
             this.elements.symmetryViewBtn.classList.remove('active');
+            this.elements.mobileAppBtn.classList.remove('active');
             
             // Show/hide UI elements
             this.elements.citiesLocationSelector.classList.remove('hidden');
             this.elements.symmetryLocationSelector.classList.add('hidden');
             this.elements.citiesContainer.classList.remove('hidden');
             this.elements.symmetryContainer.classList.add('hidden');
+            this.elements.mobileAppContainer.classList.add('hidden');
             
             // Load data if cities are set
             if (this.city1 && this.city2) {
@@ -196,6 +208,18 @@ class SolarSymmetryApp {
             } else {
                 this.renderCitiesEmptyState();
             }
+        } else if (view === 'mobileApp') {
+            // Update button states
+            this.elements.mobileAppBtn.classList.add('active');
+            this.elements.symmetryViewBtn.classList.remove('active');
+            this.elements.citiesViewBtn.classList.remove('active');
+            
+            // Show/hide UI elements
+            this.elements.symmetryLocationSelector.classList.add('hidden');
+            this.elements.citiesLocationSelector.classList.add('hidden');
+            this.elements.symmetryContainer.classList.add('hidden');
+            this.elements.citiesContainer.classList.add('hidden');
+            this.elements.mobileAppContainer.classList.remove('hidden');
         }
     }
 
@@ -205,8 +229,61 @@ class SolarSymmetryApp {
     async initializeApp() {
         this.updateMonthDisplay();
         
+        // Load saved locations from localStorage
+        this.loadSavedLocations();
+        
         // Start in symmetry view
         this.switchToView('symmetry');
+    }
+
+    /**
+     * Load saved locations from localStorage
+     */
+    loadSavedLocations() {
+        try {
+            // Load symmetry location
+            const savedLocation = localStorage.getItem('solarSymmetry_location');
+            if (savedLocation) {
+                this.currentLocation = JSON.parse(savedLocation);
+                this.elements.locationInput.value = this.currentLocation.name;
+                this.loadMonthData();
+            }
+            
+            // Load city 1
+            const savedCity1 = localStorage.getItem('solarSymmetry_city1');
+            if (savedCity1) {
+                this.city1 = JSON.parse(savedCity1);
+                this.elements.city1Input.value = this.city1.name;
+                this.elements.city1Header.textContent = this.city1.name;
+            }
+            
+            // Load city 2
+            const savedCity2 = localStorage.getItem('solarSymmetry_city2');
+            if (savedCity2) {
+                this.city2 = JSON.parse(savedCity2);
+                this.elements.city2Input.value = this.city2.name;
+                this.elements.city2Header.textContent = this.city2.name;
+            }
+        } catch (error) {
+            console.error('Failed to load saved locations:', error);
+        }
+    }
+
+    /**
+     * Save location to localStorage
+     */
+    saveLocation(location, type = 'location') {
+        try {
+            const key = type === 'location' 
+                ? 'solarSymmetry_location' 
+                : type === 'city1'
+                    ? 'solarSymmetry_city1'
+                    : 'solarSymmetry_city2';
+            
+            localStorage.setItem(key, JSON.stringify(location));
+        } catch (error) {
+            console.error('Failed to save location:', error);
+        }
     }
 
     // =================================================================
@@ -336,6 +413,9 @@ class SolarSymmetryApp {
         this.elements.locationInput.blur();
         this.currentLocation = location;
         this.hideLocationDropdown();
+        
+        // Save to localStorage
+        this.saveLocation(location, 'location');
         
         this.showLoading();
         await this.loadMonthData();
@@ -498,8 +578,10 @@ class SolarSymmetryApp {
         
         if (cityNumber === 1) {
             this.city1 = location;
+            this.saveLocation(location, 'city1');
         } else {
             this.city2 = location;
+            this.saveLocation(location, 'city2');
         }
         
         this.hideCityDropdown(cityNumber);
