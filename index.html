@@ -65,6 +65,16 @@
             
             <!-- Light After Work Timer -->
             <div id="lightAfterWorkCard" class="light-after-work-card hidden">
+                <div class="sun-arc-container">
+                    <svg class="sun-arc" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
+                        <path id="sunPath" d="M 10,90 Q 100,10 190,90" stroke="rgba(251, 191, 36, 0.3)" stroke-width="2" fill="none"/>
+                        <circle id="sunCircle" r="8" fill="#fbbf24">
+                            <animateMotion dur="3s" repeatCount="indefinite">
+                                <mpath href="#sunPath"/>
+                            </animateMotion>
+                        </circle>
+                    </svg>
+                </div>
                 <div class="card-content">
                     <div class="card-icon">🌆</div>
                     <div class="card-text">

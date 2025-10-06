@@ -671,12 +671,26 @@ class SolarSymmetryApp {
             this.elements.goldenHourToggle.classList.remove('active');
         }
         
-        // Re-render with animation
-        if (this.currentView === 'symmetry' && this.currentLocation) {
-            this.loadMonthData();
-        } else if (this.currentView === 'cities' && this.city1 && this.city2) {
-            this.loadMonthData();
-        }
+        // Just toggle visibility of existing golden hour elements
+        const goldenHourElements = document.querySelectorAll('.twilight-time.golden-hour');
+        goldenHourElements.forEach((element, index) => {
+            if (this.showGoldenHour) {
+                element.classList.remove('hidden');
+                // Smooth fade in with stagger
+                if (window.anime) {
+                    anime({
+                        targets: element,
+                        opacity: [0, 1],
+                        maxHeight: ['0px', element.scrollHeight + 'px'],
+                        duration: 300,
+                        delay: index * 15,
+                        easing: 'easeOutQuad'
+                    });
+                }
+            } else {
+                element.classList.add('hidden');
+            }
+        });
     }
     
     /**
@@ -982,6 +996,9 @@ class SolarSymmetryApp {
             );
             container.appendChild(dateElement);
         });
+        
+        // Animate all cards with stagger
+        this.animateCardEntrance(container);
     }
 
     /**
@@ -999,6 +1016,9 @@ class SolarSymmetryApp {
             );
             container.appendChild(dateElement);
         });
+        
+        // Animate all cards with stagger
+        this.animateCardEntrance(container);
     }
 
     /**
@@ -1133,24 +1153,41 @@ class SolarSymmetryApp {
         element.appendChild(dateHeader);
         element.appendChild(twilightTimes);
         
-        // Animate card entrance with anime.js
-        setTimeout(() => {
-            if (window.anime) {
-                window.anime({
-                    targets: element,
-                    opacity: [0, 1],
-                    translateY: [20, 0],
-                    duration: 600,
-                    easing: 'easeOutCubic',
-                    delay: Math.random() * 100 // Slight random delay for stagger effect
-                });
-            } else {
-                element.style.opacity = '1';
-                element.style.transform = 'translateY(0)';
-            }
-        }, 10);
-
         return element;
+    }
+    
+    /**
+     * Animate card entrance with stagger effect
+     */
+    animateCardEntrance(container) {
+        if (!window.anime) return;
+        
+        const cards = container.querySelectorAll('.date-item');
+        
+        anime({
+            targets: cards,
+            opacity: [0, 1],
+            translateY: [20, 0],
+            duration: 500,
+            delay: anime.stagger(50), // 50ms delay between each card
+            easing: 'easeOutCubic'
+        });
+        
+        // Add subtle pulse to golden hour times if visible
+        const goldenHourTimes = container.querySelectorAll('.twilight-time.golden-hour:not(.hidden)');
+        if (goldenHourTimes.length > 0) {
+            setTimeout(() => {
+                anime({
+                    targets: goldenHourTimes,
+                    scale: [1, 1.05, 1],
+                    opacity: [1, 0.9, 1],
+                    duration: 1500,
+                    delay: anime.stagger(100),
+                    easing: 'easeInOutSine',
+                    loop: 2
+                });
+            }, 800);
+        }
     }
 
     // =================================================================
