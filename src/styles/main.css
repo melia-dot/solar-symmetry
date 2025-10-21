@@ -908,3 +908,39 @@ body {
         font-size: 1.5rem;
     }
 }
+/* Extra small phones (iPhone SE) */
+@media (max-width: 380px) {
+    .dates-grid {
+        grid-template-columns: minmax(150px, 1fr) minmax(150px, 1fr);
+        min-width: 300px;
+    }
+    
+    .column {
+        padding: 0.4rem 0.25rem;
+    }
+    
+    .column-header {
+        font-size: 0.75rem;
+        padding-bottom: 0.3rem;
+    }
+    
+    .date-item {
+        padding: 0.35rem 0.25rem;
+    }
+    
+    .date-header {
+        font-size: 0.7rem;
+    }
+    
+    .twilight-times {
+        font-size: 0.55rem;
+    }
+    
+    .time-icon {
+        font-size: 0.5rem;
+    }
+    
+    .time-label {
+        font-size: 0.48rem;
+    }
+}
