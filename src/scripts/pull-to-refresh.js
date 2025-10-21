@@ -89,6 +89,9 @@ class PullToRefresh {
         this.indicator.classList.add('refreshing');
         this.indicator.querySelector('.pull-text').textContent = 'Refreshing...';
         
+        // Show fullscreen loading spinner
+        this.showFullscreenSpinner();
+        
         try {
             // Clear all caches
             if ('caches' in window) {
@@ -111,7 +114,25 @@ class PullToRefresh {
             
         } catch (error) {
             console.error('Failed to refresh:', error);
+            this.hideFullscreenSpinner();
             this.resetIndicator();
+        }
+    }
+    
+    showFullscreenSpinner() {
+        const spinner = document.createElement('div');
+        spinner.className = 'fullscreen-refresh-spinner';
+        spinner.innerHTML = `
+            <div class="refresh-spinner-wheel"></div>
+            <div class="refresh-spinner-text">Refreshing app...</div>
+        `;
+        document.body.appendChild(spinner);
+    }
+    
+    hideFullscreenSpinner() {
+        const spinner = document.querySelector('.fullscreen-refresh-spinner');
+        if (spinner) {
+            spinner.remove();
         }
     }
     
