@@ -52,7 +52,7 @@ class TwilightClient {
                 throw new Error(`API error: ${data.status}`);
             }
 
-            const twilightData = this.processTwilightData(data.results, date);
+            const twilightData = this.processTwilightData(data.results, date, lat, lng);
             
             // Cache the result
             this.cache.set(cacheKey, {
@@ -158,21 +158,37 @@ class TwilightClient {
      * Process raw API data into our format
      * @param {Object} results - Raw API results
      * @param {Date} date - The date for timezone context
+     * @param {number} lat - Latitude
+     * @param {number} lng - Longitude
      * @returns {Object} - Processed twilight data
      */
-    processTwilightData(results, date) {
+    processTwilightData(results, date, lat, lng) {
         try {
-            // The API returns UTC times, we need to convert to local time
+            // The API returns UTC times, we need to convert to local timezone
             const dawn = new Date(results.civil_twilight_begin);
             const dusk = new Date(results.civil_twilight_end);
             const sunrise = new Date(results.sunrise);
             const sunset = new Date(results.sunset);
 
+            // Get the timezone for this location
+            const timezone = this.getTimezoneForCoordinates(lat, lng);
+
+            // Calculate golden hour times
+            const goldenHourMorningStart = new Date(sunrise.getTime());
+            const goldenHourMorningEnd = new Date(sunrise.getTime() + (60 * 60 * 1000)); // 1 hour after sunrise
+            
+            const goldenHourEveningStart = new Date(sunset.getTime() - (60 * 60 * 1000)); // 1 hour before sunset
+            const goldenHourEveningEnd = new Date(sunset.getTime());
+
             return {
-                dawn: this.formatTime(dawn),
-                dusk: this.formatTime(dusk),
-                sunrise: this.formatTime(sunrise),
-                sunset: this.formatTime(sunset),
+                dawn: this.formatTimeForTimezone(dawn, timezone),
+                dusk: this.formatTimeForTimezone(dusk, timezone),
+                sunrise: this.formatTimeForTimezone(sunrise, timezone),
+                sunset: this.formatTimeForTimezone(sunset, timezone),
+                goldenHourMorningStart: this.formatTimeForTimezone(goldenHourMorningStart, timezone),
+                goldenHourMorningEnd: this.formatTimeForTimezone(goldenHourMorningEnd, timezone),
+                goldenHourEveningStart: this.formatTimeForTimezone(goldenHourEveningStart, timezone),
+                goldenHourEveningEnd: this.formatTimeForTimezone(goldenHourEveningEnd, timezone),
                 dawnISO: dawn.toISOString(),
                 duskISO: dusk.toISOString(),
                 sunriseISO: sunrise.toISOString(),
@@ -210,6 +226,80 @@ class TwilightClient {
             minute: '2-digit',
             hour12: false
         });
+    }
+
+    /**
+     * Get timezone for coordinates using approximate timezone mapping
+     * @param {number} lat - Latitude
+     * @param {number} lng - Longitude
+     * @returns {string} - IANA timezone identifier
+     */
+    getTimezoneForCoordinates(lat, lng) {
+        // Montreal is approximately 45.5°N, -73.6°W
+        // UK is approximately 51.5°N, -0.1°W
+        
+        if (lng >= -141 && lng <= -60) {
+            // North America (both USA and Canada)
+            // Atlantic timezone: east of -65°W
+            if (lng > -65) return 'America/Halifax';
+            // Eastern timezone: -65°W to -90°W (includes Montreal at -73.5°W)
+            if (lng > -90) {
+                if (lat >= 41) {
+                    return 'America/Toronto';  // Canada Eastern (includes Montreal, Toronto)
+                } else {
+                    return 'America/New_York'; // USA Eastern
+                }
+            }
+            // Central timezone: -90°W to -105°W  
+            if (lng > -105) return 'America/Chicago';
+            // Mountain timezone: -105°W to -120°W
+            if (lng > -120) return 'America/Denver';
+            // Pacific timezone: west of -120°W
+            return 'America/Los_Angeles';
+        }
+        
+        if (lng >= -15 && lng <= 40 && lat >= 35) {
+            // Europe
+            if (lng <= 2) return 'Europe/London';
+            if (lng <= 15) return 'Europe/Paris';
+            if (lng <= 25) return 'Europe/Berlin';
+            return 'Europe/Moscow';
+        }
+        
+        if (lng >= 100 && lng <= 180) {
+            // Asia-Pacific
+            if (lng <= 120) return 'Asia/Shanghai';
+            if (lng <= 140) return 'Asia/Tokyo';
+            return 'Pacific/Auckland';
+        }
+        
+        // Default fallback
+        return 'UTC';
+    }
+
+    /**
+     * Format time for a specific timezone
+     * @param {Date} date - UTC date object
+     * @param {string} timezone - IANA timezone identifier
+     * @returns {string} - Formatted time string
+     */
+    formatTimeForTimezone(date, timezone) {
+        try {
+            return date.toLocaleTimeString('en-US', {
+                timeZone: timezone,
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+        } catch (error) {
+            console.warn(`Invalid timezone ${timezone}, using UTC`);
+            return date.toLocaleTimeString('en-US', {
+                timeZone: 'UTC',
+                hour: '2-digit',
+                minute: '2-digit',
+                hour12: false
+            });
+        }
     }
 
     /**
