@@ -1,0 +1,80 @@
+Replace this section in src/styles/main.css around line 525:
+
+FROM:
+    /* Keep side-by-side on mobile with horizontal scroll */
+    .comparison-container {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .dates-grid {
+        grid-template-columns: minmax(300px, 1fr) minmax(300px, 1fr);
+        min-width: 600px;
+    }
+    
+    .current-column {
+        border-right: 1px solid #e0e7ff;
+    }
+    
+    .column {
+        padding: 1.5rem;
+    }
+
+TO:
+    /* COMPRESSED for iPhone SE - both months fit on screen */
+    .comparison-container {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+    
+    .dates-grid {
+        grid-template-columns: minmax(165px, 1fr) minmax(165px, 1fr);
+        min-width: 330px;
+        gap: 0;
+    }
+    
+    .current-column {
+        border-right: 1px solid #e0e7ff;
+    }
+    
+    .column {
+        padding: 0.5rem 0.35rem;
+    }
+    
+    .column-header {
+        font-size: 0.8rem;
+        margin-bottom: 0.5rem;
+        padding-bottom: 0.4rem;
+    }
+    
+    .date-item {
+        padding: 0.4rem 0.3rem;
+        margin-bottom: 0.3rem;
+    }
+    
+    .date-header {
+        font-size: 0.75rem;
+        margin-bottom: 0.25rem;
+    }
+    
+    .twilight-times {
+        grid-template-columns: 1fr;
+        gap: 0.15rem;
+        font-size: 0.6rem;
+    }
+    
+    .twilight-time {
+        padding: 0.15rem 0.2rem;
+        gap: 0.15rem;
+    }
+    
+    .time-icon {
+        font-size: 0.55rem;
+    }
+    
+    .time-label {
+        font-size: 0.5rem;
+        white-space: nowrap;
+    }

@@ -527,8 +527,8 @@ body {
     }
     
     .dates-grid {
-        grid-template-columns: minmax(165px, 1fr) minmax(165px, 1fr);
-        min-width: 330px;
+        grid-template-columns: minmax(300px, 1fr) minmax(300px, 1fr);
+        min-width: 600px;
     }
     
     .current-column {
@@ -536,7 +536,7 @@ body {
     }
     
     .column {
-        padding: 0.5rem 0.35rem;
+        padding: 1.5rem;
     }
     
     .month-navigation {
