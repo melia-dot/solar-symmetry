@@ -330,13 +330,20 @@ body {
         min-width: 250px;
     }
     
+    /* Keep side-by-side on mobile with horizontal scroll */
+    .comparison-container {
+        overflow-x: auto;
+        overflow-y: hidden;
+        -webkit-overflow-scrolling: touch;
+    }
+    
     .dates-grid {
-        grid-template-columns: 1fr;
+        grid-template-columns: minmax(300px, 1fr) minmax(300px, 1fr);
+        min-width: 600px;
     }
     
     .current-column {
-        border-right: none;
-        border-bottom: 1px solid #e0e7ff;
+        border-right: 1px solid #e0e7ff;
     }
     
     .column {
