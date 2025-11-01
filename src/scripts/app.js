@@ -41,6 +41,7 @@ class SolarSymmetryApp {
             symmetryLocationSelector: document.getElementById('symmetryLocationSelector'),
             locationInput: document.getElementById('locationInput'),
             locationDropdown: document.getElementById('locationDropdown'),
+            appVersion: document.getElementById('appVersion'),
             symmetryContainer: document.getElementById('symmetryContainer'),
             currentDates: document.getElementById('currentDates'),
             mirroredDates: document.getElementById('mirroredDates'),
@@ -239,10 +240,15 @@ class SolarSymmetryApp {
      */
     async initializeApp() {
         this.updateMonthDisplay();
-        
+
+        // Display app version
+        if (this.elements.appVersion && window.APP_VERSION) {
+            this.elements.appVersion.textContent = `v${window.APP_VERSION}`;
+        }
+
         // Load saved locations from localStorage
         this.loadSavedLocations();
-        
+
         // Start in symmetry view
         this.switchToView('symmetry');
     }
