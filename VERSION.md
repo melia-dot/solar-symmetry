@@ -1,6 +1,6 @@
 # Version Management
 
-## Current Version: 1.0.2
+## Current Version: 1.0.3
 
 ## Versioning Rules
 
@@ -41,6 +41,10 @@ const APP_VERSION = '1.0.2';
 ```
 
 ## Version History
+
+### 1.0.3 (2025-11-01)
+- Removed location pin icons (📍) from all city input fields to save space
+- Adjusted dropdown positioning after removing pins
 
 ### 1.0.2 (2025-11-01)
 - Fixed cities compare column alignment (both city headers now same height)

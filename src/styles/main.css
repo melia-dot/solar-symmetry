@@ -74,7 +74,7 @@ body {
 .location-dropdown {
     position: absolute;
     top: 100%;
-    left: 2.25rem;
+    left: 0;
     right: 0;
     background: white;
     border: 1px solid #e0e7ff;
@@ -193,7 +193,7 @@ body {
 #city2Dropdown {
     position: absolute;
     top: 100%;
-    left: 2.25rem;
+    left: 0;
     right: 0;
     background: white;
     border: 1px solid #e0e7ff;

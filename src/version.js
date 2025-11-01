@@ -10,7 +10,7 @@
  * IMPORTANT: Update this version number before every push to GitHub!
  */
 
-const APP_VERSION = '1.0.2';
+const APP_VERSION = '1.0.3';
 
 // Export for use in other modules
 window.APP_VERSION = APP_VERSION;
