@@ -299,6 +299,10 @@ body {
     text-align: center;
     padding-bottom: 1rem;
     border-bottom: 2px solid #e0e7ff;
+    min-height: 4rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .dates-list {
@@ -932,6 +936,7 @@ body {
     .column-header {
         font-size: 0.75rem;
         padding-bottom: 0.3rem;
+        min-height: 3rem;
     }
     
     .date-item {

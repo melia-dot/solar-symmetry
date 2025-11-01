@@ -1,7 +1,7 @@
 {
   "name": "Solar Symmetry",
   "short_name": "Solar Symmetry",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "description": "Discover the hidden symmetries in our solar year by visualizing how dates mirror around solstices",
   "start_url": "/",
   "display": "standalone",

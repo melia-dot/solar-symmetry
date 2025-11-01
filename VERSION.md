@@ -1,6 +1,6 @@
 # Version Management
 
-## Current Version: 1.0.1
+## Current Version: 1.0.2
 
 ## Versioning Rules
 
@@ -41,6 +41,10 @@ const APP_VERSION = '1.0.2';
 ```
 
 ## Version History
+
+### 1.0.2 (2025-11-01)
+- Fixed cities compare column alignment (both city headers now same height)
+- Removed "VS" divider to save vertical space in header
 
 ### 1.0.1 (2025-11-01)
 - Fixed cities compare view not displaying data (missing animations)
