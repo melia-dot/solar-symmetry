@@ -1030,12 +1030,15 @@ class SolarSymmetryApp {
 
         citiesData.forEach(item => {
             const dateElement = this.createDateElement(
-                item.date, 
-                item.city1Twilight, 
+                item.date,
+                item.city1Twilight,
                 item.isToday
             );
             container.appendChild(dateElement);
         });
+
+        // Animate all cards with stagger
+        this.animateCardEntrance(container);
     }
 
     /**
@@ -1047,12 +1050,15 @@ class SolarSymmetryApp {
 
         citiesData.forEach(item => {
             const dateElement = this.createDateElement(
-                item.date, 
-                item.city2Twilight, 
+                item.date,
+                item.city2Twilight,
                 item.isToday
             );
             container.appendChild(dateElement);
         });
+
+        // Animate all cards with stagger
+        this.animateCardEntrance(container);
     }
 
     /**
