@@ -40,6 +40,7 @@ class SolarSymmetryApp {
             // Symmetry view elements
             symmetryLocationSelector: document.getElementById('symmetryLocationSelector'),
             locationInput: document.getElementById('locationInput'),
+            locationClearBtn: document.getElementById('locationClearBtn'),
             locationDropdown: document.getElementById('locationDropdown'),
             appVersion: document.getElementById('appVersion'),
             symmetryContainer: document.getElementById('symmetryContainer'),
@@ -49,8 +50,10 @@ class SolarSymmetryApp {
             // Cities view elements
             citiesLocationSelector: document.getElementById('citiesLocationSelector'),
             city1Input: document.getElementById('city1Input'),
+            city1ClearBtn: document.getElementById('city1ClearBtn'),
             city1Dropdown: document.getElementById('city1Dropdown'),
             city2Input: document.getElementById('city2Input'),
+            city2ClearBtn: document.getElementById('city2ClearBtn'),
             city2Dropdown: document.getElementById('city2Dropdown'),
             citiesContainer: document.getElementById('citiesContainer'),
             city1Header: document.getElementById('city1Header'),
@@ -104,28 +107,49 @@ class SolarSymmetryApp {
         // Symmetry view - Location search
         this.elements.locationInput.addEventListener('input', (e) => {
             this.handleLocationSearch(e.target.value);
+            this.toggleClearButton(this.elements.locationClearBtn, e.target.value);
         });
         
         this.elements.locationInput.addEventListener('keydown', (e) => {
             this.handleLocationKeydown(e);
         });
+        
+        // Clear button for location input
+        this.elements.locationClearBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.clearLocationInput();
+        });
 
         // Cities view - City 1 search
         this.elements.city1Input.addEventListener('input', (e) => {
             this.handleCitySearch(e.target.value, 1);
+            this.toggleClearButton(this.elements.city1ClearBtn, e.target.value);
         });
         
         this.elements.city1Input.addEventListener('keydown', (e) => {
             this.handleCityKeydown(e, 1);
         });
         
+        // Clear button for city 1 input
+        this.elements.city1ClearBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.clearCityInput(1);
+        });
+        
         // Cities view - City 2 search
         this.elements.city2Input.addEventListener('input', (e) => {
             this.handleCitySearch(e.target.value, 2);
+            this.toggleClearButton(this.elements.city2ClearBtn, e.target.value);
         });
         
         this.elements.city2Input.addEventListener('keydown', (e) => {
             this.handleCityKeydown(e, 2);
+        });
+        
+        // Clear button for city 2 input
+        this.elements.city2ClearBtn.addEventListener('click', (e) => {
+            e.stopPropagation();
+            this.clearCityInput(2);
         });
 
         // Click outside to close dropdowns
@@ -263,6 +287,7 @@ class SolarSymmetryApp {
             if (savedLocation) {
                 this.currentLocation = JSON.parse(savedLocation);
                 this.elements.locationInput.value = this.currentLocation.name;
+                this.elements.locationClearBtn.classList.remove('hidden');
                 this.loadMonthData();
                 this.updateLightAfterWorkTimer();
             }
@@ -272,6 +297,7 @@ class SolarSymmetryApp {
             if (savedCity1) {
                 this.city1 = JSON.parse(savedCity1);
                 this.elements.city1Input.value = this.city1.name;
+                this.elements.city1ClearBtn.classList.remove('hidden');
                 this.elements.city1Header.textContent = this.city1.name;
             }
             
@@ -280,6 +306,7 @@ class SolarSymmetryApp {
             if (savedCity2) {
                 this.city2 = JSON.parse(savedCity2);
                 this.elements.city2Input.value = this.city2.name;
+                this.elements.city2ClearBtn.classList.remove('hidden');
                 this.elements.city2Header.textContent = this.city2.name;
             }
         } catch (error) {
@@ -1281,6 +1308,58 @@ class SolarSymmetryApp {
     hideLoading() {
         this.isLoading = false;
         this.elements.loadingIndicator.classList.add('hidden');
+    }
+
+    /**
+     * Toggle visibility of clear button based on input value
+     */
+    toggleClearButton(clearBtn, value) {
+        if (value && value.length > 0) {
+            clearBtn.classList.remove('hidden');
+        } else {
+            clearBtn.classList.add('hidden');
+        }
+    }
+
+    /**
+     * Clear location input (Symmetry view)
+     */
+    clearLocationInput() {
+        this.elements.locationInput.value = '';
+        this.elements.locationClearBtn.classList.add('hidden');
+        this.currentLocation = null;
+        this.hideLocationDropdown();
+        localStorage.removeItem('solarSymmetry_location');
+        this.renderSymmetryEmptyState();
+        this.elements.locationInput.focus();
+    }
+
+    /**
+     * Clear city input (Cities view)
+     */
+    clearCityInput(cityNumber) {
+        if (cityNumber === 1) {
+            this.elements.city1Input.value = '';
+            this.elements.city1ClearBtn.classList.add('hidden');
+            this.elements.city1Header.textContent = 'Select First City';
+            this.city1 = null;
+            this.hideCityDropdown(1);
+            localStorage.removeItem('solarSymmetry_city1');
+            this.elements.city1Input.focus();
+        } else {
+            this.elements.city2Input.value = '';
+            this.elements.city2ClearBtn.classList.add('hidden');
+            this.elements.city2Header.textContent = 'Select Second City';
+            this.city2 = null;
+            this.hideCityDropdown(2);
+            localStorage.removeItem('solarSymmetry_city2');
+            this.elements.city2Input.focus();
+        }
+        
+        // Refresh the cities view if needed
+        if (this.currentView === 'cities') {
+            this.renderCitiesEmptyState();
+        }
     }
 }
 

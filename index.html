@@ -25,7 +25,10 @@
 
             <!-- Symmetry View Location Selector -->
             <div id="symmetryLocationSelector" class="location-selector">
-                <input type="text" id="locationInput" placeholder="Enter your city..." autocomplete="off">
+                <div class="input-wrapper">
+                    <input type="text" id="locationInput" placeholder="Enter your city..." autocomplete="off">
+                    <button class="clear-btn hidden" id="locationClearBtn" aria-label="Clear location">×</button>
+                </div>
                 <div id="locationDropdown" class="location-dropdown hidden"></div>
                 <div id="appVersion" class="app-version"></div>
             </div>
@@ -33,11 +36,17 @@
             <!-- Cities Compare View Location Selectors -->
             <div id="citiesLocationSelector" class="cities-selector hidden">
                 <div class="city-selector">
-                    <input type="text" id="city1Input" placeholder="Enter first city..." autocomplete="off">
+                    <div class="input-wrapper">
+                        <input type="text" id="city1Input" placeholder="Enter first city..." autocomplete="off">
+                        <button class="clear-btn hidden" id="city1ClearBtn" aria-label="Clear city 1">×</button>
+                    </div>
                     <div id="city1Dropdown" class="location-dropdown hidden"></div>
                 </div>
                 <div class="city-selector">
-                    <input type="text" id="city2Input" placeholder="Enter second city..." autocomplete="off">
+                    <div class="input-wrapper">
+                        <input type="text" id="city2Input" placeholder="Enter second city..." autocomplete="off">
+                        <button class="clear-btn hidden" id="city2ClearBtn" aria-label="Clear city 2">×</button>
+                    </div>
                     <div id="city2Dropdown" class="location-dropdown hidden"></div>
                 </div>
             </div>
