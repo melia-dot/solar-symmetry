@@ -4,13 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Solar Symmetry</title>
-    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTQiIGZpbGw9IiM0MzM4Q0EiLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI0IiB5PSI0Ij4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iNSIgZmlsbD0iI0ZGRkZGRiIvPgo8cGF0aCBkPSJNMTIgMVYzIE0xMiAyMVYyM00yMSAxMkgxOU0zIDEySDEiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPHN2Zz4KPC9zdmc+Cjwvc3ZnPgo8L3N2Zz4K" type="image/svg+xml">
+    <link rel="icon" href="data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMzIiIGhlaWdodD0iMzIiIHZpZXdCb3g9IjAgMCAzMiAzMiIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj4KPGNpcmNsZSBjeD0iMTYiIGN5PSIxNiIgcj0iMTQiIGZpbGw9IiMxZDFkMWYiLz4KPHN2ZyB3aWR0aD0iMjQiIGhlaWdodD0iMjQiIHZpZXdCb3g9IjAgMCAyNCAyNCIgZmlsbD0ibm9uZSIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIiB4PSI0IiB5PSI0Ij4KPGNpcmNsZSBjeD0iMTIiIGN5PSIxMiIgcj0iNSIgZmlsbD0iI0ZGRkZGRiIvPgo8cGF0aCBkPSJNMTIgMVYzIE0xMiAyMVYyM00yMSAxMkgxOU0zIDEySDEiIHN0cm9rZT0iI0ZGRkZGRiIgc3Ryb2tlLXdpZHRoPSIyIiBzdHJva2UtbGluZWNhcD0icm91bmQiLz4KPC9zdmc+Cjwvc3ZnPgo8L3N2Zz4K" type="image/svg+xml">
     <link rel="manifest" href="/manifest.json">
-    <meta name="theme-color" content="#4338ca">
+    <meta name="theme-color" content="#1d1d1f">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="apple-mobile-web-app-title" content="Solar Symmetry">
     <link rel="stylesheet" href="src/styles/main.css">
+    <!-- Lucide Icons -->
+    <script src="https://unpkg.com/lucide@latest/dist/umd/lucide.min.js"></script>
 </head>
 <body>
     <div class="app-container">
@@ -18,9 +20,18 @@
         <header class="location-header">
             <!-- View Toggle -->
             <div class="view-toggle">
-                <button id="symmetryViewBtn" class="view-btn active">⚖️ Symmetry</button>
-                <button id="citiesViewBtn" class="view-btn">🌍 Compare Cities</button>
-                <button id="mobileAppBtn" class="view-btn">📱 Mobile App</button>
+                <button id="symmetryViewBtn" class="view-btn active">
+                    <i data-lucide="scale" class="btn-icon"></i>
+                    <span>Symmetry</span>
+                </button>
+                <button id="citiesViewBtn" class="view-btn">
+                    <i data-lucide="globe" class="btn-icon"></i>
+                    <span>Compare Cities</span>
+                </button>
+                <button id="mobileAppBtn" class="view-btn">
+                    <i data-lucide="smartphone" class="btn-icon"></i>
+                    <span>Mobile App</span>
+                </button>
             </div>
 
             <!-- Symmetry View Location Selector -->
@@ -56,15 +67,19 @@
         <main class="main-content">
             <!-- Month Navigation -->
             <div class="month-navigation">
-                <button id="prevMonth" class="nav-button" aria-label="Previous month">‹</button>
+                <button id="prevMonth" class="nav-button" aria-label="Previous month">
+                    <i data-lucide="chevron-left"></i>
+                </button>
                 <h1 id="currentMonth" class="month-title">September 2025</h1>
-                <button id="nextMonth" class="nav-button" aria-label="Next month">›</button>
+                <button id="nextMonth" class="nav-button" aria-label="Next month">
+                    <i data-lucide="chevron-right"></i>
+                </button>
             </div>
             
             <!-- Golden Hour Toggle -->
             <div class="golden-hour-toggle">
                 <button id="goldenHourToggle" class="toggle-btn">
-                    <span class="toggle-icon">📷</span>
+                    <i data-lucide="camera" class="toggle-icon"></i>
                     <span class="toggle-text">Show Photography Times</span>
                 </button>
             </div>
@@ -73,8 +88,8 @@
             <div id="lightAfterWorkCard" class="light-after-work-card hidden">
                 <div class="sun-arc-container">
                     <svg class="sun-arc" viewBox="0 0 200 100" xmlns="http://www.w3.org/2000/svg">
-                        <path id="sunPath" d="M 10,90 Q 100,10 190,90" stroke="rgba(251, 191, 36, 0.3)" stroke-width="2" fill="none"/>
-                        <circle id="sunCircle" r="8" fill="#fbbf24">
+                        <path id="sunPath" d="M 10,90 Q 100,10 190,90" stroke="rgba(255, 149, 0, 0.3)" stroke-width="2" fill="none"/>
+                        <circle id="sunCircle" r="8" fill="#ff9500">
                             <animateMotion dur="3s" repeatCount="indefinite">
                                 <mpath href="#sunPath"/>
                             </animateMotion>
@@ -82,7 +97,9 @@
                     </svg>
                 </div>
                 <div class="card-content">
-                    <div class="card-icon">🌆</div>
+                    <div class="card-icon">
+                        <i data-lucide="sunset" style="width: 48px; height: 48px;"></i>
+                    </div>
                     <div class="card-text">
                         <h3 id="lightAfterWorkTitle">Light After Work</h3>
                         <div id="lightAfterWorkMessage" class="countdown-message"></div>
@@ -136,53 +153,52 @@
             <!-- Mobile App Instructions View -->
             <div id="mobileAppContainer" class="mobile-app-container hidden">
                 <div class="mobile-app-content">
-                    <h1>📱 Install Solar Symmetry as a Mobile App</h1>
+                    <h1>Install Solar Symmetry</h1>
                     
                     <div class="install-section">
-                        <h2>🍎 iPhone/iPad (iOS)</h2>
+                        <h2>iPhone & iPad</h2>
                         <ol>
                             <li>Open this site in <strong>Safari</strong></li>
                             <li>Tap the <strong>Share button</strong> (box with arrow) at the bottom</li>
                             <li>Scroll down and tap <strong>"Add to Home Screen"</strong></li>
-                            <li>Tap <strong>"Add"</strong> - Done!</li>
+                            <li>Tap <strong>"Add"</strong></li>
                         </ol>
-                        <p class="tip">💡 The app will now appear on your home screen with its own icon</p>
+                        <p class="tip">The app will appear on your home screen with its own icon</p>
                     </div>
 
                     <div class="install-section">
-                        <h2>🤖 Android</h2>
+                        <h2>Android</h2>
                         <ol>
                             <li>Open this site in <strong>Chrome</strong></li>
-                            <li>Look for the <strong>"Add to Home Screen"</strong> banner at the bottom (appears automatically)</li>
-                            <li>Or: Tap the <strong>three-dot menu</strong> → <strong>"Install app"</strong> or <strong>"Add to Home Screen"</strong></li>
-                            <li>Confirm - Done!</li>
+                            <li>Look for the <strong>"Add to Home Screen"</strong> banner at the bottom</li>
+                            <li>Or tap the <strong>three-dot menu</strong> then <strong>"Install app"</strong></li>
+                            <li>Confirm installation</li>
                         </ol>
-                        <p class="tip">💡 Once installed, the app works offline and feels like a native app</p>
+                        <p class="tip">Once installed, the app works offline and feels native</p>
                     </div>
 
                     <div class="install-section">
-                        <h2>💻 Desktop (Chrome/Edge)</h2>
+                        <h2>Desktop</h2>
                         <ol>
                             <li>Visit this site in Chrome or Edge</li>
-                            <li>Look for the <strong>install icon (⊕)</strong> in the address bar</li>
+                            <li>Look for the <strong>install icon</strong> in the address bar</li>
                             <li>Click it and confirm</li>
-                            <li>App opens in its own window!</li>
                         </ol>
-                        <p class="tip">💡 Desktop app runs in a dedicated window without browser UI</p>
+                        <p class="tip">Desktop app runs in a dedicated window</p>
                     </div>
 
                     <div class="install-section benefits">
-                        <h2>✨ Benefits of Installing</h2>
+                        <h2>Benefits</h2>
                         <ul>
-                            <li><strong>Offline Access:</strong> Works without internet after first load</li>
-                            <li><strong>Fast Loading:</strong> Instant startup from home screen</li>
-                            <li><strong>Native Feel:</strong> Runs like a regular app</li>
-                            <li><strong>Your Data Saved:</strong> Locations remembered across sessions</li>
+                            <li><strong>Offline Access</strong> — Works without internet after first load</li>
+                            <li><strong>Fast Loading</strong> — Instant startup from home screen</li>
+                            <li><strong>Native Feel</strong> — Runs like a regular app</li>
+                            <li><strong>Data Saved</strong> — Locations remembered across sessions</li>
                         </ul>
                     </div>
 
                     <div class="install-note">
-                        <p><strong>Note:</strong> Installation requires HTTPS (secure connection). If you're testing locally, deploy to GitHub Pages or another HTTPS host for full PWA functionality.</p>
+                        <p><strong>Note:</strong> Installation requires HTTPS. Deploy to GitHub Pages or another HTTPS host for full PWA functionality.</p>
                     </div>
                 </div>
             </div>
@@ -190,8 +206,8 @@
             <!-- Loading Indicator -->
             <div id="loadingIndicator" class="loading-indicator hidden">
                 <div class="spinner"></div>
-                <p>Fetching complete light data...</p>
-                <small>Dawn • Sunrise • Sunset • Dusk</small>
+                <p>Fetching light data...</p>
+                <small>Dawn · Sunrise · Sunset · Dusk</small>
             </div>
         </main>
     </div>
@@ -204,6 +220,11 @@
     <script src="src/clients/geocoding.js"></script>
     <script src="src/clients/twilight.js"></script>
     <script src="src/scripts/app.js"></script>
+    
+    <!-- Initialize Lucide Icons -->
+    <script>
+        lucide.createIcons();
+    </script>
     
     <!-- Service Worker Registration -->
     <script>

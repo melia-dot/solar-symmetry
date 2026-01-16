@@ -816,18 +816,18 @@ class SolarSymmetryApp {
         
         if (hasLightNow) {
             // Currently have light
-            this.elements.lightAfterWorkTitle.textContent = '☀️ Light After Work!';
+            this.elements.lightAfterWorkTitle.textContent = 'Light After Work';
             this.elements.lightAfterWorkMessage.textContent = 'Sunset today at ' + twilightData.sunset;
-            this.elements.lightAfterWorkCountdown.textContent = 'Enjoy the daylight! 🌆';
+            this.elements.lightAfterWorkCountdown.textContent = 'Enjoy the daylight';
             this.elements.lightAfterWorkCard.classList.add('has-light');
         } else {
             // Countdown to light return
             const today = new Date();
             const daysUntil = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
             
-            this.elements.lightAfterWorkTitle.textContent = '🌆 Light Returns After Work';
+            this.elements.lightAfterWorkTitle.textContent = 'Light Returns After Work';
             this.elements.lightAfterWorkMessage.textContent = 'Sunset will be after 5pm on ' + this.dateCalc.formatDate(targetDate);
-            this.elements.lightAfterWorkCountdown.textContent = daysUntil + ' days to go!';
+            this.elements.lightAfterWorkCountdown.textContent = daysUntil + ' days';
             this.elements.lightAfterWorkCard.classList.remove('has-light');
             
             // Animate countdown
@@ -1115,7 +1115,7 @@ class SolarSymmetryApp {
             const dawnTime = document.createElement('div');
             dawnTime.className = 'twilight-time';
             dawnTime.innerHTML = `
-                <span class="time-icon">🌅</span> 
+                <i data-lucide="sunrise" class="time-icon"></i>
                 <div>
                     <div class="time-label">Dawn</div>
                     <div>${twilightData.dawn}</div>
@@ -1126,10 +1126,10 @@ class SolarSymmetryApp {
             const goldenHourMorning = document.createElement('div');
             goldenHourMorning.className = `twilight-time golden-hour ${this.showGoldenHour ? '' : 'hidden'}`;
             goldenHourMorning.innerHTML = `
-                <span class="time-icon">🌅</span> 
+                <i data-lucide="camera" class="time-icon"></i>
                 <div>
-                    <div class="time-label">Golden Hour AM</div>
-                    <div>${twilightData.goldenHourMorningStart || 'N/A'} - ${twilightData.goldenHourMorningEnd || 'N/A'}</div>
+                    <div class="time-label">Golden AM</div>
+                    <div>${twilightData.goldenHourMorningStart || 'N/A'} – ${twilightData.goldenHourMorningEnd || 'N/A'}</div>
                 </div>
             `;
 
@@ -1137,7 +1137,7 @@ class SolarSymmetryApp {
             const sunriseTime = document.createElement('div');
             sunriseTime.className = 'twilight-time';
             sunriseTime.innerHTML = `
-                <span class="time-icon">☀️</span>
+                <i data-lucide="sun" class="time-icon"></i>
                 <div>
                     <div class="time-label">Sunrise</div>
                     <div>${twilightData.sunrise}</div>
@@ -1148,7 +1148,7 @@ class SolarSymmetryApp {
             const sunsetTime = document.createElement('div');
             sunsetTime.className = 'twilight-time';
             sunsetTime.innerHTML = `
-                <span class="time-icon">🌄</span>
+                <i data-lucide="sun" class="time-icon"></i>
                 <div>
                     <div class="time-label">Sunset</div>
                     <div>${twilightData.sunset}</div>
@@ -1159,10 +1159,10 @@ class SolarSymmetryApp {
             const goldenHourEvening = document.createElement('div');
             goldenHourEvening.className = `twilight-time golden-hour ${this.showGoldenHour ? '' : 'hidden'}`;
             goldenHourEvening.innerHTML = `
-                <span class="time-icon">🌄</span> 
+                <i data-lucide="camera" class="time-icon"></i>
                 <div>
-                    <div class="time-label">Golden Hour PM</div>
-                    <div>${twilightData.goldenHourEveningStart || 'N/A'} - ${twilightData.goldenHourEveningEnd || 'N/A'}</div>
+                    <div class="time-label">Golden PM</div>
+                    <div>${twilightData.goldenHourEveningStart || 'N/A'} – ${twilightData.goldenHourEveningEnd || 'N/A'}</div>
                 </div>
             `;
 
@@ -1170,7 +1170,7 @@ class SolarSymmetryApp {
             const duskTime = document.createElement('div');
             duskTime.className = 'twilight-time';
             duskTime.innerHTML = `
-                <span class="time-icon">🌇</span>
+                <i data-lucide="sunset" class="time-icon"></i>
                 <div>
                     <div class="time-label">Dusk</div>
                     <div>${twilightData.dusk}</div>
@@ -1183,6 +1183,11 @@ class SolarSymmetryApp {
             twilightTimes.appendChild(sunsetTime);
             twilightTimes.appendChild(goldenHourEvening);
             twilightTimes.appendChild(duskTime);
+            
+            // Re-initialize Lucide icons for dynamically added content
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
         } else if (twilightData && twilightData.error) {
             twilightTimes.innerHTML = '<div class="twilight-time error">API Error</div>';
         } else {
@@ -1243,10 +1248,15 @@ class SolarSymmetryApp {
         const emptyMessage = document.createElement('div');
         emptyMessage.className = 'empty-state';
         emptyMessage.innerHTML = `
-            <div class="empty-icon">🌅</div>
+            <div class="empty-icon"><i data-lucide="sun" style="width: 48px; height: 48px;"></i></div>
             <p>Search for your city above to discover solar symmetry patterns</p>
             <small>See how dates mirror around solstices with identical twilight times</small>
         `;
+        
+        // Re-initialize Lucide icons
+        if (window.lucide) {
+            setTimeout(() => window.lucide.createIcons(), 0);
+        }
         
         currentContainer.innerHTML = '';
         mirroredContainer.innerHTML = '';
@@ -1264,7 +1274,7 @@ class SolarSymmetryApp {
         const city1Empty = document.createElement('div');
         city1Empty.className = 'empty-state';
         city1Empty.innerHTML = `
-            <div class="empty-icon">🌍</div>
+            <div class="empty-icon"><i data-lucide="globe" style="width: 48px; height: 48px;"></i></div>
             <p>Select your first city above</p>
             <small>Choose any city worldwide</small>
         `;
@@ -1272,10 +1282,15 @@ class SolarSymmetryApp {
         const city2Empty = document.createElement('div');
         city2Empty.className = 'empty-state';
         city2Empty.innerHTML = `
-            <div class="empty-icon">🏙️</div>
+            <div class="empty-icon"><i data-lucide="map-pin" style="width: 48px; height: 48px;"></i></div>
             <p>Select your second city above</p>
             <small>Compare sun times side by side</small>
         `;
+        
+        // Re-initialize Lucide icons
+        if (window.lucide) {
+            setTimeout(() => window.lucide.createIcons(), 0);
+        }
         
         city1Container.innerHTML = '';
         city2Container.innerHTML = '';

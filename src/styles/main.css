@@ -265,11 +265,15 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 1.5rem;
     color: #1d1d1f;
     cursor: pointer;
     transition: all 0.2s ease;
     box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+.nav-button svg {
+    width: 24px;
+    height: 24px;
 }
 
 .nav-button:hover:not(:disabled) {
@@ -399,7 +403,24 @@ body {
 }
 
 .time-icon {
-    font-size: 0.75rem;
+    width: 16px;
+    height: 16px;
+    flex-shrink: 0;
+    color: #86868b;
+}
+
+.date-item.today .time-icon {
+    color: rgba(255, 255, 255, 0.7);
+}
+
+.btn-icon {
+    width: 18px;
+    height: 18px;
+}
+
+.toggle-icon {
+    width: 18px;
+    height: 18px;
 }
 
 .time-label {
@@ -453,6 +474,29 @@ body {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+/* Empty State */
+.empty-state {
+    text-align: center;
+    padding: 3rem 1.5rem;
+    color: #86868b;
+}
+
+.empty-icon {
+    margin-bottom: 1.5rem;
+    color: #86868b;
+}
+
+.empty-state p {
+    font-size: 1rem;
+    margin-bottom: 0.5rem;
+    color: #1d1d1f;
+}
+
+.empty-state small {
+    font-size: 0.875rem;
+    color: #86868b;
 }
 
 /* Utility Classes */
@@ -866,8 +910,12 @@ body {
 }
 
 .card-icon {
-    font-size: 3rem;
     flex-shrink: 0;
+    color: #1d1d1f;
+}
+
+.light-after-work-card.has-light .card-icon {
+    color: #ff9500;
 }
 
 .card-text {
