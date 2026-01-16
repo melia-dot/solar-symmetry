@@ -6,7 +6,7 @@ Solar Symmetry isn't just about astronomy; it's about finding emotional anchors 
 Solar Symmetry reveals the elegant balance in our yearly light cycle. For any date, there's a "mirror date" that sits the same distance from the nearest solstice but on the opposite side. These paired dates share fascinating similarities in their twilight patterns.
 Example: September 11 (82 days after June 21 solstice) mirrors with March 31 (82 days before June 21 solstice).
 ✨ Features
-
+Golden hour photography times.
 Real-time Location Search: Search any city worldwide
 Complete Light Data: Shows dawn, sunrise, sunset, and dusk times for every date
 Accurate Twilight Data: Uses civil twilight times (when it actually starts getting light/dark)
