@@ -351,6 +351,39 @@ body {
     gap: 1rem;
 }
 
+/* "Couldn't load N dates" line under a column header */
+.load-status {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin: -1rem 0 1rem;
+    font-size: 0.8rem;
+    color: #86868b;
+}
+
+.load-status-retry {
+    font: inherit;
+    font-weight: 600;
+    color: #ff9500;
+    background: transparent;
+    border: 1px solid #ff9500;
+    border-radius: 999px;
+    padding: 0.15rem 0.75rem;
+    cursor: pointer;
+}
+
+.load-status-retry:hover:not(:disabled) {
+    background: #ff9500;
+    color: white;
+}
+
+.load-status-retry:disabled {
+    opacity: 0.6;
+    cursor: default;
+}
+
 /* Date Items */
 .date-item {
     padding: 1.5rem;

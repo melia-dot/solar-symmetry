@@ -1,46 +1,35 @@
 # Version Management
 
-## Current Version: 1.0.3
+The version is defined in exactly one place: **`src/version.js`** (`APP_VERSION`).
+The UI reads it from there, and the service worker names its cache after it, so
+bumping it is what pushes new code to installed PWAs. Don't write the current
+version anywhere else.
 
 ## Versioning Rules
 
 Solar Symmetry uses **Semantic Versioning** (MAJOR.MINOR.PATCH):
 
-### Format: `MAJOR.MINOR.PATCH`
-
-- **PATCH** (e.g., 1.0.0 → 1.0.1): Bug fixes, minor tweaks, no new features
-- **MINOR** (e.g., 1.0.1 → 1.1.0): New features, enhancements, backward-compatible changes
-- **MAJOR** (e.g., 1.1.0 → 2.0.0): Breaking changes, major redesigns, API changes
+- **PATCH** (1.4.2 → 1.4.3): bug fixes, minor tweaks, no new features
+- **MINOR** (1.4.2 → 1.5.0): new features, enhancements, backward-compatible changes
+- **MAJOR** (1.4.2 → 2.0.0): breaking changes, major redesigns
 
 ## How to Update the Version
 
-**IMPORTANT:** Update the version number in **THREE places** before every push to GitHub:
-
-1. **`src/version.js`** - Update the `APP_VERSION` constant
-2. **`manifest.json`** - Update the `version` field
-3. **`VERSION.md`** - Update the "Current Version" at the top of this file
-
-### Example: Bug Fix (1.0.1 → 1.0.2)
-
-```javascript
-// src/version.js
-const APP_VERSION = '1.0.2';
-```
-
-```json
-// manifest.json
-{
-  "version": "1.0.2",
-  ...
-}
-```
-
-```markdown
-// VERSION.md
-## Current Version: 1.0.2
-```
+1. Change `APP_VERSION` in `src/version.js`
+2. Add an entry to the Version History below
+3. Mention the new version in the commit message
 
 ## Version History
+
+### 1.1.0 (2026-11-14)
+- Sun data loads in stages: today + its mirror first, then the rest of the month, then the start of the month
+- Switched to sunrise-sunset.org API v2 with date ranges (about 6 requests per month instead of about 60)
+- All API requests go through one queue (max 2 at once, max 4 per second) to stay under the API's 5 requests/second limit
+- Removed a duplicate month load on startup that caused HTTP 429 (rate limit) errors
+- Failed dates retry automatically (1s, 3s, 6s); a "Couldn't load N dates" line with a Retry button re-fetches only the failed dates
+- Changing location/month/view cancels the old requests so stale data never overwrites new data
+- Fixed dates being one day off during British Summer Time
+- Version is now defined only in `src/version.js`; service worker cache is named after it
 
 ### 1.0.3 (2025-11-01)
 - Removed location pin icons (📍) from all city input fields to save space
@@ -62,18 +51,9 @@ const APP_VERSION = '1.0.2';
 - PWA support with offline functionality
 - Location search with localStorage persistence
 
-## Best Practices
-
-1. **Always update all three files** before pushing to GitHub
-2. **Commit version changes separately** from feature/fix commits when possible
-3. **Test the PWA** after version updates to ensure cache invalidation works
-4. **Version number appears** in the UI next to the location pin icon
-5. **Users can see the version** to confirm they have the latest update after clearing PWA cache
-
 ## Why This Matters for PWAs
 
-PWAs cache aggressively. The version number helps:
-- Users confirm they have the latest version
-- Developers track which version is deployed
-- Debugging issues by knowing exact version in production
-- Service worker updates can be tied to version changes
+PWAs cache aggressively. The service worker cache is named `solar-symmetry-<version>`,
+so a version bump makes browsers install a fresh copy of the app and delete the old
+cache. The version shown in the UI lets users and developers confirm which version
+is running.

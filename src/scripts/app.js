@@ -12,6 +12,13 @@ class SolarSymmetryApp {
         this.currentMonth = new Date();
         this.currentLocation = null;
         this.isLoading = false;
+
+        // Active month load: aborting it cancels queued/in-flight API requests
+        this.loadController = null;
+        // State of the current symmetry-view load (per-date success/failure tracking)
+        this.symmetryLoad = null;
+        // "Couldn't load N dates" status lines, one per symmetry column
+        this.columnStatus = { current: null, mirrored: null };
         this.showGoldenHour = false; // Golden hour toggle state
         
         // View mode: 'symmetry', 'cities', or 'mobileApp'
@@ -221,7 +228,7 @@ class SolarSymmetryApp {
             
             // Load data if location is set
             if (this.currentLocation) {
-                this.loadMonthData();
+                return this.loadMonthData();
             } else {
                 this.renderSymmetryEmptyState();
             }
@@ -240,7 +247,7 @@ class SolarSymmetryApp {
             
             // Load data if cities are set
             if (this.city1 && this.city2) {
-                this.loadMonthData();
+                return this.loadMonthData();
             } else {
                 this.renderCitiesEmptyState();
             }
@@ -273,8 +280,14 @@ class SolarSymmetryApp {
         // Load saved locations from localStorage
         this.loadSavedLocations();
 
-        // Start in symmetry view
-        this.switchToView('symmetry');
+        // Start in symmetry view (this is the only place the month loads on startup)
+        const loading = this.switchToView('symmetry');
+
+        // Light-after-work starts once today's data is in (it then comes from the cache)
+        if (this.currentLocation) {
+            await loading;
+            this.updateLightAfterWorkTimer();
+        }
     }
 
     /**
@@ -288,8 +301,8 @@ class SolarSymmetryApp {
                 this.currentLocation = JSON.parse(savedLocation);
                 this.elements.locationInput.value = this.currentLocation.name;
                 this.elements.locationClearBtn.classList.remove('hidden');
-                this.loadMonthData();
-                this.updateLightAfterWorkTimer();
+                // Data is loaded by initializeApp → switchToView, not here
+                // (loading here as well used to double the requests and trigger HTTP 429s)
             }
             
             // Load city 1
@@ -463,9 +476,12 @@ class SolarSymmetryApp {
         this.saveLocation(location, 'location');
         
         this.showLoading();
-        await this.loadMonthData();
-        await this.updateLightAfterWorkTimer();
-        this.hideLoading();
+        // Resolves once today + mirror are shown; the rest of the month keeps loading
+        const isCurrent = await this.loadMonthData();
+        if (isCurrent) {
+            this.hideLoading();
+            this.updateLightAfterWorkTimer();
+        }
     }
 
     // =================================================================
@@ -635,8 +651,9 @@ class SolarSymmetryApp {
         // Load data if both cities are selected
         if (this.city1 && this.city2) {
             this.showLoading();
-            await this.loadMonthData();
-            this.hideLoading();
+            if (await this.loadMonthData()) {
+                this.hideLoading();
+            }
         }
     }
 
@@ -653,10 +670,11 @@ class SolarSymmetryApp {
         this.currentMonth = this.dateCalc.getPreviousMonth(this.currentMonth);
         this.updateMonthDisplay();
         this.updateNavigationButtons();
-        
+
         this.showLoading();
-        await this.loadMonthData();
-        this.hideLoading();
+        if (await this.loadMonthData()) {
+            this.hideLoading();
+        }
     }
 
     /**
@@ -668,10 +686,11 @@ class SolarSymmetryApp {
         this.currentMonth = this.dateCalc.getNextMonth(this.currentMonth);
         this.updateMonthDisplay();
         this.updateNavigationButtons();
-        
+
         this.showLoading();
-        await this.loadMonthData();
-        this.hideLoading();
+        if (await this.loadMonthData()) {
+            this.hideLoading();
+        }
     }
 
     /**
@@ -737,15 +756,19 @@ class SolarSymmetryApp {
         
         const today = new Date();
         const targetTime = '17:00'; // 5pm
-        
+        const location = this.currentLocation;
+
         try {
             // Get today's sunset
             const todayData = await this.twilight.getTwilightTimes(
                 today,
-                this.currentLocation.lat,
-                this.currentLocation.lng
+                location.lat,
+                location.lng
             );
-            
+
+            // Location changed while waiting: don't show stale data
+            if (this.currentLocation !== location) return;
+
             const todaySunsetTime = todayData.sunset;
             
             // Check if we currently have light after 5pm
@@ -759,7 +782,7 @@ class SolarSymmetryApp {
                 this.showLightAfterWorkCountdown(today, todayData, true);
             } else {
                 // Find when light returns after work
-                this.findWhenLightReturns(targetMinutes);
+                this.findWhenLightReturns(targetMinutes, location);
             }
             
         } catch (error) {
@@ -771,20 +794,23 @@ class SolarSymmetryApp {
     /**
      * Find when sunset will be after target time
      */
-    async findWhenLightReturns(targetMinutes) {
+    async findWhenLightReturns(targetMinutes, location = this.currentLocation) {
         const today = new Date();
         const searchLimit = 365; // Search up to 1 year ahead
-        
+
         for (let daysAhead = 1; daysAhead < searchLimit; daysAhead++) {
             const futureDate = new Date(today);
             futureDate.setDate(today.getDate() + daysAhead);
-            
+
             const futureData = await this.twilight.getTwilightTimes(
                 futureDate,
-                this.currentLocation.lat,
-                this.currentLocation.lng
+                location.lat,
+                location.lng
             );
-            
+
+            // Location changed while searching: stop, the new search owns the card
+            if (this.currentLocation !== location) return;
+
             const sunsetTime = futureData.sunset;
             const sunsetHour = parseInt(sunsetTime.split(':')[0]);
             const sunsetMinute = parseInt(sunsetTime.split(':')[1]);
@@ -848,97 +874,268 @@ class SolarSymmetryApp {
     // =================================================================
 
     /**
-     * Load month data based on current view
+     * Load month data based on current view.
+     * Any load already running is cancelled first, so stale data never overwrites new data.
+     * @returns {Promise<boolean>} - false if this load was superseded by a newer one
      */
     async loadMonthData() {
-        if (this.currentView === 'symmetry') {
-            await this.loadSymmetryData();
-        } else {
-            await this.loadCitiesData();
+        this.cancelActiveLoad();
+
+        const controller = new AbortController();
+        this.loadController = controller;
+
+        try {
+            if (this.currentView === 'symmetry') {
+                await this.loadSymmetryData(controller.signal);
+            } else {
+                await this.loadCitiesData(controller.signal);
+            }
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                console.error('Failed to load month data:', error);
+            }
         }
+
+        return !controller.signal.aborted;
     }
 
     /**
-     * Load symmetry view data
+     * Cancel the running month load (queued and in-flight requests are dropped)
      */
-    async loadSymmetryData() {
+    cancelActiveLoad() {
+        if (this.loadController) {
+            this.loadController.abort();
+            this.loadController = null;
+        }
+        this.symmetryLoad = null;
+    }
+
+    /**
+     * Load symmetry view data in three stages:
+     *   1. today + today's mirror
+     *   2. rows after today to the end of the month (current column, then mirrored)
+     *   3. rows from the 1st up to the day before today (current column, then mirrored)
+     * Resolves after stage 1; stages 2 and 3 keep loading in the background.
+     * When viewing another month, "today" is today's day number capped at that month's length.
+     */
+    async loadSymmetryData(signal) {
         if (!this.currentLocation) return;
 
         const year = this.currentMonth.getFullYear();
         const month = this.currentMonth.getMonth() + 1;
-        
+        const location = this.currentLocation;
+
         const monthData = this.dateCalc.getMonthWithMirrors(year, month);
+        const daysInMonth = monthData.length; // real month length (28–31)
+
+        const state = {
+            signal,
+            location,
+            monthData,
+            // Row indexes whose date failed to load, per column
+            failed: { current: new Set(), mirrored: new Set() }
+        };
+        this.symmetryLoad = state;
+
+        // Fill anything already cached so it shows immediately
+        monthData.forEach(item => {
+            item.currentTwilight = this.twilight.getCachedTwilight(item.current, location.lat, location.lng);
+            item.mirroredTwilight = this.twilight.getCachedTwilight(item.mirrored, location.lat, location.lng);
+        });
+
+        this.clearColumnStatus();
         this.renderSymmetryData(monthData);
-        
+
+        const anchor = Math.min(new Date().getDate(), daysInMonth) - 1; // row index
+        const rowRange = (from, to) => Array.from({ length: Math.max(0, to - from) }, (_, i) => from + i);
+
+        const stages = [
+            [anchor],                              // 1. today + mirror
+            rowRange(anchor + 1, daysInMonth),     // 2. rest of month (empty on the last day)
+            rowRange(0, anchor)                    // 3. start of month (empty on the 1st)
+        ].filter(rows => rows.length > 0);
+
+        await this.loadSymmetryRows(state, stages[0]);
+        if (signal.aborted) return;
+
+        // Stages 2 and 3 run in order, in the background
+        (async () => {
+            for (const rows of stages.slice(1)) {
+                if (signal.aborted) return;
+                await this.loadSymmetryRows(state, rows);
+            }
+        })().catch(error => {
+            if (error.name !== 'AbortError') {
+                console.error('Failed to load twilight data:', error);
+            }
+        });
+    }
+
+    /**
+     * Fetch and render the given rows: current column first, then mirrored column.
+     * Each column renders as soon as its own data arrives.
+     */
+    async loadSymmetryRows(state, rows) {
+        await Promise.all([
+            this.loadSymmetryColumn(state, 'current', rows),
+            this.loadSymmetryColumn(state, 'mirrored', rows)
+        ]);
+    }
+
+    async loadSymmetryColumn(state, column, rows) {
+        const { monthData, location, signal } = state;
+        const dates = rows.map(i => column === 'current' ? monthData[i].current : monthData[i].mirrored);
+
         try {
-            const chunkSize = 5;
-            const chunks = [];
-            
-            for (let i = 0; i < monthData.length; i += chunkSize) {
-                chunks.push(monthData.slice(i, i + chunkSize));
-            }
-            
-            for (let chunkIndex = 0; chunkIndex < chunks.length; chunkIndex++) {
-                const chunk = chunks[chunkIndex];
-                
-                const uniqueDates = new Set();
-                const dateMap = new Map();
-                
-                chunk.forEach((item, localIndex) => {
-                    const globalIndex = chunkIndex * chunkSize + localIndex;
-                    
-                    const currentKey = this.formatDateKey(item.current);
-                    if (!uniqueDates.has(currentKey)) {
-                        uniqueDates.add(currentKey);
-                        dateMap.set(currentKey, { date: item.current, indices: [] });
-                    }
-                    dateMap.get(currentKey).indices.push({ type: 'current', index: globalIndex });
-                    
-                    const mirroredKey = this.formatDateKey(item.mirrored);
-                    if (!uniqueDates.has(mirroredKey)) {
-                        uniqueDates.add(mirroredKey);
-                        dateMap.set(mirroredKey, { date: item.mirrored, indices: [] });
-                    }
-                    dateMap.get(mirroredKey).indices.push({ type: 'mirrored', index: globalIndex });
-                });
-                
-                const uniqueDateArray = Array.from(dateMap.values()).map(item => item.date);
-                const twilightResults = await this.twilight.getBatchTwilightTimes(
-                    uniqueDateArray,
-                    this.currentLocation.lat,
-                    this.currentLocation.lng
-                );
-                
-                const uniqueKeys = Array.from(uniqueDates);
-                uniqueKeys.forEach((key, resultIndex) => {
-                    const twilightData = twilightResults[resultIndex];
-                    const dateInfo = dateMap.get(key);
-                    
-                    dateInfo.indices.forEach(({ type, index }) => {
-                        if (type === 'current') {
-                            monthData[index].currentTwilight = twilightData;
-                        } else {
-                            monthData[index].mirroredTwilight = twilightData;
-                        }
-                    });
-                });
-                
-                this.renderSymmetryData(monthData);
-                
-                if (chunkIndex < chunks.length - 1) {
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
-            }
+            const results = await this.twilight.getTwilightRange(dates, location.lat, location.lng, { signal });
+            if (signal.aborted || this.symmetryLoad !== state) return;
+            this.applySymmetryResults(state, column, rows, results);
         } catch (error) {
-            console.error('Failed to load twilight data:', error);
-            this.renderSymmetryData(monthData);
+            if (error.name !== 'AbortError') {
+                console.error(`Failed to load ${column} column:`, error);
+            }
         }
+    }
+
+    /**
+     * Put fetched results into the matching cards, tracking failures per date
+     */
+    applySymmetryResults(state, column, rows, results) {
+        const field = column === 'current' ? 'currentTwilight' : 'mirroredTwilight';
+        const changedCards = [];
+
+        rows.forEach(index => {
+            const item = state.monthData[index];
+            const date = column === 'current' ? item.current : item.mirrored;
+            const result = results.get(this.twilight.formatDateForAPI(date));
+            if (!result) return;
+
+            if (result.data) {
+                state.failed[column].delete(index);
+                // Already showing this exact data (from cache): leave the card alone
+                if (item[field] === result.data) return;
+                item[field] = result.data;
+            } else {
+                state.failed[column].add(index);
+                item[field] = { error: result.error ? result.error.message : 'Failed to load' };
+            }
+
+            changedCards.push(this.updateSymmetryCard(column, index, item));
+        });
+
+        if (changedCards.length > 0) {
+            if (window.lucide) {
+                window.lucide.createIcons();
+            }
+            this.animateCards(changedCards.filter(Boolean));
+        }
+
+        this.updateColumnStatus(state, column);
+    }
+
+    /**
+     * Replace one card in place (other cards are not touched)
+     */
+    updateSymmetryCard(column, index, item) {
+        const container = column === 'current' ? this.elements.currentDates : this.elements.mirroredDates;
+        const oldCard = container.children[index];
+        if (!oldCard) return null;
+
+        const newCard = column === 'current'
+            ? this.createDateElement(item.current, item.currentTwilight, item.isToday)
+            : this.createDateElement(item.mirrored, item.mirroredTwilight, false);
+
+        if (!window.anime) {
+            newCard.style.opacity = '';
+            newCard.style.transform = '';
+        }
+
+        container.replaceChild(newCard, oldCard);
+        return newCard;
+    }
+
+    /**
+     * Show / update / remove the "Couldn't load N dates" line for a column
+     */
+    updateColumnStatus(state, column) {
+        const failedCount = state.failed[column].size;
+        let status = this.columnStatus[column];
+
+        if (failedCount === 0) {
+            if (status) {
+                status.remove();
+                this.columnStatus[column] = null;
+            }
+            return;
+        }
+
+        if (!status) {
+            const container = column === 'current' ? this.elements.currentDates : this.elements.mirroredDates;
+            status = document.createElement('div');
+            status.className = 'load-status';
+            status.setAttribute('role', 'status');
+            status.innerHTML = `
+                <span class="load-status-text"></span>
+                <button type="button" class="load-status-retry">Retry</button>
+            `;
+            container.parentElement.insertBefore(status, container);
+            this.columnStatus[column] = status;
+        }
+
+        const button = status.querySelector('.load-status-retry');
+        status.querySelector('.load-status-text').textContent =
+            `Couldn't load ${failedCount} date${failedCount === 1 ? '' : 's'}`;
+        button.disabled = false;
+        button.textContent = 'Retry';
+        button.onclick = () => this.retryFailedDates(state, column);
+    }
+
+    /**
+     * Remove both column status lines
+     */
+    clearColumnStatus() {
+        ['current', 'mirrored'].forEach(column => {
+            if (this.columnStatus[column]) {
+                this.columnStatus[column].remove();
+                this.columnStatus[column] = null;
+            }
+        });
+    }
+
+    /**
+     * Re-fetch only the dates that failed in this column
+     */
+    async retryFailedDates(state, column) {
+        if (this.symmetryLoad !== state || state.signal.aborted) return;
+
+        const rows = Array.from(state.failed[column]).sort((a, b) => a - b);
+        if (rows.length === 0) return;
+
+        const status = this.columnStatus[column];
+        if (status) {
+            const button = status.querySelector('.load-status-retry');
+            button.disabled = true;
+            button.textContent = 'Retrying…';
+        }
+
+        // Put the failed cards back into their loading state
+        const field = column === 'current' ? 'currentTwilight' : 'mirroredTwilight';
+        rows.forEach(index => {
+            state.monthData[index][field] = null;
+            const card = this.updateSymmetryCard(column, index, state.monthData[index]);
+            if (card) {
+                card.style.opacity = '';
+                card.style.transform = '';
+            }
+        });
+
+        await this.loadSymmetryColumn(state, column, rows);
     }
 
     /**
      * Load cities comparison data
      */
-    async loadCitiesData() {
+    async loadCitiesData(signal) {
         if (!this.city1 || !this.city2) return;
 
         const year = this.currentMonth.getFullYear();
@@ -974,7 +1171,10 @@ class SolarSymmetryApp {
                     this.twilight.getBatchTwilightTimes(dates, this.city1.lat, this.city1.lng),
                     this.twilight.getBatchTwilightTimes(dates, this.city2.lat, this.city2.lng)
                 ]);
-                
+
+                // A newer load started (city/month/view changed): drop these results
+                if (signal && signal.aborted) return;
+
                 // Map results back
                 chunk.forEach((item, localIndex) => {
                     const globalIndex = chunkIndex * chunkSize + localIndex;
@@ -990,7 +1190,9 @@ class SolarSymmetryApp {
             }
         } catch (error) {
             console.error('Failed to load cities twilight data:', error);
-            this.renderCitiesData(citiesData);
+            if (!(signal && signal.aborted)) {
+                this.renderCitiesData(citiesData);
+            }
         }
     }
 
@@ -1204,10 +1406,15 @@ class SolarSymmetryApp {
      * Animate card entrance with stagger effect
      */
     animateCardEntrance(container) {
-        if (!window.anime) return;
-        
-        const cards = container.querySelectorAll('.date-item');
-        
+        this.animateCards(container.querySelectorAll('.date-item'));
+    }
+
+    /**
+     * Animate a set of cards in (used for whole columns and for single updated cards)
+     */
+    animateCards(cards) {
+        if (!window.anime || cards.length === 0) return;
+
         anime({
             targets: cards,
             opacity: [0, 1],
@@ -1218,7 +1425,9 @@ class SolarSymmetryApp {
         });
         
         // Add subtle pulse to golden hour times if visible
-        const goldenHourTimes = container.querySelectorAll('.twilight-time.golden-hour:not(.hidden)');
+        const goldenHourTimes = Array.from(cards).flatMap(card =>
+            Array.from(card.querySelectorAll('.twilight-time.golden-hour:not(.hidden)'))
+        );
         if (goldenHourTimes.length > 0) {
             setTimeout(() => {
                 anime({
@@ -1242,6 +1451,8 @@ class SolarSymmetryApp {
      * Render symmetry view empty state
      */
     renderSymmetryEmptyState() {
+        this.clearColumnStatus();
+
         const currentContainer = this.elements.currentDates;
         const mirroredContainer = this.elements.mirroredDates;
         
@@ -1306,7 +1517,8 @@ class SolarSymmetryApp {
      * Format date as key for deduplication
      */
     formatDateKey(date) {
-        return date.toISOString().split('T')[0];
+        // Local calendar date (toISOString() gave the previous day during BST)
+        return this.twilight.formatDateForAPI(date);
     }
 
     /**
@@ -1342,6 +1554,8 @@ class SolarSymmetryApp {
     clearLocationInput() {
         this.elements.locationInput.value = '';
         this.elements.locationClearBtn.classList.add('hidden');
+        this.cancelActiveLoad();
+        this.hideLoading();
         this.currentLocation = null;
         this.hideLocationDropdown();
         localStorage.removeItem('solarSymmetry_location');

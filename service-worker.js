@@ -1,4 +1,6 @@
-const CACHE_NAME = 'solar-symmetry-v1';
+// Cache name comes from the app version, so each version bump replaces the old cache
+importScripts('src/version.js');
+const CACHE_NAME = `solar-symmetry-${self.APP_VERSION}`;
 const urlsToCache = [
   '/',
   '/index.html',
