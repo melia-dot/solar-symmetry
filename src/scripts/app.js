@@ -19,6 +19,8 @@ class SolarSymmetryApp {
         this.symmetryLoad = null;
         // "Couldn't load N dates" status lines, one per symmetry column
         this.columnStatus = { current: null, mirrored: null };
+        // Data loads still running (incl. background stages and retries); see whenIdle()
+        this.pendingLoads = new Set();
         this.showGoldenHour = false; // Golden hour toggle state
         
         // View mode: 'symmetry', 'cities', or 'mobileApp'
@@ -885,11 +887,10 @@ class SolarSymmetryApp {
         this.loadController = controller;
 
         try {
-            if (this.currentView === 'symmetry') {
-                await this.loadSymmetryData(controller.signal);
-            } else {
-                await this.loadCitiesData(controller.signal);
-            }
+            const load = this.currentView === 'symmetry'
+                ? this.loadSymmetryData(controller.signal)
+                : this.loadCitiesData(controller.signal);
+            await this.trackLoad(load);
         } catch (error) {
             if (error.name !== 'AbortError') {
                 console.error('Failed to load month data:', error);
@@ -897,6 +898,25 @@ class SolarSymmetryApp {
         }
 
         return !controller.signal.aborted;
+    }
+
+    /**
+     * Register a running data load so whenIdle() waits for it
+     */
+    trackLoad(promise) {
+        this.pendingLoads.add(promise);
+        const remove = () => this.pendingLoads.delete(promise);
+        promise.then(remove, remove);
+        return promise;
+    }
+
+    /**
+     * Resolves once no data is loading (used before reloading for an app update)
+     */
+    async whenIdle() {
+        while (this.pendingLoads.size > 0) {
+            await Promise.allSettled(Array.from(this.pendingLoads));
+        }
     }
 
     /**
@@ -959,7 +979,7 @@ class SolarSymmetryApp {
         if (signal.aborted) return;
 
         // Stages 2 and 3 run in order, in the background
-        (async () => {
+        this.trackLoad((async () => {
             for (const rows of stages.slice(1)) {
                 if (signal.aborted) return;
                 await this.loadSymmetryRows(state, rows);
@@ -968,7 +988,7 @@ class SolarSymmetryApp {
             if (error.name !== 'AbortError') {
                 console.error('Failed to load twilight data:', error);
             }
-        });
+        }));
     }
 
     /**
@@ -1129,7 +1149,7 @@ class SolarSymmetryApp {
             }
         });
 
-        await this.loadSymmetryColumn(state, column, rows);
+        await this.trackLoad(this.loadSymmetryColumn(state, column, rows));
     }
 
     /**

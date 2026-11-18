@@ -21,6 +21,12 @@ Solar Symmetry uses **Semantic Versioning** (MAJOR.MINOR.PATCH):
 
 ## Version History
 
+### 1.2.0 (2026-11-14)
+- PWA auto-update: checks for a new version on open and when the app returns to the foreground; once data loading has finished it activates the new version and reloads once
+- Reload-loop protection: no reload on first install, one reload per page, none within 60s of the last update reload
+- Fixed service worker and manifest paths so they work on GitHub Pages (`/solar-symmetry/`); previously the service worker never registered there
+- Service worker downloads fresh files on install (bypasses the browser's HTTP cache) and no longer intercepts API requests
+
 ### 1.1.0 (2026-11-14)
 - Sun data loads in stages: today + its mirror first, then the rest of the month, then the start of the month
 - Switched to sunrise-sunset.org API v2 with date ranges (about 6 requests per month instead of about 60)
