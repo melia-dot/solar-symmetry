@@ -1,0 +1,139 @@
+# Solar Symmetry: Native App Plan
+
+Goal: ship Solar Symmetry to the Apple App Store and Google Play as a small
+commercial app. Free core, one-time £1.99 unlock for the "Companion" features.
+The web PWA (GitHub Pages) must keep working throughout.
+
+## Where we are (v1.4.0)
+
+- Static web app: HTML/CSS/vanilla JS, no build step, deployed from `main` to GitHub Pages
+- Sun times calculated on the device (SunCalc, `src/vendor/suncalc.js`); time zones
+  via `src/vendor/tz-lookup.js`. No sun API, works offline.
+- Only network call: city search (OpenStreetMap Nominatim, `src/clients/geocoding.js`)
+- Today hero at the top of the Symmetry view (today vs. its mirror date)
+- Companion message library drafted: `src/data/companion-messages.json`
+
+## Ground rules
+
+- Follow `CLAUDE.md` (bump `src/version.js`, add a `VERSION.md` entry, version in commit message)
+- Never invent plugin names, method names or API syntax. Check the current docs
+  (Capacitor, plugin READMEs, Firebase, Apple, Google) before using anything, and
+  say so if unsure.
+- Work on a branch per phase. Don't push to `main` without asking: `main` deploys live.
+- The web build must keep working. Native-only features go behind a platform check
+  (`Capacitor.isNativePlatform()` or equivalent; verify in current docs).
+- Stop and ask the human at every step that needs their accounts, money, or a decision.
+- The human is a product manager, not a developer: explain choices briefly in plain words.
+
+## Open decisions (ask before Phase 1)
+
+1. Seller: personal developer account, or Nuvance Labs Ltd (company account needs a
+   D-U-N-S number, which can take 1–2 weeks: start early)
+2. Mac with Xcode available for iOS builds, or a cloud build service?
+3. App ID / bundle identifier (e.g. `com.<something>.solarsymmetry`)
+
+## Phase 1: Native shell (Capacitor)
+
+- Add Capacitor to the project with the existing web files as the web dir.
+  Probably needs a small `package.json` and a copy step into a `www/` folder,
+  because the app currently has no build. Keep it minimal.
+- Add iOS and Android platforms
+- App icon and splash screen (from `icon.svg`), safe areas (notch, home bar)
+- Status bar styling to match the dark hero
+- Runs on the human's own iPhone and Android device
+- Remove or hide the "Mobile App" install-instructions tab inside the native app
+
+**Done when:** the app runs on a real iPhone and a real Android phone, looks right,
+works offline.
+
+## Phase 2: Onboarding, consent, settings
+
+Shown once on first launch; answers stored on the device. Add a hidden
+"Reset onboarding" option in Settings for testing.
+
+- **Screen 1, Welcome:** one line on what the app does, then pick a city (search) or
+  "Use my location" (needs location permission; only ask if they tap it)
+- **Screen 2, Analytics consent:** "Help improve Solar Symmetry by sharing anonymous
+  usage stats?" Yes / No with equal weight. Analytics stays off unless Yes.
+- **Screen 3, Companion:** explain the daily buddy messages, preview one, then trigger
+  the OS notification permission prompt. Never fire the OS prompt cold.
+- **Settings screen:** city, notification time, messages per day (0–3, default 1),
+  analytics on/off, privacy policy, terms, restore purchase, app version
+- **Privacy policy + terms:** simple pages on GitHub Pages, linked from Settings and
+  the store listings. Draft them; the human reviews.
+
+UK GDPR / PECR notes: consent must be active, optional and changeable. No pre-ticked
+boxes, no "by using this app you agree". Check the ICO's current guidance on analytics
+(rules changed recently). Not legal advice.
+
+**Done when:** a fresh install walks through the 3 screens once; all choices can be
+changed in Settings; analytics never runs without Yes.
+
+## Phase 3: Companion notifications (on device, no backend)
+
+The heart of the product: a randomised "buddy", not a robot.
+
+- Source: `src/data/companion-messages.json` (later overridable from Remote Config)
+- Seasons: `darkening` (summer solstice → winter solstice) / `brightening` (the rest).
+  Mind the southern hemisphere: base it on the user's latitude.
+- Moments: `morning` (around sunrise), `beforeSunset` (~30 min before), `afterDark`
+- Placeholders: `{city} {sunrise} {sunset} {daylight} {daysToSolstice}
+  {minutesGained} {minutesLost} {mirrorDate}`, all computed on the device with the
+  existing TwilightClient / DateCalculations
+- Milestones replace the normal line on their day: solstices, day after winter
+  solstice, equinoxes, clocks forward/back (detect from the city's time zone),
+  first sunset after 5pm, one hour gained since the winter solstice
+- Randomness rules: random moment + random line, no repeated line within 14 days,
+  jitter send time by a few minutes, respect messages-per-day setting
+- Scheduling: local notifications for the next ~2–3 weeks, rescheduled every time the
+  app opens or the city changes. iOS limits pending local notifications (about 64;
+  verify), so stay well under it.
+- Free vs paid: decide with the human. Suggestion: free users get 1 message a week
+  as a taster; unlock gives the daily buddy.
+
+**Done when:** notifications arrive on real devices with correct local times and
+varied lines; changing city or settings reschedules them.
+
+## Phase 4: Firebase
+
+Ask the human to create the Firebase project and the Apple push key (APNs .p8) and
+upload it to Firebase. Check current docs for the Capacitor Firebase plugins.
+
+- Analytics: only initialised after consent. Key events: onboarding_complete,
+  city_selected, notification_opt_in, paywall_view, unlock_purchased, app_open
+- Remote Config: companion message library + feature flags + paywall copy
+- Cloud Messaging: campaign pushes ("Solstice tonight") sent from the Firebase console
+
+**Done when:** events show in the Firebase console, a Remote Config change updates
+messages without an app release, and a test push arrives on both platforms.
+
+## Phase 5: £1.99 one-time unlock
+
+- One non-consumable product per store (same product ID on both, e.g.
+  `companion_unlock`); the human creates it in App Store Connect and Play Console
+- Purchase plugin for Capacitor (research current options; RevenueCat not needed for
+  a single non-consumable but is an option)
+- Paywall screen: what you get, price from the store (never hard-code it), Restore
+  purchase
+- Unlock flag stored on the device and re-checked with the store on launch
+- Optional: Apple allows a free time-limited trial on one-time unlocks via a £0
+  in-app item; verify current App Store Review Guidelines first
+
+**Done when:** sandbox purchase and restore work on both platforms.
+
+## Phase 6: Store launch
+
+- Store listing: name, subtitle, description, keywords, screenshots (6.7" and 5.5"
+  iPhone, Android phone), app preview optional
+- Apple privacy label; Google Play Data safety form
+- Age rating questionnaires
+- TestFlight beta and Google Play internal testing, then submit
+- Review notes for Apple: explain the native features (notifications, offline maths)
+  so it's not seen as "just a website"
+
+## Phase 7: After launch
+
+- Dashboard: downloads, day-1/day-7 retention, notification opt-in rate, paywall
+  views, unlock conversion, revenue
+- Seasonal plan: most revenue expected October–February; summer = golden hour /
+  long evenings mode

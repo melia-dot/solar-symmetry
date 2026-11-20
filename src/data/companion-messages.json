@@ -1,0 +1,90 @@
+{
+  "version": 1,
+  "_readme": "Companion notification lines. Placeholders: {city} {sunrise} {sunset} {daylight} {daysToSolstice} {minutesGained} {minutesLost} {mirrorDate}. 'darkening' = days getting shorter (summer solstice to winter solstice), 'brightening' = days getting longer. Moments: morning (around sunrise), beforeSunset (~30 min before), afterDark (evening). Milestones fire on their day instead of a normal line. Don't repeat a line within 14 days.",
+
+  "darkening": {
+    "morning": [
+      "Morning! The sun's up at {sunrise} in {city}. Go and grab a bit of it.",
+      "Rise and shine, slowly. Sunrise was {sunrise}. Coffee by a window counts.",
+      "{daylight} of daylight today. Spend a little of it outside if you can.",
+      "Good morning. Same light today as on {mirrorDate}. Nice to know it comes back.",
+      "Sun's up at {sunrise}. A ten minute walk now is worth an hour of scrolling later.",
+      "Morning, friend. {daysToSolstice} days until the light turns around. We've got this.",
+      "The sun showed up at {sunrise}. Let's be at least as reliable as the sun today."
+    ],
+    "beforeSunset": [
+      "Enjoy the sun until {sunset}. Step outside for five, it's worth it.",
+      "Sunset in about half an hour ({sunset}). Look west if you can.",
+      "Last light of the day coming up at {sunset}. Catch it while it's here.",
+      "Golden hour, {city}. Phones up, or better still, phones down.",
+      "The sun clocks off at {sunset}. Give it a little wave goodbye."
+    ],
+    "afterDark": [
+      "It may be getting dark, but light a candle and stay cosy, my friend. Soon enough the sun will be back.",
+      "Dark outside, warm inside. Blanket, tea, a good book. You're doing it right.",
+      "Long evening ahead. Perfect excuse for soup and an early night.",
+      "The dark is just the sun taking a breather. It's back at {sunrise} tomorrow.",
+      "{daysToSolstice} days to the shortest day. After that, every evening gets a little brighter.",
+      "Nights are long, but you're not alone in them. The whole hemisphere is lighting candles with you.",
+      "Cosy mode on. The light is coming back on {mirrorDate}, same as today, and more after that.",
+      "Hang in there. Winter is a season, not a forever."
+    ]
+  },
+
+  "brightening": {
+    "morning": [
+      "Morning! Sunrise at {sunrise}. The light is on its way back, you can feel it.",
+      "{minutesGained} more minutes of light than on the darkest day. Every one of them is yours.",
+      "Good morning. {daylight} of daylight today, and growing.",
+      "The sun beat you up again at {sunrise}. Let's make it a good one.",
+      "Morning, friend. Each day now is a little brighter than the last. Literally.",
+      "Spring is loading. Today's light: {daylight}."
+    ],
+    "beforeSunset": [
+      "Enjoy the sun until {sunset}. Later than last week, isn't it lovely?",
+      "Sunset at {sunset}. Remember when it was dark at four? Look at us now.",
+      "Still light out. Sunset isn't until {sunset}. Go stretch your legs.",
+      "Golden hour coming up. The evenings are coming back to us.",
+      "The sun's staying out later these days. {sunset} today."
+    ],
+    "afterDark": [
+      "Dark again, but not for as long. The nights are shrinking now.",
+      "{minutesGained} minutes of extra light since the solstice. The tide has turned.",
+      "Another day closer to long summer evenings. Sleep well.",
+      "The darkest part of the year is behind you. Well done for getting through it.",
+      "Tomorrow will be a little brighter than today. That's a promise from the planet."
+    ]
+  },
+
+  "milestones": {
+    "winterSolstice": [
+      "Today is the shortest day. From tomorrow, the light starts coming back. We made it to the turning point.",
+      "Solstice! The darkest day of the year. Light a candle tonight, it's all uphill from here."
+    ],
+    "dayAfterWinterSolstice": [
+      "The light has turned. Today is a few seconds longer than yesterday, and it only grows from here."
+    ],
+    "summerSolstice": [
+      "The longest day of the year. {daylight} of light. Get outside and soak it up.",
+      "Midsummer! Stay up late, watch the sun go down at {sunset}. You earned it."
+    ],
+    "equinoxSpring": [
+      "Spring equinox: day and night are equal today. From here, light wins."
+    ],
+    "equinoxAutumn": [
+      "Autumn equinox: day and night are equal today. Time to stock up on candles and good books."
+    ],
+    "clocksBack": [
+      "The clocks went back last night. Darker evenings ahead, but brighter mornings for now. Be gentle with yourself this week."
+    ],
+    "clocksForward": [
+      "The clocks went forward! An hour less sleep, but sunset is suddenly at {sunset}. Worth it."
+    ],
+    "firstSunsetAfter5pm": [
+      "Big day: sunset is after 5pm again ({sunset}). Light after work is back!"
+    ],
+    "oneHourGained": [
+      "One whole hour more light than on the darkest day. That's real progress, friend."
+    ]
+  }
+}
