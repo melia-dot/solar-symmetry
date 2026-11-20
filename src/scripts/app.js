@@ -299,6 +299,10 @@ class SolarSymmetryApp {
         // Start in symmetry view (this is the only place the month loads on startup)
         const loading = this.switchToView('symmetry');
 
+        // First screen is drawn (Today card + month, all calculated on the device):
+        // the native app can now fade out its launch screen
+        Promise.resolve(loading).finally(onAppReady);
+
         // Light-after-work starts once today's data is in (it then comes from the cache)
         if (this.currentLocation) {
             await loading;

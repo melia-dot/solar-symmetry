@@ -5,6 +5,8 @@
  * as they are. Capacitor needs them in a separate folder, so this script copies
  * them there. www/ is generated; don't edit it, edit the originals.
  *
+ * Also adds src/vendor/capacitor-core.js (from node_modules, native app only).
+ *
  * Not copied: service-worker.js (the native app carries its files, so it needs
  * no offline cache; src/scripts/sw-update.js skips registration in the app),
  * and editor/backup clutter (.DS_Store, *.backup).
@@ -31,4 +33,12 @@ for (const entry of ENTRIES) {
     });
 }
 
-console.log(`Copied ${ENTRIES.join(', ')} to www/`);
+// Native app only: Capacitor's core script (adds Capacitor.registerPlugin, which
+// src/utils/platform.js uses to call plugins without a build step). Copied from
+// node_modules so it always matches the installed Capacitor version.
+cpSync(
+    join(root, 'node_modules', '@capacitor', 'core', 'dist', 'capacitor.js'),
+    join(out, 'src', 'vendor', 'capacitor-core.js'),
+);
+
+console.log(`Copied ${ENTRIES.join(', ')} and the Capacitor core script to www/`);

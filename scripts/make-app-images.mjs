@@ -1,57 +1,51 @@
 /**
- * Draws the source images for the native app icon and splash screen into assets/,
- * using the sun from icon.svg (white sun on indigo).
+ * Renders the "Warm water" app icon and launch screen (design/app-icon/*.svg,
+ * the master artwork) into the PNGs the stores and @capacitor/assets need.
  *
- * Then `npx @capacitor/assets generate` turns them into every size iOS and
- * Android need (see "npm run app-images" in package.json).
+ *   design/app-icon/app-icon-1024.png   App Store icon: RGB, no transparency
+ *   design/app-icon/splash-2732.png     launch screen, full bleed
+ *   assets/icon-only.png                iOS icon (+ Android legacy icons)
+ *   assets/icon-background.png          Android adaptive icon: the whole scene
+ *   assets/icon-foreground.png          Android adaptive icon: empty (the scene
+ *                                       has no separate foreground)
+ *   assets/splash.png, splash-dark.png  launch screen (same scene in dark mode)
  *
- *   icon-only.png        1024  iOS icon: full square, no transparency (Apple rejects it)
- *   icon-foreground.png  1024  Android adaptive icon, sun layer (transparent)
- *   icon-background.png  1024  Android adaptive icon, colour layer
- *   splash.png           2732  launch screen (splash-dark.png: same, for dark mode)
+ * Then run `npx @capacitor/assets generate ...` (see README) to produce every
+ * size iOS and Android need.
  */
-import { mkdirSync } from 'node:fs';
+import { mkdirSync, readFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import sharp from 'sharp';
 
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
-const out = join(root, 'assets');
-mkdirSync(out, { recursive: true });
+const design = join(root, 'design', 'app-icon');
+const assets = join(root, 'assets');
+mkdirSync(assets, { recursive: true });
 
-const INDIGO = '#4338ca';
+const iconSvg = readFileSync(join(design, 'app-icon.svg'));
+const splashSvg = readFileSync(join(design, 'splash.svg'));
 
-// The sun from icon.svg (drawn around 256,256 in a 512 box)
-const SUN = `
-  <circle cx="256" cy="256" r="120" fill="#ffffff"/>
-  <g stroke="#ffffff" stroke-width="24" stroke-linecap="round">
-    <path d="M256 40 V120"/><path d="M256 392 V472"/>
-    <path d="M472 256 H392"/><path d="M120 256 H40"/>
-    <path d="M403 109 L347 165"/><path d="M165 347 L109 403"/>
-    <path d="M403 403 L347 347"/><path d="M165 165 L109 109"/>
-  </g>`;
-
-// size = image width/height; sunScale = sun size relative to icon.svg; bg = colour or null
-function svg(size, sunScale, bg) {
-    const c = size / 2;
-    return `<svg xmlns="http://www.w3.org/2000/svg" width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">
-  ${bg ? `<rect width="${size}" height="${size}" fill="${bg}"/>` : ''}
-  <g transform="translate(${c} ${c}) scale(${sunScale}) translate(-256 -256)">${SUN}</g>
-</svg>`;
+// SVG → PNG at an exact size, flattened (no alpha channel: Apple rejects icons with one)
+async function render(svg, size, out) {
+    await sharp(svg, { density: 72 * size / 1024 })
+        .resize(size, size)
+        .flatten({ background: '#121226' })
+        .removeAlpha()
+        .png()
+        .toFile(out);
+    console.log(out.replace(root + '/', ''));
 }
 
-const images = {
-    // Rays reach ~67% of the width: clear of the iOS rounded corners
-    'icon-only.png': svg(1024, 1.5, INDIGO),
-    // Android: @capacitor/assets insets this layer by 16.7%, so the image already
-    // maps to the visible part of the adaptive icon; same sun size as on iOS
-    'icon-foreground.png': svg(1024, 1.5, null),
-    'icon-background.png': svg(1024, 0, INDIGO),
-    'splash.png': svg(2732, 1.6, INDIGO),
-    'splash-dark.png': svg(2732, 1.6, INDIGO),
-};
+await render(iconSvg, 1024, join(design, 'app-icon-1024.png'));
+await render(splashSvg, 2732, join(design, 'splash-2732.png'));
 
-for (const [name, source] of Object.entries(images)) {
-    await sharp(Buffer.from(source)).png().toFile(join(out, name));
-    console.log(`assets/${name}`);
-}
+await render(iconSvg, 1024, join(assets, 'icon-only.png'));
+await render(iconSvg, 1024, join(assets, 'icon-background.png'));
+await render(splashSvg, 2732, join(assets, 'splash.png'));
+await render(splashSvg, 2732, join(assets, 'splash-dark.png'));
+
+await sharp({ create: { width: 1024, height: 1024, channels: 4, background: { r: 0, g: 0, b: 0, alpha: 0 } } })
+    .png()
+    .toFile(join(assets, 'icon-foreground.png'));
+console.log('assets/icon-foreground.png');

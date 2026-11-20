@@ -21,6 +21,12 @@ Solar Symmetry uses **Semantic Versioning** (MAJOR.MINOR.PATCH):
 
 ## Version History
 
+### 1.6.0 (2026-11-20)
+- New look from the "Warm water" app icon (Phase 1b of `docs/NATIVE_APP_PLAN.md`): all colours are now named in one place at the top of `src/styles/main.css` (night, dusk violet/plum, sunrise coral, amber, cream); warm cream background instead of grey/white; amber replaces orange for the active tab, buttons and today's date, with dark text so it stays readable (checked against WCAG AA)
+- Today card drawn like the icon: night sky with faint stars, sunrise towards the bottom, message on a warm "horizon" strip
+- Loading and pull-to-refresh screens use the night sky instead of orange
+- Native app: new icon and launch screen (rendered from `design/app-icon/*.svg`; the PNGs in that folder were blank and are now regenerated); the launch screen now stays until the first screen is drawn and then fades into it (`@capacitor/splash-screen` 8.0.2), instead of flashing grey
+
 ### 1.5.0 (2026-11-20)
 - Native iOS and Android apps (Capacitor 8), Phase 1 of `docs/NATIVE_APP_PLAN.md`: the same web files run inside a native shell (App ID `com.solarsymmetry.app`); `npm run sync` copies them into `www/` and the native projects
 - Icons (Lucide 1.69.0, pinned) and animations (anime.js 3.2.2) are now bundled in `src/vendor/` instead of loaded from CDNs: work offline, and the icon set can no longer change unannounced (it was `lucide@latest`)
