@@ -25,12 +25,15 @@ The web PWA (GitHub Pages) must keep working throughout.
 - Stop and ask the human at every step that needs their accounts, money, or a decision.
 - The human is a product manager, not a developer: explain choices briefly in plain words.
 
-## Open decisions (ask before Phase 1)
+## Decisions
 
-1. Seller: personal developer account, or Nuvance Labs Ltd (company account needs a
-   D-U-N-S number, which can take 1–2 weeks: start early)
-2. Mac with Xcode available for iOS builds, or a cloud build service?
-3. App ID / bundle identifier (e.g. `com.<something>.solarsymmetry`)
+1. Seller: **personal developer account** in Mikael's own name (decided 2026-11-20).
+   No D-U-N-S needed.
+2. Builds: **Mikael's own Mac with VS Code**; Xcode from the Mac App Store.
+   Check the chip (About This Mac) before Phase 1: Apple silicon is ideal; Intel still
+   works for now but Apple is phasing out Intel support.
+3. Still open, ask before Phase 1: App ID / bundle identifier
+   (e.g. `com.<something>.solarsymmetry`)
 
 ## Phase 1: Native shell (Capacitor)
 
