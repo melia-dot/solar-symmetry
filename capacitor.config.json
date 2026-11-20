@@ -1,0 +1,13 @@
+{
+  "appId": "com.solarsymmetry.app",
+  "appName": "SolarSymmetry",
+  "webDir": "www",
+  "backgroundColor": "#f5f5f7",
+  "plugins": {
+    "SystemBars": {
+      "insetsHandling": "native",
+      "initialViewportFitValueHint": "cover",
+      "style": "LIGHT"
+    }
+  }
+}

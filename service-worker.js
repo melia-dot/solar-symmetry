@@ -4,7 +4,7 @@
  * - Cache is named after the app version (src/version.js), so every version
  *   bump installs a fresh copy of the app files and deletes the old cache.
  * - Serves the app's own files cache-first (works offline).
- * - Does not touch network requests (Nominatim city search, CDNs).
+ * - Does not touch network requests (Nominatim city search).
  * - A new version waits until the page says it's safe to switch
  *   (SKIP_WAITING message from src/scripts/sw-update.js), so the page can
  *   finish loading data before it reloads.
@@ -30,7 +30,10 @@ const urlsToCache = [
   'src/clients/twilight.js',
   'src/vendor/suncalc.js',
   'src/vendor/tz-lookup.js',
-  'src/utils/date-calculations.js'
+  'src/vendor/lucide.min.js',
+  'src/vendor/anime.min.js',
+  'src/utils/date-calculations.js',
+  'src/utils/platform.js'
 ];
 
 // Install: download fresh copies (bypassing the browser's HTTP cache) into the new cache

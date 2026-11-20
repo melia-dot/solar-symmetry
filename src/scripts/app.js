@@ -119,6 +119,11 @@ class SolarSymmetryApp {
         this.elements.mobileAppBtn.addEventListener('click', () => {
             this.switchToView('mobileApp');
         });
+
+        // The native app is already installed: no "install the web app" tab there
+        if (isNativeApp()) {
+            this.elements.mobileAppBtn.classList.add('hidden');
+        }
         
         // Symmetry view - Location search
         this.elements.locationInput.addEventListener('input', (e) => {

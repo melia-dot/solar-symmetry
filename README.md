@@ -47,6 +47,23 @@ Your app will be live at https://melia-dot.github.io/solar-symmetry
 
 
 
+📱 Native Apps (iOS / Android)
+The same web files are wrapped as native apps with Capacitor 8 (see docs/NATIVE_APP_PLAN.md).
+The web app still needs no build; the native apps get a copy of it in www/ (generated, not in git).
+
+Needs: Node 22+, Xcode 26+ (iOS), Android Studio 2025.2.1+ (Android)
+
+bash   npm install          # once
+   npm run ios          # copy web files into the apps and open Xcode
+   npm run android      # same, opens Android Studio
+   npm run sync         # just copy (after any web change)
+
+App icon / splash: edit scripts/make-app-images.mjs, then
+bash   node scripts/make-app-images.mjs
+   npx @capacitor/assets generate --ios --android --iconBackgroundColor '#4338ca' --iconBackgroundColorDark '#4338ca' --splashBackgroundColor '#4338ca' --splashBackgroundColorDark '#4338ca'
+
+Native-only behaviour goes behind isNativeApp() (src/utils/platform.js) so the web version is unaffected.
+
 🏗️ Project Structure
 solar-symmetry/
 ├── index.html                 # Main HTML file
