@@ -172,7 +172,7 @@ Solar Symmetry visualizes the relationship between any date and its "mirror date
 
 ### APIs & Dependencies
 - **Geocoding**: OpenStreetMap Nominatim (free, no API key)
-- **Twilight Data**: Sunrise-sunset.org API (free, no API key)
+- **Twilight Data**: calculated on the device with SunCalc (src/vendor/suncalc.js); time zones via @photostructure/tz-lookup (src/vendor/tz-lookup.js). No network needed.
 - **Technology Stack**: Pure HTML5, CSS3, JavaScript ES6+
 - **No Build Process**: Direct browser compatibility
 

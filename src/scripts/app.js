@@ -1552,7 +1552,16 @@ class SolarSymmetryApp {
      * Animate a set of cards in (used for whole columns and for single updated cards)
      */
     animateCards(cards) {
-        if (!window.anime || cards.length === 0) return;
+        if (cards.length === 0) return;
+
+        // No animation library (e.g. offline, CDN blocked): just show the cards
+        if (!window.anime) {
+            Array.from(cards).forEach(card => {
+                card.style.opacity = '';
+                card.style.transform = '';
+            });
+            return;
+        }
 
         anime({
             targets: cards,

@@ -21,6 +21,13 @@ Solar Symmetry uses **Semantic Versioning** (MAJOR.MINOR.PATCH):
 
 ## Version History
 
+### 1.4.0 (2026-11-20)
+- Sun times are now calculated on the device (SunCalc 2.1.4, vendored in `src/vendor/`) instead of calling sunrise-sunset.org: instant, works offline, no rate limits
+- Correct time zones for every city via offline lookup (@photostructure/tz-lookup 11.8.0); the old longitude guess showed e.g. Helsinki in Berlin time
+- Golden hour uses the sun's angle (below 6°) instead of a fixed hour after sunrise / before sunset
+- Polar day and night show "Up all day" / "No sunrise" instead of errors
+- Date cards now show even if the animation library fails to load (e.g. offline)
+
 ### 1.3.0 (2026-11-20)
 - New Today hero at the top of the Symmetry view: today vs. its mirror date in your city (sunrise, sunset, daylight length) with a short encouraging message
 - The hero always shows the real today and loads first; the month list below loads after it (today's row then comes from the cache)

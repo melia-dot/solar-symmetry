@@ -230,7 +230,7 @@
             <!-- Loading Indicator -->
             <div id="loadingIndicator" class="loading-indicator hidden">
                 <div class="spinner"></div>
-                <p>Fetching light data...</p>
+                <p>Calculating light...</p>
                 <small>Dawn · Sunrise · Sunset · Dusk</small>
             </div>
         </main>
@@ -242,12 +242,14 @@
     <script src="src/scripts/pull-to-refresh.js"></script>
     <script src="src/utils/date-calculations.js"></script>
     <script src="src/clients/geocoding.js"></script>
+    <script src="src/vendor/suncalc.js"></script>
+    <script src="src/vendor/tz-lookup.js"></script>
     <script src="src/clients/twilight.js"></script>
     <script src="src/scripts/app.js"></script>
     
     <!-- Initialize Lucide Icons -->
     <script>
-        lucide.createIcons();
+        if (window.lucide) lucide.createIcons();
     </script>
     
     <!-- Service Worker Registration + automatic updates -->

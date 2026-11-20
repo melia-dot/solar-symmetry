@@ -4,7 +4,7 @@
  * - Cache is named after the app version (src/version.js), so every version
  *   bump installs a fresh copy of the app files and deletes the old cache.
  * - Serves the app's own files cache-first (works offline).
- * - Does not touch API requests (sunrise-sunset.org, Nominatim, CDNs).
+ * - Does not touch network requests (Nominatim city search, CDNs).
  * - A new version waits until the page says it's safe to switch
  *   (SKIP_WAITING message from src/scripts/sw-update.js), so the page can
  *   finish loading data before it reloads.
@@ -28,6 +28,8 @@ const urlsToCache = [
   'src/scripts/sw-update.js',
   'src/clients/geocoding.js',
   'src/clients/twilight.js',
+  'src/vendor/suncalc.js',
+  'src/vendor/tz-lookup.js',
   'src/utils/date-calculations.js'
 ];
 

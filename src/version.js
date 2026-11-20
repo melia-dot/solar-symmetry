@@ -11,7 +11,7 @@
  * - MAJOR for breaking changes / major redesigns (1.4.2 → 2.0.0)
  */
 
-const APP_VERSION = '1.3.0';
+const APP_VERSION = '1.4.0';
 
 // `self` is `window` on the page and the worker scope in the service worker
 self.APP_VERSION = APP_VERSION;
