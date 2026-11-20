@@ -95,6 +95,34 @@ The heart of the product: a randomised "buddy", not a robot.
 **Done when:** notifications arrive on real devices with correct local times and
 varied lines; changing city or settings reschedules them.
 
+## Phase 3b: Cosy images + "Share my winter" card
+
+**Images in notifications (no backend)**
+- Curated set of ~30–60 images bundled in the app: fireplaces, candles, steaming
+  mugs, frosty windows, first spring sunrises, summer golden hour
+- Our own AI-generated images (generated once, curated by the human, bundled), or
+  properly licensed photos. No unlicensed stock, no live per-user generation.
+- Tag each image with moment + season so it matches the line (candles → afterDark,
+  sunrise → morning). Attach as a notification image on iOS and Android (check
+  current docs for local-notification attachments on both platforms).
+- Later: extra images via Remote Config (download, cache, then attach)
+
+**"Share my winter" card (no backend, nothing to moderate)**
+- User takes or picks a cosy photo; the app overlays a branded caption, e.g.
+  "Southport · 31 days until the light turns · Solar Symmetry"
+- Opens the native share sheet (Instagram, WhatsApp, etc.). The photo never leaves
+  the device except through the user's own share.
+- Strip location metadata from the exported image
+- Analytics event (with consent): share_card_created
+
+**Explicitly NOT in v1: an in-app community feed of user photos.** That needs a
+backend, moderation, report/block tools (App Store Review Guidelines on
+user-generated content), UK Online Safety Act duties and privacy handling. Revisit
+as v2 if the share card shows real traction.
+
+**Done when:** notifications show matching images on both platforms; a share card
+can be created and shared from a real phone.
+
 ## Phase 4: Firebase
 
 Ask the human to create the Firebase project and the Apple push key (APNs .p8) and
