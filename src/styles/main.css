@@ -1209,3 +1209,21 @@ body {
         display: none;
     }
 }
+
+/* Safe areas: keep content clear of the notch / status bar and the home bar.
+   viewport-fit=cover (index.html) lets the page draw edge to edge; env() is
+   0px where there's nothing to avoid (desktop, normal browser tabs). Kept at
+   the end so it wins over the padding set in the responsive rules above. */
+.location-header {
+    padding-top: calc(1.5rem + env(safe-area-inset-top, 0px));
+}
+
+.main-content {
+    padding-bottom: calc(3rem + env(safe-area-inset-bottom, 0px));
+}
+
+@media (max-width: 768px) {
+    .main-content {
+        padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    }
+}

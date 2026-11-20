@@ -30,8 +30,13 @@ The web PWA (GitHub Pages) must keep working throughout.
 1. Seller: **personal developer account** in Mikael's own name (decided 2026-11-20).
    No D-U-N-S needed.
 2. Builds: **Mikael's own Mac (M4, 16 GB) with VS Code**; Xcode from the Mac App Store.
-3. Still open, ask before Phase 1: App ID / bundle identifier
-   (e.g. `com.<something>.solarsymmetry`)
+3. App ID / bundle identifier: **`com.solarsymmetry.app`** (decided 2026-11-20).
+   Permanent once the app is in a store.
+4. Name under the home-screen icon: **SolarSymmetry** (decided 2026-11-20). The store
+   listing name is set separately in Phase 6.
+5. Phase 1 testing: free Apple ID (app expires after 7 days on the iPhone; paid
+   Apple Developer account needed by Phase 4/6) and the Android emulator (no
+   Android phone yet; test on a real one before launch).
 
 ## Phase 1: Native shell (Capacitor)
 

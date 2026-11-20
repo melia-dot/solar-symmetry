@@ -12,6 +12,9 @@
  */
 (function () {
     if (!('serviceWorker' in navigator)) return;
+    // The native app ships its files inside the app and updates through the app
+    // stores, so it needs no service worker (and www/ doesn't include one)
+    if (isNativeApp()) return;
 
     const RELOAD_GUARD_KEY = 'solarSymmetry_swReloadedAt';
     const RELOAD_GUARD_MS = 60 * 1000;

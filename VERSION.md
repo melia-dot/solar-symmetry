@@ -21,6 +21,12 @@ Solar Symmetry uses **Semantic Versioning** (MAJOR.MINOR.PATCH):
 
 ## Version History
 
+### 1.5.0 (2026-11-20)
+- Native iOS and Android apps (Capacitor 8), Phase 1 of `docs/NATIVE_APP_PLAN.md`: the same web files run inside a native shell (App ID `com.solarsymmetry.app`); `npm run sync` copies them into `www/` and the native projects
+- Icons (Lucide 1.69.0, pinned) and animations (anime.js 3.2.2) are now bundled in `src/vendor/` instead of loaded from CDNs: work offline, and the icon set can no longer change unannounced (it was `lucide@latest`)
+- Edge-to-edge layout: header and page bottom keep clear of the notch/status bar and home bar (`viewport-fit=cover` + safe-area padding)
+- In the native app: "Mobile App" install tab hidden, no service worker; app icon and splash screen from `icon.svg`; portrait only, light appearance with dark status bar text
+
 ### 1.4.0 (2026-11-20)
 - Sun times are now calculated on the device (SunCalc 2.1.4, vendored in `src/vendor/`) instead of calling sunrise-sunset.org: instant, works offline, no rate limits
 - Correct time zones for every city via offline lookup (@photostructure/tz-lookup 11.8.0); the old longitude guess showed e.g. Helsinki in Berlin time
