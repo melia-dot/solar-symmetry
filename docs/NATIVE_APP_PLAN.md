@@ -29,9 +29,7 @@ The web PWA (GitHub Pages) must keep working throughout.
 
 1. Seller: **personal developer account** in Mikael's own name (decided 2026-11-20).
    No D-U-N-S needed.
-2. Builds: **Mikael's own Mac with VS Code**; Xcode from the Mac App Store.
-   Check the chip (About This Mac) before Phase 1: Apple silicon is ideal; Intel still
-   works for now but Apple is phasing out Intel support.
+2. Builds: **Mikael's own Mac (M4, 16 GB) with VS Code**; Xcode from the Mac App Store.
 3. Still open, ask before Phase 1: App ID / bundle identifier
    (e.g. `com.<something>.solarsymmetry`)
 
