@@ -65,6 +65,30 @@
 
         <!-- Main Content -->
         <main class="main-content">
+            <!-- Today Hero: today vs. its mirror date in the chosen city -->
+            <section id="todayHero" class="today-hero hidden" aria-live="polite">
+                <div class="hero-title">
+                    <span class="hero-kicker">Today in</span>
+                    <h2 id="heroCity" class="hero-city"></h2>
+                </div>
+                <div class="hero-pair">
+                    <div class="hero-day hero-today">
+                        <div class="hero-label">Today</div>
+                        <div id="heroTodayDate" class="hero-date"></div>
+                        <div id="heroTodayTimes" class="hero-times"></div>
+                    </div>
+                    <div class="hero-link" aria-hidden="true">
+                        <i data-lucide="repeat"></i>
+                    </div>
+                    <div class="hero-day hero-mirror">
+                        <div class="hero-label">Same light on</div>
+                        <div id="heroMirrorDate" class="hero-date"></div>
+                        <div id="heroMirrorTimes" class="hero-times"></div>
+                    </div>
+                </div>
+                <p id="heroMessage" class="hero-message"></p>
+            </section>
+
             <!-- Month Navigation -->
             <div class="month-navigation">
                 <button id="prevMonth" class="nav-button" aria-label="Previous month">

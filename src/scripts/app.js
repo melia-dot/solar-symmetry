@@ -53,6 +53,13 @@ class SolarSymmetryApp {
             locationDropdown: document.getElementById('locationDropdown'),
             appVersion: document.getElementById('appVersion'),
             symmetryContainer: document.getElementById('symmetryContainer'),
+            todayHero: document.getElementById('todayHero'),
+            heroCity: document.getElementById('heroCity'),
+            heroTodayDate: document.getElementById('heroTodayDate'),
+            heroTodayTimes: document.getElementById('heroTodayTimes'),
+            heroMirrorDate: document.getElementById('heroMirrorDate'),
+            heroMirrorTimes: document.getElementById('heroMirrorTimes'),
+            heroMessage: document.getElementById('heroMessage'),
             currentDates: document.getElementById('currentDates'),
             mirroredDates: document.getElementById('mirroredDates'),
             
@@ -245,6 +252,7 @@ class SolarSymmetryApp {
             this.elements.symmetryLocationSelector.classList.add('hidden');
             this.elements.citiesContainer.classList.remove('hidden');
             this.elements.symmetryContainer.classList.add('hidden');
+            this.elements.todayHero.classList.add('hidden');
             this.elements.mobileAppContainer.classList.add('hidden');
             
             // Load data if cities are set
@@ -265,6 +273,7 @@ class SolarSymmetryApp {
             this.elements.symmetryContainer.classList.add('hidden');
             this.elements.citiesContainer.classList.add('hidden');
             this.elements.mobileAppContainer.classList.remove('hidden');
+            this.elements.todayHero.classList.add('hidden');
         }
     }
 
@@ -872,6 +881,111 @@ class SolarSymmetryApp {
     }
 
     // =================================================================
+    // TODAY HERO
+    // =================================================================
+
+    /**
+     * Fetch today and today's mirror date, then render the hero card.
+     * Both dates go in one call (two small range requests through the shared queue).
+     */
+    async loadTodayHero(state) {
+        const { location, signal } = state;
+        const today = new Date();
+        today.setHours(0, 0, 0, 0);
+        const mirror = this.dateCalc.calculateMirrorDate(today);
+
+        this.renderTodayHero(location, today, mirror, null, null);
+
+        try {
+            const results = await this.twilight.getTwilightRange([today, mirror], location.lat, location.lng, { signal });
+            if (signal.aborted || this.symmetryLoad !== state) return;
+
+            const pick = date => {
+                const result = results.get(this.twilight.formatDateForAPI(date));
+                if (!result) return null;
+                return result.data || { error: result.error ? result.error.message : 'Failed to load' };
+            };
+            this.renderTodayHero(location, today, mirror, pick(today), pick(mirror));
+        } catch (error) {
+            if (error.name !== 'AbortError') {
+                console.error('Failed to load today hero:', error);
+            }
+        }
+    }
+
+    renderTodayHero(location, today, mirror, todayData, mirrorData) {
+        const el = this.elements;
+        el.todayHero.classList.remove('hidden');
+        el.heroCity.textContent = (location.name || '').split(',')[0];
+
+        const longDate = date => date.toLocaleDateString('en-GB', { weekday: 'short', day: 'numeric', month: 'short' });
+        el.heroTodayDate.textContent = longDate(today);
+        el.heroMirrorDate.textContent = longDate(mirror);
+
+        el.heroTodayTimes.innerHTML = this.heroTimesHTML(todayData);
+        el.heroMirrorTimes.innerHTML = this.heroTimesHTML(mirrorData);
+        el.heroMessage.textContent = this.heroMessage(today, mirror, todayData);
+
+        if (window.lucide) {
+            window.lucide.createIcons();
+        }
+    }
+
+    heroTimesHTML(data) {
+        if (!data) {
+            return '<div class="hero-loading">Loading…</div>';
+        }
+        if (data.error) {
+            return '<div class="hero-loading">Couldn\'t load</div>';
+        }
+        const daylight = this.formatDaylight(data);
+        return `
+            <div class="hero-row"><i data-lucide="sunrise"></i><span>Sunrise</span><strong>${data.sunrise}</strong></div>
+            <div class="hero-row"><i data-lucide="sunset"></i><span>Sunset</span><strong>${data.sunset}</strong></div>
+            ${daylight ? `<div class="hero-row hero-daylight"><i data-lucide="sun"></i><span>Daylight</span><strong>${daylight}</strong></div>` : ''}
+        `;
+    }
+
+    /**
+     * Daylight length from the ISO sunrise/sunset times, e.g. "8h 05m"
+     */
+    formatDaylight(data) {
+        if (!data.sunriseISO || !data.sunsetISO) return null;
+        const minutes = Math.round((new Date(data.sunsetISO) - new Date(data.sunriseISO)) / 60000);
+        if (!Number.isFinite(minutes) || minutes <= 0) return null;
+        return `${Math.floor(minutes / 60)}h ${String(minutes % 60).padStart(2, '0')}m`;
+    }
+
+    /**
+     * A short, warm line about where we are in the year
+     */
+    heroMessage(today, mirror, todayData) {
+        const dayMs = 24 * 60 * 60 * 1000;
+        const solstice = this.dateCalc.getNearestSolstice(today);
+        const days = Math.round((solstice - today) / dayMs); // > 0: solstice still ahead
+        const isWinter = solstice.getMonth() === 11;
+        const mirrorText = mirror.toLocaleDateString('en-GB', { day: 'numeric', month: 'long' });
+
+        if (days === 0) {
+            return isWinter
+                ? 'The shortest day. From tomorrow, the light starts coming back.'
+                : 'The longest day. Get outside and soak it up.';
+        }
+
+        if (isWinter) {
+            if (days > 0) {
+                return `${days} day${days === 1 ? '' : 's'} until the shortest day. After that the light turns, and by ${mirrorText} you'll have today's light again. Hang in there.`;
+            }
+            return `You made it past the darkest day. Today's light matches ${mirrorText}, and every day from here gets a little longer.`;
+        }
+
+        if (days > 0) {
+            return `${days} day${days === 1 ? '' : 's'} until the longest day. Long, light evenings ahead.`;
+        }
+        return `The days are slowly shortening, but today still has the same light as ${mirrorText}. Make the most of it.`;
+    }
+
+    // =================================================================
     // DATA LOADING
     // =================================================================
 
@@ -931,11 +1045,12 @@ class SolarSymmetryApp {
     }
 
     /**
-     * Load symmetry view data in three stages:
+     * Load symmetry view data. First the Today hero (today vs. its mirror date),
+     * then the month list in three stages (today's row is then served from the cache):
      *   1. today + today's mirror
      *   2. rows after today to the end of the month (current column, then mirrored)
      *   3. rows from the 1st up to the day before today (current column, then mirrored)
-     * Resolves after stage 1; stages 2 and 3 keep loading in the background.
+     * Resolves after the hero and stage 1; stages 2 and 3 keep loading in the background.
      * When viewing another month, "today" is today's day number capped at that month's length.
      */
     async loadSymmetryData(signal) {
@@ -965,6 +1080,10 @@ class SolarSymmetryApp {
 
         this.clearColumnStatus();
         this.renderSymmetryData(monthData);
+
+        // 0. Hero first: today + today's mirror (always the real today, whatever month is shown)
+        await this.loadTodayHero(state);
+        if (signal.aborted) return;
 
         const anchor = Math.min(new Date().getDate(), daysInMonth) - 1; // row index
         const rowRange = (from, to) => Array.from({ length: Math.max(0, to - from) }, (_, i) => from + i);
@@ -1472,6 +1591,7 @@ class SolarSymmetryApp {
      */
     renderSymmetryEmptyState() {
         this.clearColumnStatus();
+        this.elements.todayHero.classList.add('hidden');
 
         const currentContainer = this.elements.currentDates;
         const mirroredContainer = this.elements.mirroredDates;

@@ -21,6 +21,10 @@ Solar Symmetry uses **Semantic Versioning** (MAJOR.MINOR.PATCH):
 
 ## Version History
 
+### 1.3.0 (2026-11-20)
+- New Today hero at the top of the Symmetry view: today vs. its mirror date in your city (sunrise, sunset, daylight length) with a short encouraging message
+- The hero always shows the real today and loads first; the month list below loads after it (today's row then comes from the cache)
+
 ### 1.2.0 (2026-11-14)
 - PWA auto-update: checks for a new version on open and when the app returns to the foreground; once data loading has finished it activates the new version and reloads once
 - Reload-loop protection: no reload on first install, one reload per page, none within 60s of the last update reload

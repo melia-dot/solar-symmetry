@@ -1057,3 +1057,155 @@ body {
         font-size: 0.625rem;
     }
 }
+
+/* Today Hero: today vs. its mirror date */
+.today-hero {
+    max-width: 720px;
+    margin: 0 auto 2.5rem auto;
+    padding: 2rem;
+    border-radius: 24px;
+    background: linear-gradient(160deg, #1d1d1f 0%, #2c2c34 55%, #4a3520 100%);
+    color: #fff;
+    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+}
+
+.hero-title {
+    margin-bottom: 1.5rem;
+}
+
+.hero-kicker {
+    display: block;
+    font-size: 0.8rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: rgba(255, 255, 255, 0.55);
+}
+
+.hero-city {
+    font-size: 2rem;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+}
+
+.hero-pair {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 1rem;
+    align-items: stretch;
+}
+
+.hero-day {
+    padding: 1.25rem;
+    border-radius: 16px;
+    background: rgba(255, 255, 255, 0.06);
+}
+
+.hero-today {
+    background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
+}
+
+.hero-label {
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+    opacity: 0.75;
+}
+
+.hero-date {
+    font-size: 1.25rem;
+    font-weight: 600;
+    margin: 0.25rem 0 1rem 0;
+}
+
+.hero-times {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    font-size: 0.95rem;
+}
+
+.hero-row {
+    display: grid;
+    grid-template-columns: 18px 1fr auto;
+    gap: 0.5rem;
+    align-items: center;
+}
+
+.hero-row svg {
+    width: 16px;
+    height: 16px;
+    opacity: 0.8;
+}
+
+.hero-row span {
+    opacity: 0.8;
+}
+
+.hero-row strong {
+    white-space: nowrap;
+}
+
+.hero-daylight {
+    margin-top: 0.25rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(255, 255, 255, 0.2);
+}
+
+.hero-loading {
+    opacity: 0.6;
+}
+
+.hero-link {
+    display: flex;
+    align-items: center;
+    color: #ff9500;
+}
+
+.hero-message {
+    margin-top: 1.5rem;
+    font-size: 1.05rem;
+    line-height: 1.5;
+    color: rgba(255, 255, 255, 0.85);
+}
+
+@media (max-width: 768px) {
+    .today-hero {
+        padding: 1.25rem;
+        margin-bottom: 1.5rem;
+        border-radius: 20px;
+    }
+
+    .hero-city {
+        font-size: 1.5rem;
+    }
+
+    .hero-pair {
+        grid-template-columns: 1fr 1fr;
+        gap: 0.75rem;
+    }
+
+    .hero-link {
+        display: none;
+    }
+
+    .hero-day {
+        padding: 1rem;
+    }
+
+    .hero-date {
+        font-size: 1rem;
+    }
+
+    .hero-times {
+        font-size: 0.85rem;
+    }
+
+    .hero-row {
+        grid-template-columns: 1fr auto;
+    }
+
+    .hero-row > i,
+    .hero-row svg {
+        display: none;
+    }
+}
