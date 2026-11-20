@@ -47,6 +47,52 @@ The web PWA (GitHub Pages) must keep working throughout.
 **Done when:** the app runs on a real iPhone and a real Android phone, looks right,
 works offline.
 
+## Phase 1b: New icon + visual refresh (do next, before Phase 2)
+
+The app icon is now **"Warm water"** (night sky → sunrise over warm water).
+Files and rationale: `design/app-icon/` (read its README). The app's current
+orange/charcoal-on-white look no longer matches it. Let the icon lead.
+
+**1. Icon + launch screen**
+- Replace the Phase 1 indigo icon and splash with `design/app-icon/app-icon-1024.png`
+  and `design/app-icon/splash-2732.png`; regenerate native assets (check current
+  `@capacitor/assets` docs)
+- Launch screen should flow into the Today card (same colours), no white flash
+
+**2. Palette (taken from the icon)**
+| Role | Hex |
+|---|---|
+| Night (top of sky) | `#121226` |
+| Dusk violet | `#2a2342` |
+| Dusk plum | `#6b3a55` |
+| Sunrise coral | `#e2704a` |
+| Amber (new accent, replaces `#ff9500`) | `#ffb46a` |
+| Warm cream (sun glow) | `#ffd7a0` / `#fff2d8` |
+| Warm water | `#9a5a4c` → `#5a3a40` |
+
+- Put these in CSS custom properties in one place; replace hard-coded oranges
+- Background: warm cream (e.g. `#fbf6ef`) instead of cold white/grey
+- Buttons, active tab, highlights: amber / coral, with text contrast checked (WCAG AA)
+
+**3. Today card**
+- Same night-to-sunrise gradient as the icon (night top → amber/cream at the bottom),
+  optional faint stars at the top
+- "Today" and "Same light on" tiles readable on it (contrast check)
+
+**4. Month list + Compare Cities**
+- Softer cards on the cream background; today's card highlighted in amber, not orange
+
+**5. Evening mode (nice to have)**
+- After local sunset, switch to a dark warm theme (night/plum background, cream text).
+  Also respect the phone's dark mode setting. Ask the human before building if unsure.
+
+**Ground rules:** CSS-first, no new libraries; keep it calm and soft (the audience
+dislikes winter darkness and may be anxious: no harsh contrast, no alarming reds).
+Bump the minor version. Show before/after screenshots (iPhone simulator) to the human.
+
+**Done when:** icon + launch screen are the new artwork on the phone, and the app's
+colours clearly belong to the same family as the icon.
+
 ## Phase 2: Onboarding, consent, settings
 
 Shown once on first launch; answers stored on the device. Add a hidden
