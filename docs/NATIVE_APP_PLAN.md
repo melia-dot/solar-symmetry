@@ -37,6 +37,11 @@ The web PWA (GitHub Pages) must keep working throughout.
 5. Phase 1 testing: free Apple ID (app expires after 7 days on the iPhone; paid
    Apple Developer account needed by Phase 4/6) and the Android emulator (no
    Android phone yet; test on a real one before launch).
+6. Phase 1 result (2026-11-20): verified on the human's iPhone SE and the iPhone 18 Pro
+   simulator. **Android not tested yet** (deferred by the human; do before launch).
+7. Phase 2 (decided 2026-11-20): onboarding + Settings in the **native app only**; the
+   website stays as it is. Privacy policy / terms use a **`[CONTACT EMAIL]` placeholder**
+   until the human chooses a public address.
 
 ## Phase 1: Native shell (Capacitor)
 
