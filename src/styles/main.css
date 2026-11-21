@@ -1,3 +1,53 @@
+/* Colours: the "Coast" palette from the app icon (design/app-icon): sunrise
+   with sunbeams over the sea, and a rapeseed field. No purple, plum, pink or
+   deep orange. Components use the role names below, not raw hex values.
+   Contrast ratios (WCAG) are noted where text sits on them; AA needs 4.5:1
+   (3:1 for icons and large text). */
+:root {
+    /* Palette */
+    --sky-blue: #2f6fd6;
+    --sun-gold: #ffcf4a;
+    --cream: #fff6d8;
+    --sea-light: #4f93d8;
+    --sea-dark: #2a63b0;
+    --rapeseed: #ffd60a;
+    --green: #6aa84f;
+    --green-dark: #5e9e46;
+    --ink: #1f2d4a;
+    --glow: #ffe2a0;                                 /* warm sky just above the horizon (from the icon) */
+
+    /* Light surfaces */
+    --bg: #fbf6ef;                                   /* page: warm cream */
+    --bg-frosted: rgba(251, 246, 239, 0.88);         /* sticky header and month bar */
+    --surface: #fffdf9;                              /* cards, inputs */
+    --surface-alt: #fbf4ea;                          /* second column */
+    --surface-muted: #f5ece0;                        /* date tiles, panels */
+    --surface-hover: #efe2d2;
+    --shadow-rgb: 31, 45, 74;                        /* ink: soft shadows */
+
+    /* Text on light surfaces */
+    --text: var(--ink);                              /* 12.7:1 on --bg */
+    --text-muted: #4d5a74;                           /* 5.9:1 on --surface-muted */
+    --heading: var(--sea-dark);                      /* 5.6:1 on --bg, 5.1:1 on --surface-muted */
+
+    /* Accent: gold fills with dark text (buttons, active tab, today's date) */
+    --accent: var(--sun-gold);
+    --accent-gradient: linear-gradient(135deg, var(--glow) 0%, var(--sun-gold) 100%);
+    --on-accent: var(--ink);                         /* 9.3:1 on gold */
+    --on-accent-muted: #3d4a66;                      /* 6.0:1 on gold, 5.4:1 on the Today card's mist pane */
+    --on-accent-icon: var(--sea-dark);               /* 4.1:1 on gold (icons need 3:1) */
+    --accent-text: var(--sea-dark);                  /* accent-coloured text: 4.7:1+ */
+    --accent-icon: var(--sea-dark);                  /* small icons: 4.7:1+ on light surfaces */
+    --accent-line: var(--sun-gold);                  /* thin borders, decorations */
+    --accent-shadow: rgba(255, 207, 74, 0.45);
+    --focus-ring: rgba(42, 99, 176, 0.35);
+
+    /* The sky from the icon: blue at the top, warm cream and gold at the bottom */
+    --sky-gradient: linear-gradient(180deg, var(--sky-blue) 0%, var(--sea-light) 30%, var(--cream) 65%, var(--glow) 85%, #ffcc66 100%);
+    --on-sky: var(--ink);                            /* text sits in the lower half: 7:1+ */
+    --on-sky-top: #ffffff;                           /* text on the sky blue top: 4.8:1 */
+}
+
 /* Reset and Base Styles */
 * {
     margin: 0;
@@ -7,9 +57,9 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: #f5f5f7;
+    background: var(--bg);
     min-height: 100vh;
-    color: #1d1d1f;
+    color: var(--text);
     overflow-x: hidden;
 }
 
@@ -24,7 +74,7 @@ body {
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(245, 245, 247, 0.9);
+    background: var(--bg-frosted);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     padding: 1.5rem 3rem;
@@ -41,12 +91,12 @@ body {
 
 .location-icon {
     font-size: 1.5rem;
-    color: #1d1d1f;
+    color: var(--text);
 }
 
 .app-version {
     font-size: 0.7rem;
-    color: #86868b;
+    color: var(--text-muted);
     font-weight: 400;
     padding: 0.25rem 0.5rem;
     white-space: nowrap;
@@ -64,8 +114,8 @@ body {
     right: 1rem;
     top: 50%;
     transform: translateY(-50%);
-    background: #86868b;
-    color: white;
+    background: var(--text-muted);
+    color: var(--surface);
     border: none;
     border-radius: 50%;
     width: 20px;
@@ -81,7 +131,7 @@ body {
 }
 
 .clear-btn:hover {
-    background: #1d1d1f;
+    background: var(--text);
 }
 
 #locationInput {
@@ -91,14 +141,14 @@ body {
     border: none;
     border-radius: 12px;
     font-size: 1rem;
-    background: white;
+    background: var(--surface);
     transition: all 0.2s ease;
     outline: none;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 3px rgba(var(--shadow-rgb), 0.08);
 }
 
 #locationInput:focus {
-    box-shadow: 0 0 0 4px rgba(255, 149, 0, 0.2);
+    box-shadow: 0 0 0 4px var(--focus-ring);
 }
 
 .location-dropdown {
@@ -106,9 +156,9 @@ body {
     top: calc(100% + 8px);
     left: 0;
     right: 0;
-    background: white;
+    background: var(--surface);
     border-radius: 12px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 24px rgba(var(--shadow-rgb), 0.12);
     max-height: 240px;
     overflow-y: auto;
     z-index: 1000;
@@ -118,16 +168,16 @@ body {
     padding: 1rem 1.25rem;
     cursor: pointer;
     transition: background-color 0.15s ease;
-    color: #1d1d1f;
+    color: var(--text);
 }
 
 .location-option:hover {
-    background-color: #f5f5f7;
+    background-color: var(--surface-muted);
 }
 
 .location-option.selected {
-    background-color: #ff9500;
-    color: white;
+    background-color: var(--accent);
+    color: var(--on-accent);
 }
 
 .location-option:first-child {
@@ -150,7 +200,7 @@ body {
     padding: 0.875rem 1.75rem;
     border: none;
     background: transparent;
-    color: #86868b;
+    color: var(--text-muted);
     border-radius: 20px;
     font-size: 0.9rem;
     font-weight: 500;
@@ -162,13 +212,13 @@ body {
 }
 
 .view-btn:hover {
-    color: #1d1d1f;
-    background: rgba(0, 0, 0, 0.04);
+    color: var(--text);
+    background: rgba(var(--shadow-rgb), 0.04);
 }
 
 .view-btn.active {
-    background: #ff9500;
-    color: white;
+    background: var(--accent);
+    color: var(--on-accent);
 }
 
 /* Cities Selector */
@@ -192,7 +242,7 @@ body {
 .vs-divider {
     font-weight: 600;
     font-size: 0.875rem;
-    color: #86868b;
+    color: var(--text-muted);
     text-transform: uppercase;
     letter-spacing: 0.05em;
 }
@@ -205,15 +255,15 @@ body {
     border: none;
     border-radius: 12px;
     font-size: 1rem;
-    background: white;
+    background: var(--surface);
     transition: all 0.2s ease;
     outline: none;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 3px rgba(var(--shadow-rgb), 0.08);
 }
 
 #city1Input:focus,
 #city2Input:focus {
-    box-shadow: 0 0 0 4px rgba(255, 149, 0, 0.2);
+    box-shadow: 0 0 0 4px var(--focus-ring);
 }
 
 #city1Dropdown,
@@ -222,9 +272,9 @@ body {
     top: calc(100% + 8px);
     left: 0;
     right: 0;
-    background: white;
+    background: var(--surface);
     border-radius: 12px;
-    box-shadow: 0 4px 24px rgba(0, 0, 0, 0.12);
+    box-shadow: 0 4px 24px rgba(var(--shadow-rgb), 0.12);
     max-height: 240px;
     overflow-y: auto;
     z-index: 1000;
@@ -249,7 +299,7 @@ body {
     justify-content: center;
     gap: 3rem;
     margin-bottom: 3rem;
-    background: rgba(245, 245, 247, 0.9);
+    background: var(--bg-frosted);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
     padding: 1.5rem 3rem;
@@ -257,7 +307,7 @@ body {
 }
 
 .nav-button {
-    background: white;
+    background: var(--surface);
     border: none;
     border-radius: 50%;
     width: 48px;
@@ -265,10 +315,10 @@ body {
     display: flex;
     align-items: center;
     justify-content: center;
-    color: #1d1d1f;
+    color: var(--text);
     cursor: pointer;
     transition: all 0.2s ease;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 3px rgba(var(--shadow-rgb), 0.08);
 }
 
 .nav-button svg {
@@ -277,8 +327,8 @@ body {
 }
 
 .nav-button:hover:not(:disabled) {
-    background: #ff9500;
-    color: white;
+    background: var(--accent);
+    color: var(--on-accent);
     transform: scale(1.05);
 }
 
@@ -290,21 +340,21 @@ body {
 .month-title {
     font-size: 2.5rem;
     font-weight: 600;
-    color: #1d1d1f;
+    color: var(--heading);
     text-align: center;
     min-width: 320px;
     letter-spacing: -0.02em;
 }
 
 .month-title::selection {
-    background: rgba(255, 149, 0, 0.3);
+    background: var(--accent-shadow);
 }
 
 /* Comparison Container */
 .comparison-container {
-    background: white;
+    background: var(--surface);
     border-radius: 24px;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 12px rgba(var(--shadow-rgb), 0.06);
     overflow: hidden;
 }
 
@@ -319,18 +369,18 @@ body {
 }
 
 .current-column {
-    background: white;
+    background: var(--surface);
 }
 
 .mirrored-column,
 .city2-column {
-    background: #fafafa;
+    background: var(--surface-alt);
 }
 
 .column-header {
     font-size: 0.875rem;
     font-weight: 600;
-    color: #86868b;
+    color: var(--text-muted);
     margin-bottom: 2rem;
     text-align: center;
     text-transform: uppercase;
@@ -342,7 +392,7 @@ body {
 }
 
 .current-column .column-header {
-    color: #ff9500;
+    color: var(--accent-text);
 }
 
 .dates-list {
@@ -360,23 +410,23 @@ body {
     gap: 0.5rem;
     margin: -1rem 0 1rem;
     font-size: 0.8rem;
-    color: #86868b;
+    color: var(--text-muted);
 }
 
 .load-status-retry {
     font: inherit;
     font-weight: 600;
-    color: #ff9500;
+    color: var(--accent-text);
     background: transparent;
-    border: 1px solid #ff9500;
+    border: 1px solid var(--accent-line);
     border-radius: 999px;
     padding: 0.15rem 0.75rem;
     cursor: pointer;
 }
 
 .load-status-retry:hover:not(:disabled) {
-    background: #ff9500;
-    color: white;
+    background: var(--accent);
+    color: var(--on-accent);
 }
 
 .load-status-retry:disabled {
@@ -388,21 +438,21 @@ body {
 .date-item {
     padding: 1.5rem;
     border-radius: 16px;
-    background: #f5f5f7;
+    background: var(--surface-muted);
     border: none;
     transition: all 0.2s ease;
 }
 
 .date-item:hover {
-    background: #ebebed;
+    background: var(--surface-hover);
     transform: translateY(-2px);
-    border-left: 3px solid #ff9500;
+    border-left: 3px solid var(--accent-line);
 }
 
 .date-item.today {
-    background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
-    color: white;
-    box-shadow: 0 4px 16px rgba(255, 149, 0, 0.3);
+    background: var(--accent-gradient);
+    color: var(--on-accent);
+    box-shadow: 0 4px 16px var(--accent-shadow);
 }
 
 .date-header {
@@ -414,7 +464,7 @@ body {
 }
 
 .date-item.today .date-header {
-    color: white;
+    color: var(--on-accent);
 }
 
 .twilight-times {
@@ -422,12 +472,12 @@ body {
     grid-template-columns: 1fr 1fr;
     gap: 0.75rem;
     font-size: 0.875rem;
-    color: #86868b;
+    color: var(--text-muted);
     margin-top: 0.75rem;
 }
 
 .date-item.today .twilight-times {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--on-accent-muted);
 }
 
 .twilight-time {
@@ -449,11 +499,11 @@ body {
     width: 16px;
     height: 16px;
     flex-shrink: 0;
-    color: #ff9500;
+    color: var(--accent-icon);
 }
 
 .date-item.today .time-icon {
-    color: rgba(255, 255, 255, 0.7);
+    color: var(--on-accent-icon);
 }
 
 .btn-icon {
@@ -480,24 +530,24 @@ body {
     left: 50%;
     transform: translate(-50%, -50%);
     z-index: 200;
-    background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
+    background: var(--sky-gradient);
     padding: 3rem 4rem;
     border-radius: 24px;
-    box-shadow: 0 24px 80px rgba(255, 149, 0, 0.3);
+    box-shadow: 0 24px 80px rgba(var(--shadow-rgb), 0.3);
     backdrop-filter: blur(20px);
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    color: white;
+    color: var(--on-sky);
     min-width: 280px;
 }
 
 .spinner {
     width: 40px;
     height: 40px;
-    border: 3px solid rgba(255, 255, 255, 0.2);
-    border-top: 3px solid white;
+    border: 3px solid rgba(31, 45, 74, 0.14);
+    border-top: 3px solid var(--sea-dark);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 1.5rem;
@@ -510,7 +560,7 @@ body {
 }
 
 .loading-indicator small {
-    opacity: 0.6;
+    opacity: 0.8;
     font-size: 0.875rem;
 }
 
@@ -523,23 +573,23 @@ body {
 .empty-state {
     text-align: center;
     padding: 3rem 1.5rem;
-    color: #86868b;
+    color: var(--text-muted);
 }
 
 .empty-icon {
     margin-bottom: 1.5rem;
-    color: #ff9500;
+    color: var(--accent-icon);
 }
 
 .empty-state p {
     font-size: 1rem;
     margin-bottom: 0.5rem;
-    color: #1d1d1f;
+    color: var(--text);
 }
 
 .empty-state small {
     font-size: 0.875rem;
-    color: #86868b;
+    color: var(--text-muted);
 }
 
 /* Utility Classes */
@@ -558,15 +608,15 @@ body {
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
-    color: white;
+    background: var(--sky-gradient);
+    color: var(--on-sky);
     z-index: 1000;
     opacity: 0;
     transition: opacity 0.2s ease;
 }
 
 .pull-to-refresh-indicator.ready {
-    background: #ff9500;
+    background: var(--sun-gold);
 }
 
 .pull-to-refresh-indicator.refreshing .pull-spinner {
@@ -576,8 +626,8 @@ body {
 .pull-spinner {
     width: 30px;
     height: 30px;
-    border: 3px solid rgba(255, 255, 255, 0.2);
-    border-top: 3px solid white;
+    border: 3px solid rgba(31, 45, 74, 0.14);
+    border-top: 3px solid var(--sea-dark);
     border-radius: 50%;
     margin-bottom: 8px;
 }
@@ -594,7 +644,7 @@ body {
     left: 0;
     right: 0;
     bottom: 0;
-    background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
+    background: var(--sky-gradient);
     display: flex;
     flex-direction: column;
     align-items: center;
@@ -605,15 +655,15 @@ body {
 .refresh-spinner-wheel {
     width: 60px;
     height: 60px;
-    border: 4px solid rgba(255, 255, 255, 0.2);
-    border-top: 4px solid white;
+    border: 4px solid rgba(31, 45, 74, 0.14);
+    border-top: 4px solid var(--sea-dark);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     margin-bottom: 2rem;
 }
 
 .refresh-spinner-text {
-    color: white;
+    color: var(--on-sky);
     font-size: 1rem;
     font-weight: 500;
 }
@@ -734,14 +784,14 @@ body {
 }
 
 .mobile-app-content {
-    background: white;
+    background: var(--surface);
     border-radius: 24px;
     padding: 4rem;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 12px rgba(var(--shadow-rgb), 0.06);
 }
 
 .mobile-app-content h1 {
-    color: #1d1d1f;
+    color: var(--heading);
     font-size: 2.5rem;
     font-weight: 600;
     margin-bottom: 3rem;
@@ -752,13 +802,13 @@ body {
 .install-section {
     margin-bottom: 3rem;
     padding: 2rem;
-    background: #f5f5f7;
+    background: var(--surface-muted);
     border-radius: 16px;
     border-left: none;
 }
 
 .install-section h2 {
-    color: #1d1d1f;
+    color: var(--heading);
     font-size: 1.5rem;
     font-weight: 600;
     margin-bottom: 1.5rem;
@@ -774,29 +824,29 @@ body {
 .install-section li {
     margin-bottom: 1rem;
     line-height: 1.6;
-    color: #1d1d1f;
+    color: var(--text);
 }
 
 .install-section strong {
-    color: #1d1d1f;
+    color: var(--text);
     font-weight: 600;
 }
 
 .tip {
     margin-top: 1.5rem;
     padding: 1rem 1.25rem;
-    background: white;
+    background: var(--surface);
     border-radius: 12px;
-    color: #86868b;
+    color: var(--text-muted);
     font-size: 0.875rem;
 }
 
 .benefits {
-    background: #f5f5f7;
+    background: var(--surface-muted);
 }
 
 .benefits h2 {
-    color: #1d1d1f;
+    color: var(--heading);
 }
 
 .benefits ul {
@@ -813,21 +863,21 @@ body {
     content: "✓";
     position: absolute;
     left: 0;
-    color: #ff9500;
+    color: var(--accent-icon);
     font-weight: 600;
 }
 
 .install-note {
     margin-top: 3rem;
     padding: 1.5rem;
-    background: #f5f5f7;
+    background: var(--surface-muted);
     border-radius: 12px;
     border: none;
 }
 
 .install-note p {
     margin: 0;
-    color: #86868b;
+    color: var(--text-muted);
     font-size: 0.875rem;
 }
 
@@ -856,30 +906,30 @@ body {
 }
 
 .toggle-btn {
-    background: white;
+    background: var(--surface);
     border: none;
     border-radius: 20px;
     padding: 0.875rem 1.75rem;
     font-size: 0.9rem;
     font-weight: 500;
-    color: #86868b;
+    color: var(--text-muted);
     cursor: pointer;
     transition: all 0.2s ease;
     display: inline-flex;
     align-items: center;
     gap: 0.5rem;
-    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 1px 3px rgba(var(--shadow-rgb), 0.08);
 }
 
 .toggle-btn:hover {
-    background: #f5f5f7;
-    color: #1d1d1f;
+    background: var(--surface-muted);
+    color: var(--text);
 }
 
 .toggle-btn.active {
-    background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
-    color: white;
-    box-shadow: 0 4px 12px rgba(255, 149, 0, 0.3);
+    background: var(--accent-gradient);
+    color: var(--on-accent);
+    box-shadow: 0 4px 12px var(--accent-shadow);
 }
 
 .toggle-icon {
@@ -888,8 +938,8 @@ body {
 
 /* Golden Hour Times Styling */
 .twilight-time.golden-hour {
-    background: #fff9e6;
-    border-left: 3px solid #ff9500;
+    background: var(--cream);
+    border-left: 3px solid var(--accent);
     padding-left: 0.75rem;
     border-radius: 8px;
     transition: all 0.2s ease;
@@ -902,22 +952,22 @@ body {
 }
 
 .twilight-time.golden-hour .time-label {
-    color: #cc7700;
+    color: var(--sea-dark);
     font-weight: 600;
 }
 
 .twilight-time.golden-hour:hover {
-    background: #fff3cc;
+    background: var(--glow);
 }
 
 /* Light After Work Card */
 .light-after-work-card {
     max-width: 600px;
     margin: 0 auto 3rem auto;
-    background: white;
+    background: var(--surface);
     border-radius: 20px;
     padding: 2rem;
-    box-shadow: 0 2px 12px rgba(0, 0, 0, 0.06);
+    box-shadow: 0 2px 12px rgba(var(--shadow-rgb), 0.06);
     transition: all 0.2s ease;
     position: relative;
     overflow: hidden;
@@ -938,13 +988,22 @@ body {
     height: 100%;
 }
 
+.sun-arc #sunPath {
+    stroke: var(--sea-light);
+    stroke-opacity: 0.6;
+}
+
+.sun-arc #sunCircle {
+    fill: var(--accent);
+}
+
 .light-after-work-card:hover {
     transform: translateY(-2px);
-    box-shadow: 0 4px 20px rgba(0, 0, 0, 0.08);
+    box-shadow: 0 4px 20px rgba(var(--shadow-rgb), 0.08);
 }
 
 .light-after-work-card.has-light {
-    background: #fff9e6;
+    background: var(--cream);
 }
 
 .card-content {
@@ -955,11 +1014,11 @@ body {
 
 .card-icon {
     flex-shrink: 0;
-    color: #1d1d1f;
+    color: var(--text);
 }
 
 .light-after-work-card.has-light .card-icon {
-    color: #ff9500;
+    color: var(--accent-icon);
 }
 
 .card-text {
@@ -968,35 +1027,35 @@ body {
 
 .card-text h3 {
     margin: 0 0 0.75rem 0;
-    color: #1d1d1f;
+    color: var(--heading);
     font-size: 1.5rem;
     font-weight: 600;
     letter-spacing: -0.01em;
 }
 
 .light-after-work-card.has-light h3 {
-    color: #1d1d1f;
+    color: var(--heading);
 }
 
 .countdown-message {
-    color: #86868b;
+    color: var(--text-muted);
     font-size: 1rem;
     margin-bottom: 1rem;
 }
 
 .light-after-work-card.has-light .countdown-message {
-    color: #86868b;
+    color: var(--text-muted);
 }
 
 .countdown-value {
     font-size: 2.5rem;
     font-weight: 700;
-    color: #1d1d1f;
+    color: var(--text);
     letter-spacing: -0.02em;
 }
 
 .light-after-work-card.has-light .countdown-value {
-    color: #ff9500;
+    color: var(--accent-text);
 }
 
 @media (max-width: 768px) {
@@ -1058,15 +1117,32 @@ body {
     }
 }
 
-/* Today Hero: today vs. its mirror date */
+/* Today Hero: today vs. its mirror date.
+   Drawn like the app icon: blue sky at the top fading to warm cream and gold,
+   the sun low on the horizon with soft beams, the message on the horizon. */
 .today-hero {
+    position: relative;
+    isolation: isolate;                              /* keeps the sunbeams (z-index -1) inside the card */
+    overflow: hidden;
     max-width: 720px;
     margin: 0 auto 2.5rem auto;
     padding: 2rem;
     border-radius: 24px;
-    background: linear-gradient(160deg, #1d1d1f 0%, #2c2c34 55%, #4a3520 100%);
-    color: #fff;
-    box-shadow: 0 8px 32px rgba(0, 0, 0, 0.18);
+    /* Stops pinned in px from the top (sky blue behind the city name) and from
+       the bottom (warm glow just above the message strip), whatever the card's height */
+    background: linear-gradient(180deg,
+        var(--sky-blue) 0%,
+        var(--sky-blue) 56px,
+        var(--sea-light) calc(100% - 330px),
+        var(--cream) calc(100% - 210px),
+        var(--glow) calc(100% - 120px));
+    color: var(--on-sky-top);
+    box-shadow: 0 8px 32px rgba(var(--shadow-rgb), 0.16);
+}
+
+/* Content above the sunbeams */
+.today-hero > * {
+    position: relative;
 }
 
 .hero-title {
@@ -1078,7 +1154,7 @@ body {
     font-size: 0.8rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(255, 255, 255, 0.55);
+    color: var(--on-sky-top);                        /* 4.8:1 on sky blue */
 }
 
 .hero-city {
@@ -1094,21 +1170,28 @@ body {
     align-items: stretch;
 }
 
+/* "Same light on": a pane of morning mist, dark text (8:1+ wherever it sits) */
 .hero-day {
     padding: 1.25rem;
     border-radius: 16px;
-    background: rgba(255, 255, 255, 0.06);
+    background: rgba(255, 250, 240, 0.7);
+    border: 1px solid rgba(255, 255, 255, 0.6);
+    color: var(--ink);
 }
 
+/* "Today": the sun, peach with dark text */
 .hero-today {
-    background: linear-gradient(135deg, #ff9500 0%, #ff6b00 100%);
+    background: var(--accent-gradient);
+    border-color: transparent;
+    color: var(--on-accent);
+    box-shadow: 0 6px 24px rgba(255, 207, 74, 0.4);
 }
 
 .hero-label {
     font-size: 0.75rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    opacity: 0.75;
+    color: var(--on-accent-muted);                   /* 5.1:1+ on both tiles */
 }
 
 .hero-date {
@@ -1134,11 +1217,15 @@ body {
 .hero-row svg {
     width: 16px;
     height: 16px;
-    opacity: 0.8;
+    color: var(--accent-icon);
 }
 
 .hero-row span {
-    opacity: 0.8;
+    color: var(--on-accent-muted);
+}
+
+.hero-today .hero-row svg {
+    color: var(--on-accent-icon);
 }
 
 .hero-row strong {
@@ -1148,7 +1235,7 @@ body {
 .hero-daylight {
     margin-top: 0.25rem;
     padding-top: 0.5rem;
-    border-top: 1px solid rgba(255, 255, 255, 0.2);
+    border-top: 1px solid rgba(31, 45, 74, 0.14);
 }
 
 .hero-loading {
@@ -1158,14 +1245,51 @@ body {
 .hero-link {
     display: flex;
     align-items: center;
-    color: #ff9500;
+    color: var(--sea-dark);
 }
 
+/* The horizon: the message on a warm cream glow */
 .hero-message {
-    margin-top: 1.5rem;
+    margin: 4rem -2rem -2rem;
+    padding: 1.25rem 2rem 1.5rem;
     font-size: 1.05rem;
     line-height: 1.5;
-    color: rgba(255, 255, 255, 0.85);
+    color: var(--text);                              /* 12.7:1 on cream */
+    background: linear-gradient(180deg, var(--glow) 0%, var(--cream) 60%);
+    border-top: 2px solid rgba(255, 250, 235, 0.95);
+}
+
+/* The sun, low: half of it above the horizon */
+.hero-message::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: 100%;
+    width: 64px;
+    height: 32px;
+    margin-left: -32px;
+    border-radius: 32px 32px 0 0;
+    background: radial-gradient(circle at 50% 100%, #fffef8 0, #fff0b0 60%, var(--sun-gold) 100%);
+    box-shadow: 0 0 22px 6px rgba(255, 246, 216, 0.9);
+    pointer-events: none;
+}
+
+/* Soft sunbeams and a glow around the sun, behind the tiles; they fade out
+   before the city name, so its text keeps full contrast */
+.hero-message::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 100%;
+    height: 320px;
+    z-index: -1;
+    pointer-events: none;
+    background:
+        radial-gradient(circle at 50% 100%, rgba(255, 251, 232, 0.95) 0, rgba(255, 251, 232, 0) 140px),
+        repeating-conic-gradient(from -90deg at 50% 100%, rgba(255, 246, 216, 0.5) 0deg 6deg, rgba(255, 246, 216, 0) 6deg 18deg);
+    -webkit-mask-image: radial-gradient(circle at 50% 100%, #000 0, #000 110px, transparent 230px);
+    mask-image: radial-gradient(circle at 50% 100%, #000 0, #000 110px, transparent 230px);
 }
 
 @media (max-width: 768px) {
@@ -1207,6 +1331,17 @@ body {
     .hero-row > i,
     .hero-row svg {
         display: none;
+    }
+
+    .hero-message {
+        margin: 3.5rem -1.25rem -1.25rem;
+        padding: 1rem 1.25rem 1.25rem;
+    }
+
+    .hero-message::before {
+        width: 56px;
+        height: 28px;
+        margin-left: -28px;
     }
 }
 

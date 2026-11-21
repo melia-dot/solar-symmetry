@@ -10,7 +10,7 @@ Golden hour photography times.
 Real-time Location Search: Search any city worldwide
 Complete Light Data: Shows dawn, sunrise, sunset, and dusk times for every date
 Accurate Twilight Data: Uses civil twilight times (when it actually starts getting light/dark)
-Beautiful UI: Clean, modern design with indigo/white theme
+Beautiful UI: Calm, warm design taken from the app icon
 Mobile Responsive: Works perfectly on all devices
 Monthly Navigation: Smoothly browse through all months
 Visual Highlighting: Today's date is prominently highlighted
@@ -58,9 +58,11 @@ bash   npm install          # once
    npm run android      # same, opens Android Studio
    npm run sync         # just copy (after any web change)
 
-App icon / splash: edit scripts/make-app-images.mjs, then
+App icon / splash: the master artwork is design/app-icon/*.svg ("Coast"). After changing it:
 bash   node scripts/make-app-images.mjs
-   npx @capacitor/assets generate --ios --android --iconBackgroundColor '#4338ca' --iconBackgroundColorDark '#4338ca' --splashBackgroundColor '#4338ca' --splashBackgroundColorDark '#4338ca'
+   npx @capacitor/assets generate --ios --android --iconBackgroundColor '#fff6d8' --iconBackgroundColorDark '#fff6d8' --splashBackgroundColor '#fff6d8' --splashBackgroundColorDark '#fff6d8'
+
+Colours: all defined once as CSS custom properties at the top of src/styles/main.css (palette from the icon + role names like --accent, --text); use the role names in components.
 
 Native-only behaviour goes behind isNativeApp() (src/utils/platform.js) so the web version is unaffected.
 
@@ -94,7 +96,7 @@ No Dependencies: Pure web technologies, no build process needed
 
 🎨 Design Features
 
-Indigo Color Scheme: Professional indigo (#4338ca) and white theme
+Coast Colour Scheme: sunrise-over-the-sea palette from the app icon (sky blue, sun gold, cream, sea blue, rapeseed yellow, green) (see top of main.css)
 Custom Favicon: Solar-themed icon for browser tabs
 Responsive Grid: Two-column layout that stacks on mobile
 Smooth Animations: Hover effects and transitions

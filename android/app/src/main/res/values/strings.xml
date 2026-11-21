@@ -1,7 +1,7 @@
 <?xml version='1.0' encoding='utf-8'?>
 <resources>
-    <string name="app_name">SolarSymmetry</string>
-    <string name="title_activity_main">SolarSymmetry</string>
+    <string name="app_name">SolarSym</string>
+    <string name="title_activity_main">SolarSym</string>
     <string name="package_name">com.solarsymmetry.app</string>
     <string name="custom_url_scheme">com.solarsymmetry.app</string>
 </resources>

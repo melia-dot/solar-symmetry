@@ -21,6 +21,23 @@ Solar Symmetry uses **Semantic Versioning** (MAJOR.MINOR.PATCH):
 
 ## Version History
 
+### 1.6.2 (2026-11-21)
+- Final app icon "Coast" (Phase 1b): sunrise with sunbeams over the sea and a Skåne-style rapeseed field, replacing "First light" (too pale and drab at home-screen size). New icon and launch screen on iPhone and Android, launch background cream `#fff6d8`
+- Colours re-tuned to match: sky blue, sun gold, cream, sea blue, rapeseed yellow and green; headings in sea blue, body text `#1f2d4a`; buttons, the active tab and today's date are gold with dark text (all checked against WCAG AA). No purple, plum, pink or deep orange left
+- Today card is a blue sky fading to warm cream and gold, the sun low on the horizon with soft beams, no stars; loading and pull-to-refresh screens use the same sky
+
+### 1.6.1 (2026-11-21)
+- New look from the "First light" app icon (Phase 1b redo): "Warm water" read as a sunset on the home screen, and the app is about light returning, so every colour now says morning. The palette at the top of `src/styles/main.css` is dawn blue, lavender, dawn pink, peach and cream; no dark violet, plum or deep orange left. Headings and small icons are dawn blue; buttons, the active tab and today's date are peach with dark text (all checked against WCAG AA)
+- Today card is a dawn sky: dawn blue with two faint stars at the top, lavender and pink lower down, the sun clearly above a peach/cream horizon with the message on it. The "Same light on" tile is a light mist pane with dark text
+- Loading and pull-to-refresh screens use the dawn sky
+- Native app: new "First light" icon and launch screen (dawn sky, sun at the horizon over calm water; `design/app-icon/*.svg`), replacing "Warm water"; home-screen name is now "SolarSym" (iOS cut "SolarSymmetry" off); launch background is cream `#fff0d6`
+
+### 1.6.0 (2026-11-20)
+- New look from the "Warm water" app icon (Phase 1b of `docs/NATIVE_APP_PLAN.md`): all colours are now named in one place at the top of `src/styles/main.css` (night, dusk violet/plum, sunrise coral, amber, cream); warm cream background instead of grey/white; amber replaces orange for the active tab, buttons and today's date, with dark text so it stays readable (checked against WCAG AA)
+- Today card drawn like the icon: night sky with faint stars, sunrise towards the bottom, message on a warm "horizon" strip
+- Loading and pull-to-refresh screens use the night sky instead of orange
+- Native app: new icon and launch screen (rendered from `design/app-icon/*.svg`; the PNGs in that folder were blank and are now regenerated); the launch screen now stays until the first screen is drawn and then fades into it (`@capacitor/splash-screen` 8.0.2), instead of flashing grey
+
 ### 1.5.0 (2026-11-20)
 - Native iOS and Android apps (Capacitor 8), Phase 1 of `docs/NATIVE_APP_PLAN.md`: the same web files run inside a native shell (App ID `com.solarsymmetry.app`); `npm run sync` copies them into `www/` and the native projects
 - Icons (Lucide 1.69.0, pinned) and animations (anime.js 3.2.2) are now bundled in `src/vendor/` instead of loaded from CDNs: work offline, and the icon set can no longer change unannounced (it was `lucide@latest`)
