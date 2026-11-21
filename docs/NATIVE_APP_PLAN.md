@@ -63,7 +63,12 @@ apps are the product, and the website no longer has to keep working.
     app, results cached, app identified via `appendUserAgent` in
     `capacitor.config.json`, "© OpenStreetMap contributors" shown with results and in
     Settings, "Use my location" rounded to ~1 km. Fine for launch with a moderate
-    number of users; see Phase 4 for making it switchable.
+    number of users; see Phase 4 for making it switchable. Since v1.8.0, suggestions
+    while typing come from a town list inside the app (GeoNames, CC BY 4.0,
+    `scripts/build-towns.mjs`), not from Nominatim.
+13. Phase 2 result (2026-11-21): onboarding, Settings, Daybreak/Dark by home screen,
+    day-list rework and in-app town search (v1.7.0 → v1.8.1) approved on the human's
+    iPhone and merged to `main`. Anything new goes in the next phase.
 
 ## Phase 1: Native shell (Capacitor)
 
