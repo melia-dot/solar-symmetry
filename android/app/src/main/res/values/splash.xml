@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Night (top of the "Warm water" icon) -->
-    <color name="splash_background">#121226</color>
+    <!-- Cream (bottom of the "First light" icon) -->
+    <color name="splash_background">#fff0d6</color>
 </resources>

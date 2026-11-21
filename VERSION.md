@@ -21,6 +21,12 @@ Solar Symmetry uses **Semantic Versioning** (MAJOR.MINOR.PATCH):
 
 ## Version History
 
+### 1.6.1 (2026-11-21)
+- New look from the "First light" app icon (Phase 1b redo): "Warm water" read as a sunset on the home screen, and the app is about light returning, so every colour now says morning. The palette at the top of `src/styles/main.css` is dawn blue, lavender, dawn pink, peach and cream; no dark violet, plum or deep orange left. Headings and small icons are dawn blue; buttons, the active tab and today's date are peach with dark text (all checked against WCAG AA)
+- Today card is a dawn sky: dawn blue with two faint stars at the top, lavender and pink lower down, the sun clearly above a peach/cream horizon with the message on it. The "Same light on" tile is a light mist pane with dark text
+- Loading and pull-to-refresh screens use the dawn sky
+- Native app: home-screen name is now "SolarSym" (iOS cut "SolarSymmetry" off); Android launch background is cream `#fff0d6`
+
 ### 1.6.0 (2026-11-20)
 - New look from the "Warm water" app icon (Phase 1b of `docs/NATIVE_APP_PLAN.md`): all colours are now named in one place at the top of `src/styles/main.css` (night, dusk violet/plum, sunrise coral, amber, cream); warm cream background instead of grey/white; amber replaces orange for the active tab, buttons and today's date, with dark text so it stays readable (checked against WCAG AA)
 - Today card drawn like the icon: night sky with faint stars, sunrise towards the bottom, message on a warm "horizon" strip

@@ -14,7 +14,7 @@
       "launchShowDuration": 3000,
       "launchFadeOutDuration": 300,
       "androidScaleType": "CENTER_CROP",
-      "backgroundColor": "#121226"
+      "backgroundColor": "#fff0d6"
     }
   }
 }

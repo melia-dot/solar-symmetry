@@ -58,9 +58,9 @@ bash   npm install          # once
    npm run android      # same, opens Android Studio
    npm run sync         # just copy (after any web change)
 
-App icon / splash: the master artwork is design/app-icon/*.svg ("Warm water"). After changing it:
+App icon / splash: the master artwork is design/app-icon/*.svg ("First light"). After changing it:
 bash   node scripts/make-app-images.mjs
-   npx @capacitor/assets generate --ios --android --iconBackgroundColor '#121226' --iconBackgroundColorDark '#121226' --splashBackgroundColor '#121226' --splashBackgroundColorDark '#121226'
+   npx @capacitor/assets generate --ios --android --iconBackgroundColor '#fff0d6' --iconBackgroundColorDark '#fff0d6' --splashBackgroundColor '#fff0d6' --splashBackgroundColorDark '#fff0d6'
 
 Colours: all defined once as CSS custom properties at the top of src/styles/main.css (palette from the icon + role names like --accent, --text); use the role names in components.
 
@@ -96,7 +96,7 @@ No Dependencies: Pure web technologies, no build process needed
 
 🎨 Design Features
 
-Warm Water Colour Scheme: night sky to sunrise palette from the app icon (see top of main.css)
+First Light Colour Scheme: dawn sky palette from the app icon (dawn blue, lavender, pink, peach, cream) (see top of main.css)
 Custom Favicon: Solar-themed icon for browser tabs
 Responsive Grid: Two-column layout that stacks on mobile
 Smooth Animations: Hover effects and transitions

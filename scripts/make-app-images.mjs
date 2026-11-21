@@ -1,5 +1,5 @@
 /**
- * Renders the "Warm water" app icon and launch screen (design/app-icon/*.svg,
+ * Renders the "First light" app icon and launch screen (design/app-icon/*.svg,
  * the master artwork) into the PNGs the stores and @capacitor/assets need.
  *
  *   design/app-icon/app-icon-1024.png   App Store icon: RGB, no transparency
@@ -30,7 +30,7 @@ const splashSvg = readFileSync(join(design, 'splash.svg'));
 async function render(svg, size, out) {
     await sharp(svg, { density: 72 * size / 1024 })
         .resize(size, size)
-        .flatten({ background: '#121226' })
+        .flatten({ background: '#fff0d6' })
         .removeAlpha()
         .png()
         .toFile(out);

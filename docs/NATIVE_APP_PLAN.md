@@ -63,40 +63,48 @@ works offline.
 
 ## Phase 1b: New icon + visual refresh (do next, before Phase 2)
 
-The app icon is now **"Warm water"** (night sky → sunrise over warm water).
-Files and rationale: `design/app-icon/` (read its README). The app's current
-orange/charcoal-on-white look no longer matches it. Let the icon lead.
+The app icon is now **"First light"** (dawn sky, sun just above the horizon; chosen
+2026-11-21). It replaces "Warm water", which read as a sunset on the home screen.
+The app is about light returning, so everything must say morning/sunrise: no dark
+violet, plum or deep orange anywhere. Files and rationale: `design/app-icon/` (read
+its README). Let the icon lead.
 
-**1. Icon + launch screen**
-- Replace the Phase 1 indigo icon and splash with `design/app-icon/app-icon-1024.png`
-  and `design/app-icon/splash-2732.png`; regenerate native assets (check current
-  `@capacitor/assets` docs)
-- Launch screen should flow into the Today card (same colours), no white flash
+**1. Icon + launch screen + name**
+- `design/app-icon/app-icon.svg` is the master; `splash.svg` is the same artwork with
+  `preserveAspectRatio="xMidYMid slice"`. Render `app-icon-1024.png` (RGB, no
+  transparency) and `splash-2732.png`, then regenerate native assets (check current
+  `@capacitor/assets` docs). Android splash background: `#fff0d6`
+- Launch screen should flow into the app, no white or grey flash
+- Home-screen name **"SolarSym"** on iOS and Android (iOS cuts "SolarSymmetry" off).
+  The store listing name stays **"Solar Symmetry"**
 
 **2. Palette (taken from the icon)**
 | Role | Hex |
 |---|---|
-| Night (top of sky) | `#121226` |
-| Dusk violet | `#2a2342` |
-| Dusk plum | `#6b3a55` |
-| Sunrise coral | `#e2704a` |
-| Amber (new accent, replaces `#ff9500`) | `#ffb46a` |
-| Warm cream (sun glow) | `#ffd7a0` / `#fff2d8` |
-| Warm water | `#9a5a4c` → `#5a3a40` |
+| Dawn blue (headings, top of Today card) | `#3d5a92` |
+| Lavender | `#8f97c9` |
+| Dawn pink | `#e9b3bf` |
+| Peach | `#ffd3a6` |
+| Cream | `#fff0d6` |
+| Water | `#c9a9bf` → `#6f7fae` |
+| Background | `#fbf6ef` |
+| Accent (buttons, active tab, today's date) | peach `#ffc48a` with dark text `#2b2f4a` |
+| Body text | `#2b2f4a` |
 
-- Put these in CSS custom properties in one place; replace hard-coded oranges
-- Background: warm cream (e.g. `#fbf6ef`) instead of cold white/grey
-- Buttons, active tab, highlights: amber / coral, with text contrast checked (WCAG AA)
+- Put these in CSS custom properties in one place; no hard-coded colours in components
+- Small icons: from the palette, contrast checked (WCAG AA)
 
 **3. Today card**
-- Same night-to-sunrise gradient as the icon (night top → amber/cream at the bottom),
-  optional faint stars at the top
+- Dawn sky like the icon: dawn blue top → lavender → pink → peach/cream at the bottom;
+  at most two faint stars; the sun clearly above the horizon
 - "Today" and "Same light on" tiles readable on it (contrast check)
 
 **4. Month list + Compare Cities**
-- Softer cards on the cream background; today's card highlighted in amber, not orange
+- Softer cards on the cream background; today's card highlighted in peach
 
-**5. Evening mode:** moved to Phase 1c, after Phase 2 (decided 2026-11-21).
+**5. Loading / pull-to-refresh:** dawn sky, not night sky.
+
+**6. Evening mode:** moved to Phase 1c, after Phase 2 (decided 2026-11-21).
 
 **Ground rules:** CSS-first, no new libraries; keep it calm and soft (the audience
 dislikes winter darkness and may be anxious: no harsh contrast, no alarming reds).

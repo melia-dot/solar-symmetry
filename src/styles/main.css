@@ -1,17 +1,17 @@
-/* Colours: the "Warm water" palette from the app icon (design/app-icon).
+/* Colours: the "First light" palette from the app icon (design/app-icon).
+   Everything says morning: dawn blue sky, lavender, pink, peach, cream.
    Components use the role names below, not raw hex values. Contrast ratios
    (WCAG) are noted where text sits on them; AA needs 4.5:1 (3:1 for icons). */
 :root {
     /* Palette */
-    --night: #121226;
-    --dusk-violet: #2a2342;
-    --dusk-plum: #6b3a55;
-    --sunrise-coral: #e2704a;
-    --amber: #ffb46a;
-    --cream-glow: #ffd7a0;
-    --cream-light: #fff2d8;
-    --water-light: #9a5a4c;
-    --water-dark: #5a3a40;
+    --dawn-blue: #3d5a92;
+    --lavender: #8f97c9;
+    --dawn-pink: #e9b3bf;
+    --peach: #ffd3a6;
+    --cream: #fff0d6;
+    --water-light: #c9a9bf;
+    --water-dark: #6f7fae;
+    --ink: #2b2f4a;
 
     /* Light surfaces */
     --bg: #fbf6ef;                                   /* page: warm cream */
@@ -20,26 +20,29 @@
     --surface-alt: #fbf4ea;                          /* second column */
     --surface-muted: #f5ece0;                        /* date tiles, panels */
     --surface-hover: #efe2d2;
-    --shadow-rgb: 42, 35, 66;                        /* dusk violet: soft, warm shadows */
+    --shadow-rgb: 43, 47, 74;                        /* ink: soft shadows */
 
     /* Text on light surfaces */
-    --text: var(--dusk-violet);                      /* 13.8:1 on --bg */
-    --text-muted: #6e5c64;                           /* 5.3:1 on --surface-muted */
+    --text: var(--ink);                              /* 12.1:1 on --bg */
+    --text-muted: #5c6280;                           /* 5.1:1 on --surface-muted */
+    --heading: var(--dawn-blue);                     /* 6.3:1 on --bg, 5.8:1 on --surface-muted */
 
-    /* Accent: amber fills with dark text (white on amber is only 1.75:1) */
-    --accent: var(--amber);
-    --accent-gradient: linear-gradient(135deg, var(--cream-glow) 0%, var(--amber) 100%);
-    --on-accent: var(--night);                       /* 10.5:1 on amber */
-    --on-accent-muted: var(--water-dark);            /* 5.7:1 on amber */
-    --accent-text: var(--dusk-plum);                 /* accent-coloured text: 7.6:1+ */
-    --accent-icon: #c95c38;                          /* deeper coral for small icons: 3.5:1+ */
-    --accent-line: var(--sunrise-coral);             /* thin borders, decorations */
-    --accent-shadow: rgba(226, 112, 74, 0.25);
-    --focus-ring: rgba(255, 180, 106, 0.45);
+    /* Accent: peach fills with dark text (buttons, active tab, today's date) */
+    --accent: #ffc48a;
+    --accent-gradient: linear-gradient(135deg, var(--peach) 0%, var(--accent) 100%);
+    --on-accent: var(--ink);                         /* 8.4:1 on --accent */
+    --on-accent-muted: #4a4f6e;                      /* 5.1:1 on --accent and on the Today card's mist pane */
+    --on-accent-icon: var(--dawn-blue);              /* 4.4:1 on --accent (icons need 3:1) */
+    --accent-text: var(--dawn-blue);                 /* accent-coloured text: 5.4:1+ */
+    --accent-icon: var(--dawn-blue);                 /* small icons: 5.4:1+ on light surfaces */
+    --accent-line: var(--dawn-pink);                 /* thin borders, decorations */
+    --accent-shadow: rgba(255, 196, 138, 0.45);
+    --focus-ring: rgba(61, 90, 146, 0.35);
 
-    /* The sky from the icon: night at the top, sunrise at the bottom */
-    --sky-gradient: linear-gradient(180deg, var(--night) 0%, var(--dusk-violet) 35%, var(--dusk-plum) 75%, var(--sunrise-coral) 100%);
-    --on-sky: var(--cream-light);                    /* 13.4:1 on violet, 8:1 on plum */
+    /* The dawn sky from the icon: dawn blue at the top, peach at the bottom */
+    --sky-gradient: linear-gradient(180deg, var(--dawn-blue) 0%, var(--lavender) 35%, var(--dawn-pink) 70%, var(--peach) 100%);
+    --on-sky: var(--ink);                            /* text sits in the middle: 4.6:1 on lavender, 7.3:1 on pink */
+    --on-sky-top: var(--cream);                      /* text on the dawn blue top: 6.1:1 */
 }
 
 /* Reset and Base Styles */
@@ -334,7 +337,7 @@ body {
 .month-title {
     font-size: 2.5rem;
     font-weight: 600;
-    color: var(--text);
+    color: var(--heading);
     text-align: center;
     min-width: 320px;
     letter-spacing: -0.02em;
@@ -497,7 +500,7 @@ body {
 }
 
 .date-item.today .time-icon {
-    color: var(--on-accent-muted);
+    color: var(--on-accent-icon);
 }
 
 .btn-icon {
@@ -540,8 +543,8 @@ body {
 .spinner {
     width: 40px;
     height: 40px;
-    border: 3px solid rgba(255, 242, 216, 0.2);
-    border-top: 3px solid var(--amber);
+    border: 3px solid rgba(43, 47, 74, 0.14);
+    border-top: 3px solid var(--dawn-blue);
     border-radius: 50%;
     animation: spin 1s linear infinite;
     margin-bottom: 1.5rem;
@@ -554,7 +557,7 @@ body {
 }
 
 .loading-indicator small {
-    opacity: 0.6;
+    opacity: 0.8;
     font-size: 0.875rem;
 }
 
@@ -610,7 +613,7 @@ body {
 }
 
 .pull-to-refresh-indicator.ready {
-    background: var(--dusk-plum);
+    background: var(--dawn-pink);
 }
 
 .pull-to-refresh-indicator.refreshing .pull-spinner {
@@ -620,8 +623,8 @@ body {
 .pull-spinner {
     width: 30px;
     height: 30px;
-    border: 3px solid rgba(255, 242, 216, 0.2);
-    border-top: 3px solid var(--amber);
+    border: 3px solid rgba(43, 47, 74, 0.14);
+    border-top: 3px solid var(--dawn-blue);
     border-radius: 50%;
     margin-bottom: 8px;
 }
@@ -649,8 +652,8 @@ body {
 .refresh-spinner-wheel {
     width: 60px;
     height: 60px;
-    border: 4px solid rgba(255, 242, 216, 0.2);
-    border-top: 4px solid var(--amber);
+    border: 4px solid rgba(43, 47, 74, 0.14);
+    border-top: 4px solid var(--dawn-blue);
     border-radius: 50%;
     animation: spin 0.8s linear infinite;
     margin-bottom: 2rem;
@@ -785,7 +788,7 @@ body {
 }
 
 .mobile-app-content h1 {
-    color: var(--text);
+    color: var(--heading);
     font-size: 2.5rem;
     font-weight: 600;
     margin-bottom: 3rem;
@@ -802,7 +805,7 @@ body {
 }
 
 .install-section h2 {
-    color: var(--text);
+    color: var(--heading);
     font-size: 1.5rem;
     font-weight: 600;
     margin-bottom: 1.5rem;
@@ -840,7 +843,7 @@ body {
 }
 
 .benefits h2 {
-    color: var(--text);
+    color: var(--heading);
 }
 
 .benefits ul {
@@ -932,8 +935,8 @@ body {
 
 /* Golden Hour Times Styling */
 .twilight-time.golden-hour {
-    background: var(--cream-light);
-    border-left: 3px solid var(--amber);
+    background: var(--cream);
+    border-left: 3px solid var(--accent);
     padding-left: 0.75rem;
     border-radius: 8px;
     transition: all 0.2s ease;
@@ -946,12 +949,12 @@ body {
 }
 
 .twilight-time.golden-hour .time-label {
-    color: var(--water-dark);
+    color: var(--dawn-blue);
     font-weight: 600;
 }
 
 .twilight-time.golden-hour:hover {
-    background: var(--cream-glow);
+    background: var(--peach);
 }
 
 /* Light After Work Card */
@@ -983,12 +986,12 @@ body {
 }
 
 .sun-arc #sunPath {
-    stroke: var(--accent-line);
-    stroke-opacity: 0.35;
+    stroke: var(--lavender);
+    stroke-opacity: 0.6;
 }
 
 .sun-arc #sunCircle {
-    fill: var(--accent-line);
+    fill: var(--accent);
 }
 
 .light-after-work-card:hover {
@@ -997,7 +1000,7 @@ body {
 }
 
 .light-after-work-card.has-light {
-    background: var(--cream-light);
+    background: var(--cream);
 }
 
 .card-content {
@@ -1021,14 +1024,14 @@ body {
 
 .card-text h3 {
     margin: 0 0 0.75rem 0;
-    color: var(--text);
+    color: var(--heading);
     font-size: 1.5rem;
     font-weight: 600;
     letter-spacing: -0.01em;
 }
 
 .light-after-work-card.has-light h3 {
-    color: var(--text);
+    color: var(--heading);
 }
 
 .countdown-message {
@@ -1112,8 +1115,9 @@ body {
 }
 
 /* Today Hero: today vs. its mirror date.
-   Drawn like the app icon: night sky with a few fading stars at the top,
-   sunrise towards the bottom, and the message on a warm "horizon" glow. */
+   Drawn like the app icon at first light: dawn blue sky with two faint stars
+   at the top, lavender and pink lower down, the sun just above a peach and
+   cream horizon, where the message sits. */
 .today-hero {
     position: relative;
     overflow: hidden;
@@ -1121,32 +1125,28 @@ body {
     margin: 0 auto 2.5rem auto;
     padding: 2rem;
     border-radius: 24px;
-    /* Sunrise pinned just above the message strip at the bottom (~110px tall),
-       so it shows whatever the card's height */
+    /* Stops pinned in px from the top (dawn blue behind the city name) and from
+       the bottom (peach just above the message strip), whatever the card's height */
     background: linear-gradient(180deg,
-        var(--night) 0%,
-        var(--dusk-violet) 30%,
-        var(--dusk-plum) calc(100% - 210px),
-        var(--sunrise-coral) calc(100% - 125px),
-        var(--amber) calc(100% - 95px));
-    color: var(--on-sky);
-    box-shadow: 0 8px 32px rgba(var(--shadow-rgb), 0.22);
+        var(--dawn-blue) 0%,
+        var(--dawn-blue) 64px,
+        var(--lavender) calc(100% - 300px),
+        var(--dawn-pink) calc(100% - 210px),
+        var(--peach) calc(100% - 140px));
+    color: var(--on-sky-top);
+    box-shadow: 0 8px 32px rgba(var(--shadow-rgb), 0.16);
 }
 
-/* Faint stars: top right of the card, clear of the city name */
+/* Two faint stars, top right on the dawn blue, clear of the city name */
 .today-hero::before {
     content: '';
     position: absolute;
     inset: 0 0 auto 0;
-    height: 120px;
+    height: 90px;
     pointer-events: none;
     background:
-        radial-gradient(circle at 48% 10%, rgba(255, 255, 255, 0.5) 0 1px, transparent 2px),
-        radial-gradient(circle at 62% 26%, rgba(255, 255, 255, 0.7) 0 1.5px, transparent 2.5px),
-        radial-gradient(circle at 74% 8%, rgba(255, 255, 255, 0.55) 0 1px, transparent 2px),
-        radial-gradient(circle at 86% 30%, rgba(255, 255, 255, 0.75) 0 1.5px, transparent 2.5px),
-        radial-gradient(circle at 94% 12%, rgba(255, 255, 255, 0.45) 0 1px, transparent 2px),
-        radial-gradient(circle at 56% 44%, rgba(255, 255, 255, 0.3) 0 1px, transparent 2px);
+        radial-gradient(circle at 78% 22%, rgba(255, 255, 255, 0.5) 0 1.25px, transparent 2.25px),
+        radial-gradient(circle at 90% 46%, rgba(255, 255, 255, 0.35) 0 1px, transparent 2px);
 }
 
 /* Content above the stars */
@@ -1163,7 +1163,7 @@ body {
     font-size: 0.8rem;
     letter-spacing: 0.08em;
     text-transform: uppercase;
-    color: rgba(255, 242, 216, 0.65);
+    color: rgba(255, 240, 214, 0.85);                /* 5.0:1 on dawn blue */
 }
 
 .hero-city {
@@ -1179,32 +1179,28 @@ body {
     align-items: stretch;
 }
 
-/* "Same light on": a darker pane of sky, cream text */
+/* "Same light on": a pane of morning mist, dark text (8:1+ wherever it sits) */
 .hero-day {
     padding: 1.25rem;
     border-radius: 16px;
-    background: rgba(18, 18, 38, 0.35);
-    border: 1px solid rgba(255, 242, 216, 0.14);
+    background: rgba(255, 248, 236, 0.66);
+    border: 1px solid rgba(255, 255, 255, 0.55);
+    color: var(--ink);
 }
 
-/* "Today": the sun, warm amber with dark text */
+/* "Today": the sun, peach with dark text */
 .hero-today {
     background: var(--accent-gradient);
     border-color: transparent;
     color: var(--on-accent);
-    box-shadow: 0 6px 24px rgba(255, 180, 106, 0.3);
+    box-shadow: 0 6px 24px rgba(255, 196, 138, 0.45);
 }
 
 .hero-label {
     font-size: 0.75rem;
     letter-spacing: 0.06em;
     text-transform: uppercase;
-    opacity: 0.75;
-}
-
-.hero-today .hero-label {
-    color: var(--on-accent-muted);
-    opacity: 1;
+    color: var(--on-accent-muted);                   /* 5.1:1+ on both tiles */
 }
 
 .hero-date {
@@ -1230,17 +1226,15 @@ body {
 .hero-row svg {
     width: 16px;
     height: 16px;
-    opacity: 0.8;
+    color: var(--accent-icon);
 }
 
 .hero-row span {
-    opacity: 0.8;
+    color: var(--on-accent-muted);
 }
 
-.hero-today .hero-row span,
 .hero-today .hero-row svg {
-    color: var(--on-accent-muted);
-    opacity: 1;
+    color: var(--on-accent-icon);
 }
 
 .hero-row strong {
@@ -1250,11 +1244,7 @@ body {
 .hero-daylight {
     margin-top: 0.25rem;
     padding-top: 0.5rem;
-    border-top: 1px solid rgba(255, 242, 216, 0.22);
-}
-
-.hero-today .hero-daylight {
-    border-top-color: rgba(18, 18, 38, 0.15);
+    border-top: 1px solid rgba(43, 47, 74, 0.14);
 }
 
 .hero-loading {
@@ -1264,18 +1254,32 @@ body {
 .hero-link {
     display: flex;
     align-items: center;
-    color: var(--amber);
+    color: var(--cream);
 }
 
-/* The horizon: the sky meets a warm glow, like the sun line in the icon */
+/* The horizon: the message on a peach-to-cream glow, the sun clearly above it */
 .hero-message {
-    margin: 1.75rem -2rem -2rem;
+    margin: 3.5rem -2rem -2rem;
     padding: 1.25rem 2rem 1.5rem;
     font-size: 1.05rem;
     line-height: 1.5;
-    color: var(--text);
-    background: linear-gradient(180deg, var(--cream-glow) 0%, var(--cream-light) 100%);
-    border-top: 2px solid rgba(255, 244, 224, 0.85);
+    color: var(--text);                              /* 11.6:1 on cream */
+    background: linear-gradient(180deg, var(--peach) 0%, var(--cream) 55%);
+    border-top: 2px solid rgba(255, 248, 236, 0.9);
+}
+
+.hero-message::before {
+    content: '';
+    position: absolute;
+    left: 50%;
+    bottom: calc(100% + 12px);
+    width: 34px;
+    height: 34px;
+    margin-left: -17px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fffaf0 0 45%, var(--cream) 100%);
+    box-shadow: 0 0 16px 6px rgba(255, 244, 224, 0.85);
+    pointer-events: none;
 }
 
 @media (max-width: 768px) {
@@ -1320,8 +1324,14 @@ body {
     }
 
     .hero-message {
-        margin: 1.25rem -1.25rem -1.25rem;
+        margin: 3.25rem -1.25rem -1.25rem;
         padding: 1rem 1.25rem 1.25rem;
+    }
+
+    .hero-message::before {
+        width: 30px;
+        height: 30px;
+        margin-left: -15px;
     }
 }
 
