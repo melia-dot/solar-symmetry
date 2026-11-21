@@ -23,7 +23,7 @@ Solar Symmetry uses **Semantic Versioning** (MAJOR.MINOR.PATCH):
 
 ### 1.7.7 (2026-11-21)
 - Fixed: "Light returns after work" could be up to 6 days late (Southport said Feb 7; sunset first passes 5pm on Feb 5). It now checks every day instead of once a week, and uses the same sunset time the day list shows, so the tile and the list always agree. Days left are counted in calendar days, so a clock change can't add one
-- Day cards: the golden lines are labelled "Golden am" and "Golden pm"
+- Day cards: the golden lines are labelled "Golden am" and "Golden pm". On phones up to 400px wide (iPhone SE to iPhone 13/14) they have no camera icon, so they still fit on one line
 
 ### 1.7.6 (2026-11-21)
 - Launch screen shortened to about 0.8 seconds
