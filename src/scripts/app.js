@@ -1040,11 +1040,37 @@ class SolarSymmetryApp {
             return '<div class="hero-loading">Couldn\'t load</div>';
         }
         const daylight = this.formatDaylight(data);
+        const { daybreak, darkBy } = this.lightTimes(data);
+        // Headline: when it's light enough to see outside (civil dawn) and when
+        // it's dark again (civil dusk). Sunrise / sunset stay, smaller, below.
         return `
-            <div class="hero-row"><i data-lucide="sunrise"></i><span>Sunrise</span><strong>${data.sunrise}</strong></div>
-            <div class="hero-row"><i data-lucide="sunset"></i><span>Sunset</span><strong>${data.sunset}</strong></div>
-            ${daylight ? `<div class="hero-row hero-daylight"><i data-lucide="sun"></i><span>Daylight</span><strong>${daylight}</strong></div>` : ''}
+            <div class="hero-main">
+                <div class="hero-row hero-big"><span>Daybreak</span><strong>${daybreak}</strong></div>
+                <div class="hero-row hero-big"><span>Dark by</span><strong>${darkBy}</strong></div>
+            </div>
+            <div class="hero-small">
+                <div class="hero-row"><span>Sunrise</span><strong>${data.sunrise}</strong></div>
+                <div class="hero-row"><span>Sunset</span><strong>${data.sunset}</strong></div>
+                ${daylight ? `<div class="hero-row"><span>Daylight</span><strong>${daylight}</strong></div>` : ''}
+            </div>
         `;
+    }
+
+    /**
+     * Daybreak = civil dawn, Dark by = civil dusk (SunCalc dawn / dusk: the sun
+     * 6° below the horizon). Near the poles there may be none: then it either
+     * never gets dark (light summer nights) or never gets light (polar night).
+     */
+    lightTimes(data) {
+        if (data.dawnISO && data.duskISO) {
+            return { daybreak: data.dawn, darkBy: data.dusk };
+        }
+        const neverDark = data.sunriseISO || data.sunset === 'Up all day';
+        const none = neverDark ? 'Light all night' : 'Dark all day';
+        return {
+            daybreak: data.dawnISO ? data.dawn : none,
+            darkBy: data.duskISO ? data.dusk : none,
+        };
     }
 
     /**

@@ -21,6 +21,11 @@ Solar Symmetry uses **Semantic Versioning** (MAJOR.MINOR.PATCH):
 
 ## Version History
 
+### 1.7.2 (2026-11-21)
+- Today tile: the two big times are now **Daybreak** (civil dawn: light enough to see outside) and **Dark by** (civil dusk), for today and its "Same light on" date. Sunrise, sunset and daylight stay on the tile, smaller, underneath. Near the poles it says "Light all night" or "Dark all day" where there's no civil dawn/dusk
+- Home screen order: Today tile, then "Light after work", then the month (e.g. November) with its day list
+- Mirror-date matching unchanged
+
 ### 1.7.1 (2026-11-21)
 - Fixed: after "Turn on messages" the welcome screens could start again from screen 1 instead of opening the app. On iPhone, waiting for a native plugin (notifications, location, in-app browser) never finished, so the notification and "Use my location" buttons hung; now they work
 - Onboarding is now saved (done, with your chosen moments) before the phone asks about notifications, so it always ends in the app, whether you tap Allow or Don't Allow

@@ -1209,7 +1209,7 @@ body {
 
 .hero-row {
     display: grid;
-    grid-template-columns: 18px 1fr auto;
+    grid-template-columns: 1fr auto;
     gap: 0.5rem;
     align-items: center;
 }
@@ -1232,10 +1232,32 @@ body {
     white-space: nowrap;
 }
 
-.hero-daylight {
+/* Headline times: Daybreak (civil dawn) and Dark by (civil dusk) */
+.hero-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+}
+
+.hero-big strong {
+    font-size: 1.35rem;
+    font-weight: 700;
+    letter-spacing: -0.01em;
+}
+
+/* Sunrise, sunset, daylight: smaller, under a thin line */
+.hero-small {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
     margin-top: 0.25rem;
-    padding-top: 0.5rem;
+    padding-top: 0.6rem;
     border-top: 1px solid rgba(31, 45, 74, 0.14);
+    font-size: 0.8rem;
+}
+
+.hero-small strong {
+    font-weight: 600;
 }
 
 .hero-loading {
@@ -1326,6 +1348,14 @@ body {
 
     .hero-row {
         grid-template-columns: 1fr auto;
+    }
+
+    .hero-big strong {
+        font-size: 1.15rem;
+    }
+
+    .hero-small {
+        font-size: 0.75rem;
     }
 
     .hero-row > i,
