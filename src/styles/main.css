@@ -1362,3 +1362,708 @@ body {
         padding-bottom: calc(1.5rem + env(safe-area-inset-bottom, 0px));
     }
 }
+
+/* =================================================================
+   Phase 2: gear button, onboarding, Settings, city picker, switches.
+   Same Coast tokens as above; calm and soft, no alarming colours.
+   ================================================================= */
+:root {
+    --switch-off: #8c93a3;                           /* switch track when off: 3.1:1 on --surface */
+    --switch-on: var(--sea-dark);                    /* 5.6:1 on --surface */
+    --card-shadow: 0 1px 3px rgba(var(--shadow-rgb), 0.08);
+}
+
+body.overlay-open {
+    overflow: hidden;
+}
+
+/* Header: tabs centred, gear on the right. The empty ::before balances the
+   gear so the tabs stay centred, and gives way first on narrow phones. */
+.view-toggle {
+    align-items: center;
+}
+
+.view-toggle::before {
+    content: '';
+    flex: 0 1 40px;
+}
+
+.view-tabs {
+    flex: 1 1 auto;
+    display: flex;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.settings-btn {
+    flex: none;
+    width: 40px;
+    height: 40px;
+    border: none;
+    border-radius: 50%;
+    background: transparent;
+    color: var(--accent-icon);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    cursor: pointer;
+    padding: 0;
+}
+
+.settings-btn:hover {
+    background: rgba(var(--shadow-rgb), 0.05);
+}
+
+.settings-btn svg {
+    width: 22px;
+    height: 22px;
+}
+
+@media (max-width: 768px) {
+    .view-tabs {
+        gap: 0.25rem;
+    }
+
+    /* Phones: room for "Compare Cities" on one line next to the gear */
+    .view-toggle::before {
+        display: none;
+    }
+
+    .view-btn {
+        padding: 0.75rem 1rem;
+    }
+}
+
+/* Header search: "Search for …" row, OpenStreetMap credit */
+.search-hint {
+    display: block;
+    width: 100%;
+    padding: 1rem 1.25rem;
+    border: none;
+    background: none;
+    text-align: left;
+    font: inherit;
+    color: var(--accent-text);
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.search-hint.is-busy {
+    color: var(--text-muted);
+    font-weight: 400;
+    cursor: default;
+}
+
+.search-credit {
+    display: block;
+    padding: 0.6rem 1.25rem;
+    font-size: 0.75rem;
+    color: var(--text-muted);
+    text-decoration: none;
+    border-top: 1px solid var(--surface-muted);
+}
+
+/* Shared buttons */
+.primary-btn,
+.secondary-btn,
+.choice-btn {
+    width: 100%;
+    min-height: 52px;
+    padding: 0.9rem 1rem;
+    border-radius: 14px;
+    font: inherit;
+    font-size: 1rem;
+    font-weight: 600;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.5rem;
+}
+
+.primary-btn {
+    border: none;
+    background: var(--accent);
+    color: var(--on-accent);
+    box-shadow: 0 2px 10px var(--accent-shadow);
+}
+
+.secondary-btn {
+    border: 1.5px solid var(--surface-hover);
+    background: var(--surface);
+    color: var(--text);
+}
+
+/* Analytics Yes / No: identical styling, so neither is nudged */
+.choice-btn {
+    border: 2px solid var(--sea-dark);
+    background: var(--surface);
+    color: var(--heading);
+}
+
+.primary-btn:disabled,
+.secondary-btn:disabled,
+.choice-btn:disabled {
+    opacity: 0.45;
+    cursor: default;
+    box-shadow: none;
+}
+
+.secondary-btn svg {
+    width: 18px;
+    height: 18px;
+    color: var(--accent-icon);
+}
+
+.link-btn {
+    border: none;
+    background: none;
+    font: inherit;
+    font-weight: 600;
+    color: var(--accent-text);
+    cursor: pointer;
+    padding: 0.75rem;
+}
+
+/* On/off switches (companion moments, analytics) */
+.switch-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    padding: 0.85rem 1rem;
+    background: var(--surface);
+    border-bottom: 1px solid var(--surface-muted);
+    cursor: pointer;
+}
+
+.switch-row:last-child {
+    border-bottom: none;
+}
+
+.switch-title {
+    display: block;
+    font-weight: 600;
+    color: var(--text);
+}
+
+.switch-detail {
+    display: block;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    margin-top: 0.1rem;
+}
+
+.switch {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: none;
+    position: relative;
+    width: 51px;
+    height: 31px;
+    margin: 0;
+    border-radius: 31px;
+    background: var(--switch-off);
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.switch::before {
+    content: '';
+    position: absolute;
+    top: 2px;
+    left: 2px;
+    width: 27px;
+    height: 27px;
+    border-radius: 50%;
+    background: #ffffff;
+    box-shadow: 0 2px 4px rgba(var(--shadow-rgb), 0.25);
+    transition: transform 0.2s ease;
+}
+
+.switch:checked {
+    background: var(--switch-on);
+}
+
+.switch:checked::before {
+    transform: translateX(20px);
+}
+
+.switch:focus-visible {
+    outline: none;
+    box-shadow: 0 0 0 4px var(--focus-ring);
+}
+
+.moment-list {
+    background: var(--surface);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+}
+
+/* City picker (onboarding screen 1, Settings → Your city) */
+.cp-chosen {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    padding: 0.75rem 0.75rem 0.75rem 1rem;
+    background: var(--surface);
+    border-radius: 14px;
+    box-shadow: var(--card-shadow);
+}
+
+.cp-chosen svg {
+    flex: none;
+    width: 20px;
+    height: 20px;
+    color: var(--accent-icon);
+}
+
+.cp-chosen-name {
+    flex: 1;
+    font-weight: 600;
+    color: var(--text);
+    min-width: 0;
+}
+
+.cp-change {
+    padding: 0.5rem;
+}
+
+.cp-form {
+    display: flex;
+    gap: 0.5rem;
+}
+
+.cp-input {
+    flex: 1;
+    min-width: 0;
+    padding: 0.9rem 1rem;
+    border: 1.5px solid var(--surface-hover);
+    border-radius: 12px;
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: 1rem;                                 /* 16px: iOS doesn't zoom in */
+    outline: none;
+}
+
+.cp-input:focus {
+    border-color: var(--sea-dark);
+    box-shadow: 0 0 0 4px var(--focus-ring);
+}
+
+.cp-search-btn {
+    flex: none;
+    padding: 0 1.1rem;
+    border: none;
+    border-radius: 12px;
+    background: var(--accent);
+    color: var(--on-accent);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.cp-search-btn:disabled {
+    opacity: 0.45;
+}
+
+.cp-results {
+    margin-top: 0.5rem;
+    background: var(--surface);
+    border-radius: 12px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+}
+
+.cp-results:empty {
+    display: none;
+}
+
+.cp-result {
+    display: block;
+    width: 100%;
+    padding: 0.9rem 1rem;
+    border: none;
+    border-bottom: 1px solid var(--surface-muted);
+    background: none;
+    text-align: left;
+    font: inherit;
+    font-size: 1rem;
+    color: var(--text);
+    cursor: pointer;
+}
+
+.cp-result:active,
+.cp-result:hover {
+    background: var(--surface-muted);
+}
+
+.cp-results .search-credit {
+    padding: 0.6rem 1rem;
+    border-top: none;
+}
+
+.cp-status {
+    margin: 0.6rem 0 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+    line-height: 1.45;
+}
+
+.cp-status:empty {
+    display: none;
+}
+
+/* Problems are explained calmly: cream panel, gold edge, dark text */
+.cp-status.is-error,
+.settings-note.is-warning {
+    padding: 0.6rem 0.75rem;
+    border-left: 3px solid var(--sun-gold);
+    border-radius: 8px;
+    background: var(--cream);
+    color: var(--text);
+}
+
+.cp-locate {
+    margin-top: 0.75rem;
+}
+
+/* Onboarding: full screen, the icon's sky at the top */
+.onboarding {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    background: var(--bg);
+    display: flex;
+    flex-direction: column;
+}
+
+.onboarding.is-leaving {
+    animation: ob-fade-out 0.35s ease forwards;
+}
+
+@keyframes ob-fade-out {
+    to { opacity: 0; }
+}
+
+.ob-sky {
+    flex: none;
+    position: relative;
+    height: calc(150px + env(safe-area-inset-top, 0px));
+    background: var(--sky-gradient);
+    overflow: hidden;
+}
+
+.ob-sun {
+    position: absolute;
+    left: 50%;
+    bottom: -46px;
+    width: 120px;
+    height: 120px;
+    margin-left: -60px;
+    border-radius: 50%;
+    background: radial-gradient(circle, #fff3c4 0%, var(--sun-gold) 55%, rgba(255, 207, 74, 0) 72%);
+}
+
+.ob-card {
+    flex: 1;
+    width: 100%;
+    max-width: 560px;
+    margin: -20px auto 0;
+    position: relative;
+    padding: 1.25rem 1.5rem calc(1.5rem + env(safe-area-inset-bottom, 0px));
+    background: var(--bg);
+    border-radius: 24px 24px 0 0;
+}
+
+.ob-dots {
+    list-style: none;
+    display: flex;
+    justify-content: center;
+    gap: 0.4rem;
+    margin-bottom: 1.25rem;
+}
+
+.ob-dots li {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--surface-hover);
+}
+
+.ob-dots li.is-done {
+    background: var(--sea-dark);
+}
+
+.ob-step {
+    display: none;
+}
+
+.ob-step.is-active {
+    display: block;
+    animation: ob-step-in 0.3s ease;
+}
+
+@keyframes ob-step-in {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: none; }
+}
+
+.ob-step h1 {
+    font-size: 1.6rem;
+    line-height: 1.25;
+    color: var(--heading);
+    margin-bottom: 0.6rem;
+}
+
+.ob-lead {
+    font-size: 1.05rem;
+    line-height: 1.5;
+    color: var(--text);
+}
+
+.ob-question {
+    font-size: 1rem;
+    font-weight: 600;
+    color: var(--text);
+    margin: 1.5rem 0 0.75rem;
+}
+
+.ob-icon {
+    width: 56px;
+    height: 56px;
+    border-radius: 50%;
+    background: var(--cream);
+    color: var(--accent-icon);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 1rem;
+}
+
+.ob-points {
+    list-style: none;
+    margin: 1rem 0 0;
+}
+
+.ob-points li {
+    position: relative;
+    padding: 0.35rem 0 0.35rem 1.4rem;
+    color: var(--text);
+    line-height: 1.4;
+}
+
+.ob-points li::before {
+    content: '';
+    position: absolute;
+    left: 0.2rem;
+    top: 0.85rem;
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--sun-gold);
+}
+
+.ob-actions {
+    display: flex;
+    flex-direction: column;
+    gap: 0.75rem;
+    margin-top: 1.75rem;
+}
+
+.ob-actions.ob-choice {
+    flex-direction: row;
+}
+
+.ob-step .ob-back {
+    display: block;
+    margin: 0.75rem auto 0;
+}
+
+.ob-preview {
+    margin: 1.25rem 0 0;
+    padding: 0.85rem 1rem;
+    border-radius: 18px;
+    background: var(--surface);
+    box-shadow: 0 4px 18px rgba(var(--shadow-rgb), 0.10);
+}
+
+.ob-preview-head {
+    display: flex;
+    align-items: center;
+    gap: 0.45rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--text-muted);
+    text-transform: uppercase;
+    letter-spacing: 0.03em;
+}
+
+.ob-preview-icon {
+    width: 20px;
+    height: 20px;
+    border-radius: 5px;
+}
+
+.ob-preview-time {
+    margin-left: auto;
+    font-weight: 400;
+    text-transform: none;
+}
+
+.ob-preview-text {
+    margin-top: 0.4rem;
+    font-size: 0.95rem;
+    line-height: 1.45;
+    color: var(--text);
+}
+
+.moment-count {
+    margin: 0.6rem 0.25rem 0;
+    font-size: 0.9rem;
+    color: var(--text-muted);
+}
+
+.ob-small {
+    margin-top: 0.75rem;
+    font-size: 0.85rem;
+    color: var(--text-muted);
+    text-align: center;
+}
+
+/* Settings: a full-screen sheet that slides up */
+.sheet {
+    position: fixed;
+    inset: 0;
+    z-index: 2000;
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
+    background: var(--bg);
+    transform: translateY(100%);
+    transition: transform 0.32s ease;
+}
+
+.sheet.is-open {
+    transform: none;
+}
+
+.sheet-header {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: calc(1rem + env(safe-area-inset-top, 0px)) 1.25rem 0.75rem;
+    background: var(--bg-frosted);
+    backdrop-filter: blur(20px);
+    -webkit-backdrop-filter: blur(20px);
+}
+
+.sheet-header h1 {
+    font-size: 1.5rem;
+    color: var(--heading);
+}
+
+.sheet-done {
+    border: none;
+    border-radius: 20px;
+    padding: 0.55rem 1.15rem;
+    background: var(--accent);
+    color: var(--on-accent);
+    font: inherit;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.sheet-body {
+    max-width: 560px;
+    margin: 0 auto;
+    padding: 0 1.25rem calc(2rem + env(safe-area-inset-bottom, 0px));
+}
+
+.settings-group {
+    margin-top: 1.5rem;
+}
+
+.settings-group h2 {
+    margin: 0 0 0.5rem 0.25rem;
+    font-size: 0.8rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--text-muted);
+}
+
+.settings-card {
+    background: var(--surface);
+    border-radius: 14px;
+    overflow: hidden;
+    box-shadow: var(--card-shadow);
+}
+
+.settings-card .moment-list,
+.settings-card .cp-chosen {
+    box-shadow: none;
+    border-radius: 0;
+}
+
+.settings-city .cp-search {
+    padding: 0.75rem;
+}
+
+.settings-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 1rem;
+    width: 100%;
+    padding: 0.95rem 1rem;
+    border: none;
+    border-bottom: 1px solid var(--surface-muted);
+    background: none;
+    font: inherit;
+    font-size: 1rem;
+    color: var(--text);
+    text-align: left;
+    cursor: pointer;
+}
+
+.settings-row:last-child {
+    border-bottom: none;
+}
+
+.settings-row:disabled {
+    color: var(--text);
+    opacity: 1;
+    cursor: default;
+}
+
+.row-end {
+    flex: none;
+    display: flex;
+    align-items: center;
+    color: var(--text-muted);
+    font-size: 0.95rem;
+}
+
+.row-end svg {
+    width: 18px;
+    height: 18px;
+}
+
+.settings-note {
+    margin: 0.5rem 0.25rem 0;
+    font-size: 0.85rem;
+    line-height: 1.45;
+    color: var(--text-muted);
+}
+
+/* The hidden "Reset onboarding" row is last; don't leave a line under Version */
+.settings-version:has(+ .settings-reset.hidden) {
+    border-bottom: none;
+}

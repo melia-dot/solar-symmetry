@@ -3,6 +3,7 @@
   "appName": "SolarSymmetry",
   "webDir": "www",
   "backgroundColor": "#fbf6ef",
+  "appendUserAgent": "SolarSymmetryApp (com.solarsymmetry.app)",
   "plugins": {
     "SystemBars": {
       "insetsHandling": "native",

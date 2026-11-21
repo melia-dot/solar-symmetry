@@ -21,6 +21,12 @@ Solar Symmetry uses **Semantic Versioning** (MAJOR.MINOR.PATCH):
 
 ## Version History
 
+### 1.7.0 (2026-11-21)
+- Welcome screens on first launch (Phase 2): pick your city (search or "Use my location"), an optional Yes / No for anonymous usage stats (off unless you say Yes), and the companion messages with a preview and the choice of Morning / Before sunset / After dark (default Morning only). The phone only asks about notifications after "Turn on messages"
+- New Settings screen (gear icon): city, companion moments (each one ticked is one message a day), usage stats on/off, privacy policy and terms (links coming), OpenStreetMap credit, version. Tapping the version 5 times shows "Reset onboarding" for testing
+- City search now runs when you press Search instead of while you type, as OpenStreetMap's usage policy requires; results credit OpenStreetMap. "Use my location" rounds your position to about 1 km before looking up the town
+- The app now identifies itself to OpenStreetMap ("SolarSymmetryApp" in its User-Agent)
+
 ### 1.6.2 (2026-11-21)
 - Final app icon "Coast" (Phase 1b): sunrise with sunbeams over the sea and a Skåne-style rapeseed field, replacing "First light" (too pale and drab at home-screen size). New icon and launch screen on iPhone and Android, launch background cream `#fff6d8`
 - Colours re-tuned to match: sky blue, sun gold, cream, sea blue, rapeseed yellow and green; headings in sea blue, body text `#1f2d4a`; buttons, the active tab and today's date are gold with dark text (all checked against WCAG AA). No purple, plum, pink or deep orange left
