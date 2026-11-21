@@ -64,17 +64,19 @@ works offline.
 
 ## Phase 1b: New icon + visual refresh (do next, before Phase 2)
 
-The app icon is now **"First light"** (dawn sky, sun just above the horizon; chosen
-2026-11-21). It replaces "Warm water", which read as a sunset on the home screen.
-The app is about light returning, so everything must say morning/sunrise: no dark
-violet, plum or deep orange anywhere. Files and rationale: `design/app-icon/` (read
-its README). Let the icon lead.
+The app icon is now **"Coast"** (chosen 2026-11-21): sunrise with sunbeams over the
+sea, with a rapeseed field inspired by Skåne. It replaces "First light", which was too
+pale and drab at home-screen size (and "First light" replaced "Warm water", which read
+as a sunset). Everything must say morning/sunrise: no purple, plum, pink or deep
+orange anywhere. Files and rationale: `design/app-icon/` (read its README). Let the
+icon lead.
 
 **1. Icon + launch screen + name**
-- `design/app-icon/app-icon.svg` is the master; `splash.svg` is the same artwork with
-  `preserveAspectRatio="xMidYMid slice"`. Render `app-icon-1024.png` (RGB, no
+- `design/app-icon/app-icon.svg` and `splash.svg` are the masters (supplied as
+  `solarsym-icon.svg` / `solarsym-splash.svg`; the splash uses
+  `preserveAspectRatio="xMidYMid slice"`). Render `app-icon-1024.png` (RGB, no
   transparency) and `splash-2732.png`, then regenerate native assets (check current
-  `@capacitor/assets` docs). Android splash background: `#fff0d6`
+  `@capacitor/assets` docs). Android launch background: `#fff6d8`
 - Launch screen should flow into the app, no white or grey flash
 - Home-screen name **"SolarSym"** on iOS and Android (iOS cuts "SolarSymmetry" off).
   The store listing name stays **"Solar Symmetry"**
@@ -82,28 +84,30 @@ its README). Let the icon lead.
 **2. Palette (taken from the icon)**
 | Role | Hex |
 |---|---|
-| Dawn blue (headings, top of Today card) | `#3d5a92` |
-| Lavender | `#8f97c9` |
-| Dawn pink | `#e9b3bf` |
-| Peach | `#ffd3a6` |
-| Cream | `#fff0d6` |
-| Water | `#c9a9bf` → `#6f7fae` |
+| Sky blue | `#2f6fd6` |
+| Sun gold | `#ffcf4a` |
+| Cream | `#fff6d8` |
+| Sea | `#4f93d8` → `#2a63b0` |
+| Rapeseed yellow | `#ffd60a` |
+| Green | `#6aa84f` / `#5e9e46` |
 | Background | `#fbf6ef` |
-| Accent (buttons, active tab, today's date) | peach `#ffc48a` with dark text `#2b2f4a` |
-| Body text | `#2b2f4a` |
+| Body text | `#1f2d4a` |
+| Headings | sea blue `#2a63b0` |
+| Accent (buttons, active tab, today's date) | gold `#ffcf4a` with dark text `#1f2d4a` |
 
 - Put these in CSS custom properties in one place; no hard-coded colours in components
-- Small icons: from the palette, contrast checked (WCAG AA)
+- Small icons: from the palette, contrast checked (WCAG AA). No purple, plum, pink or
+  deep orange
 
 **3. Today card**
-- Dawn sky like the icon: dawn blue top → lavender → pink → peach/cream at the bottom;
-  at most two faint stars; the sun clearly above the horizon
+- Like the icon: blue sky at the top fading to warm cream/gold, the sun low with soft
+  beams. No stars
 - "Today" and "Same light on" tiles readable on it (contrast check)
 
 **4. Month list + Compare Cities**
-- Softer cards on the cream background; today's card highlighted in peach
+- Softer cards on the cream background; today's card highlighted in gold
 
-**5. Loading / pull-to-refresh:** dawn sky, not night sky.
+**5. Loading / pull-to-refresh:** the same sky as the Today card.
 
 **6. Evening mode:** moved to Phase 1c, after Phase 2 (decided 2026-11-21).
 

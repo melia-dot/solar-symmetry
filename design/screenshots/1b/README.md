@@ -26,3 +26,15 @@ Compare with the "after" side of the images above.
 | `first-light-3-today.png` | Top of the app with the Today card | iPhone 18 Pro simulator |
 | `first-light-4-month-list.png` | Month list, today highlighted, photography times on | Browser at iPhone 18 Pro size (402×874) |
 | `first-light-5-compare-cities.png` | Compare Cities | Browser at iPhone 18 Pro size |
+
+## "Coast" (v1.6.2), final icon, after only
+
+Replaces "First light" (too pale and drab at home-screen size).
+
+| File | What it shows | Source |
+|---|---|---|
+| `coast-1-icon.png` | Home-screen icon and the "SolarSym" name | iPhone 18 Pro simulator |
+| `coast-2-launch.png` | Launch screen | iPhone 18 Pro simulator (frame from a launch recording) |
+| `coast-3-today.png` | Top of the app with the Today card | Browser at iPhone 18 Pro size (402×874) |
+| `coast-4-month-list.png` | Month list, today highlighted, photography times on | Browser at iPhone 18 Pro size |
+| `coast-5-compare-cities.png` | Compare Cities | Browser at iPhone 18 Pro size |

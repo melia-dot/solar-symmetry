@@ -1,15 +1,22 @@
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1024 1024" preserveAspectRatio="xMidYMid slice">
 <defs>
-<linearGradient id="sky" x1="0" y1="0" x2="0" y2="760" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#3d5a92"/><stop offset="0.35" stop-color="#8f97c9"/><stop offset="0.62" stop-color="#e9b3bf"/><stop offset="0.85" stop-color="#ffd3a6"/><stop offset="1" stop-color="#fff0d6"/></linearGradient>
-<linearGradient id="sea" x1="0" y1="760" x2="0" y2="1024" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#c9a9bf"/><stop offset="1" stop-color="#6f7fae"/></linearGradient>
-<radialGradient id="bloom" cx="512" cy="640" r="520" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fffaf0" stop-opacity="0.95"/><stop offset="0.3" stop-color="#ffe0b0" stop-opacity="0.4"/><stop offset="1" stop-color="#ffd0a0" stop-opacity="0"/></radialGradient>
-<radialGradient id="sun" cx="512" cy="640" r="140" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff"/><stop offset="0.75" stop-color="#fff6e2"/><stop offset="1" stop-color="#ffe2b0"/></radialGradient>
+<linearGradient id="sky" x1="0" y1="0" x2="0" y2="1024" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#2f6fd6"/><stop offset="0.68" stop-color="#ffe2a0"/><stop offset="1" stop-color="#ffcc66"/></linearGradient>
+<radialGradient id="sun" cx="512" cy="720" r="170" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fffef8"/><stop offset="0.6" stop-color="#fff0b0"/><stop offset="1" stop-color="#ffcf4a"/></radialGradient>
+<radialGradient id="halo" cx="512" cy="720" r="420" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fffbe8" stop-opacity="1"/><stop offset="1" stop-color="#fffbe8" stop-opacity="0"/></radialGradient>
 </defs>
-<rect width="1024" height="760" fill="url(#sky)"/>
-<rect y="760" width="1024" height="264" fill="url(#sea)"/>
-<rect width="1024" height="1024" fill="url(#bloom)"/>
-<g fill="#fff"><circle cx="190" cy="140" r="4" opacity="0.45"/><circle cx="820" cy="110" r="3.5" opacity="0.35"/></g>
-<circle cx="512" cy="640" r="140" fill="url(#sun)"/>
-<rect y="758" width="1024" height="3" fill="#fff8ea" opacity="0.7"/>
-<g fill="#fff6e4"><rect x="402" y="790" width="220" height="10" rx="5" opacity="0.85"/><rect x="432" y="822" width="160" height="9" rx="4.5" opacity="0.6"/><rect x="460" y="850" width="104" height="8" rx="4" opacity="0.4"/><rect x="484" y="876" width="56" height="7" rx="3.5" opacity="0.25"/></g>
+<rect width="1024" height="1024" fill="url(#sky)"/>
+<g fill="#fff6d8" opacity="0.55">
+<path d="M512 720 L 452 0 L 572 0 Z"/>
+<path d="M512 720 L 170 0 L 280 0 Z"/><path d="M512 720 L 744 0 L 854 0 Z"/>
+<path d="M512 720 L 0 120 L 0 260 Z"/><path d="M512 720 L 1024 120 L 1024 260 Z"/>
+<path d="M512 720 L 0 470 L 0 560 Z"/><path d="M512 720 L 1024 470 L 1024 560 Z"/>
+</g>
+<rect width="1024" height="1024" fill="url(#halo)"/>
+<circle cx="512" cy="720" r="170" fill="url(#sun)"/>
+<defs><linearGradient id="seaG" x1="0" y1="770" x2="0" y2="880" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#4f93d8"/><stop offset="1" stop-color="#2a63b0"/></linearGradient>
+<radialGradient id="shim" cx="512" cy="790" r="200" gradientTransform="translate(0 790) scale(1 0.35) translate(0 -790)" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff4c8" stop-opacity="0.95"/><stop offset="1" stop-color="#fff4c8" stop-opacity="0"/></radialGradient></defs><rect y="770" width="1024" height="254" fill="url(#seaG)"/>
+<rect y="770" width="1024" height="254" fill="url(#shim)"/>
+<path d="M240 1024 C 420 900, 640 830, 1024 810 L1024 1024 Z" fill="#6aa84f"/>
+<path d="M380 1024 C 540 920, 720 862, 1024 850 L1024 1024 Z" fill="#ffd60a"/>
+<path d="M640 1024 C 760 970, 880 948, 1024 944 L1024 1024 Z" fill="#5e9e46"/>
 </svg>

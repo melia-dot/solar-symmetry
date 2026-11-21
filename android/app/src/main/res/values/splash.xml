@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- Cream (bottom of the "First light" icon) -->
-    <color name="splash_background">#fff0d6</color>
+    <!-- Cream (sun glow of the "Coast" icon) -->
+    <color name="splash_background">#fff6d8</color>
 </resources>

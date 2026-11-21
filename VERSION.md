@@ -21,6 +21,11 @@ Solar Symmetry uses **Semantic Versioning** (MAJOR.MINOR.PATCH):
 
 ## Version History
 
+### 1.6.2 (2026-11-21)
+- Final app icon "Coast" (Phase 1b): sunrise with sunbeams over the sea and a Skåne-style rapeseed field, replacing "First light" (too pale and drab at home-screen size). New icon and launch screen on iPhone and Android, launch background cream `#fff6d8`
+- Colours re-tuned to match: sky blue, sun gold, cream, sea blue, rapeseed yellow and green; headings in sea blue, body text `#1f2d4a`; buttons, the active tab and today's date are gold with dark text (all checked against WCAG AA). No purple, plum, pink or deep orange left
+- Today card is a blue sky fading to warm cream and gold, the sun low on the horizon with soft beams, no stars; loading and pull-to-refresh screens use the same sky
+
 ### 1.6.1 (2026-11-21)
 - New look from the "First light" app icon (Phase 1b redo): "Warm water" read as a sunset on the home screen, and the app is about light returning, so every colour now says morning. The palette at the top of `src/styles/main.css` is dawn blue, lavender, dawn pink, peach and cream; no dark violet, plum or deep orange left. Headings and small icons are dawn blue; buttons, the active tab and today's date are peach with dark text (all checked against WCAG AA)
 - Today card is a dawn sky: dawn blue with two faint stars at the top, lavender and pink lower down, the sun clearly above a peach/cream horizon with the message on it. The "Same light on" tile is a light mist pane with dark text

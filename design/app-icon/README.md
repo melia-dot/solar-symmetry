@@ -1,15 +1,15 @@
-# App icon: "First light" (chosen 2026-11-21)
+# App icon: "Coast" (chosen 2026-11-21)
 
-A pale dawn sky over calm water: dawn blue at the top with two faint stars, then
-lavender, pink and peach, and a glowing sun at the horizon with its reflection on
-the water. Everything says morning: the light is coming back.
+Sunrise with sunbeams over the sea: a blue sky with soft cream beams, a golden sun
+half above a blue sea, and a yellow rapeseed field in the bottom right, inspired
+by Skåne. Bright and hopeful: the light is coming back.
 
-It replaces **"Warm water"** (chosen 2026-11-20), which looked like a sunset on the
-home screen. The app is about light returning, so the icon (and the app's colours)
-must say sunrise, with no dark violet, plum or deep orange.
+It replaces **"First light"** (chosen earlier on 2026-11-21), which was too pale and
+drab at home-screen size. ("First light" itself replaced "Warm water", which looked
+like a sunset.)
 
-Palette: dawn blue `#3d5a92`, lavender `#8f97c9`, dawn pink `#e9b3bf`, peach
-`#ffd3a6`, cream `#fff0d6`, water `#c9a9bf` → `#6f7fae`.
+Palette: sky blue `#2f6fd6`, sun gold `#ffcf4a`, cream `#fff6d8`, sea `#4f93d8` →
+`#2a63b0`, rapeseed yellow `#ffd60a`, green `#6aa84f` / `#5e9e46`.
 
 - `app-icon.svg`: master artwork (1024×1024)
 - `app-icon-1024.png`: App Store / source icon, RGB, no transparency
@@ -17,5 +17,5 @@ Palette: dawn blue `#3d5a92`, lavender `#8f97c9`, dawn pink `#e9b3bf`, peach
   `preserveAspectRatio="xMidYMid slice"` (full-bleed, centre-cropped on phones)
 
 For Capacitor: `node scripts/make-app-images.mjs`, then `@capacitor/assets` with a
-cream `#fff0d6` background (exact command in the main README). The web `icon.svg`
+cream `#fff6d8` background (exact command in the main README). The web `icon.svg`
 is not used any more (web version retired).
