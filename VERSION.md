@@ -21,6 +21,9 @@ Solar Symmetry uses **Semantic Versioning** (MAJOR.MINOR.PATCH):
 
 ## Version History
 
+### 1.7.4 (2026-11-21)
+- The launch screen now stays for about 1.5 seconds before fading into the app, instead of flashing past (it still hides by itself after 3 seconds if anything goes wrong)
+
 ### 1.7.3 (2026-11-21)
 - Top bar: only the tabs and the gear stay fixed; the city search and the month heading scroll with the page. The version moved from the top to the very bottom of the page (small, centred; still in Settings)
 - Place names show the town, not the council district ("Southport", not "Sefton"): search and "Use my location" now use the most local place OpenStreetMap returns. A city saved before 1.7.3 keeps its old name until it's picked again

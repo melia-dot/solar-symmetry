@@ -34,14 +34,21 @@ const capacitorCoreReady = isNativeApp()
  * blank flash in between. (The launch screen also hides by itself after 3s,
  * see capacitor.config.json, in case anything here fails.)
  */
+const MIN_LAUNCH_SCREEN_MS = 1500; // the launch artwork stays at least this long (Mikael, v1.7.4)
+
 function onAppReady() {
     if (!capacitorCoreReady) return;
 
-    // Two frames: the browser has actually painted the first screen
+    // Two frames: the browser has actually painted the first screen. Then wait
+    // until the launch screen has been up for MIN_LAUNCH_SCREEN_MS (counted from
+    // when the page started loading), so it doesn't just flash past.
     requestAnimationFrame(() => requestAnimationFrame(() => {
-        capacitorCoreReady
-            .then(() => window.Capacitor.registerPlugin('SplashScreen').hide({ fadeOutDuration: 300 }))
-            .catch((error) => console.warn('[platform] could not hide the launch screen:', error));
+        const wait = Math.max(0, MIN_LAUNCH_SCREEN_MS - performance.now());
+        setTimeout(() => {
+            capacitorCoreReady
+                .then(() => window.Capacitor.registerPlugin('SplashScreen').hide({ fadeOutDuration: 300 }))
+                .catch((error) => console.warn('[platform] could not hide the launch screen:', error));
+        }, wait);
     }));
 }
 
