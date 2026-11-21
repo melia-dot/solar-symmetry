@@ -21,6 +21,9 @@ Solar Symmetry uses **Semantic Versioning** (MAJOR.MINOR.PATCH):
 
 ## Version History
 
+### 1.7.5 (2026-11-21)
+- Launch screen shortened to about 1 second (1.5 seconds felt too long)
+
 ### 1.7.4 (2026-11-21)
 - The launch screen now stays for about 1.5 seconds before fading into the app, instead of flashing past (it still hides by itself after 3 seconds if anything goes wrong)
 
