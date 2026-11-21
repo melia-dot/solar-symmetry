@@ -21,8 +21,8 @@ Compare with the "after" side of the images above.
 
 | File | What it shows | Source |
 |---|---|---|
-| `first-light-1-icon.png` | Home-screen icon | *to come: waiting for the First light artwork* |
-| `first-light-2-launch.png` | Launch screen | *to come: waiting for the First light artwork* |
+| `first-light-1-icon.png` | Home-screen icon and the "SolarSym" name | iPhone 18 Pro simulator |
+| `first-light-2-launch.png` | Launch screen | iPhone 18 Pro simulator (frame from a launch recording) |
 | `first-light-3-today.png` | Top of the app with the Today card | iPhone 18 Pro simulator |
 | `first-light-4-month-list.png` | Month list, today highlighted, photography times on | Browser at iPhone 18 Pro size (402×874) |
 | `first-light-5-compare-cities.png` | Compare Cities | Browser at iPhone 18 Pro size |
