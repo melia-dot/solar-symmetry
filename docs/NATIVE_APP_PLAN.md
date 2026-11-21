@@ -49,6 +49,21 @@ apps are the product, and the website no longer has to keep working.
    2026-11-21), not GitHub Pages.
 10. Phase 1b result (2026-11-21): "Coast" icon, launch screen and palette (v1.6.2)
     approved on the human's iPhone SE and merged to `main`.
+11. Phase 2 choices (decided 2026-11-21): Settings opens from a **gear icon** in the
+    header. Companion messages are **sun-timed moments** (Morning / Before sunset /
+    After dark), each switched on or off; the number switched on is the number of
+    messages a day (no separate "messages per day" or clock-time setting). Default:
+    **Morning only**. Analytics and message choices are shown and saved now, used in
+    Phases 3/4; **Restore purchase is hidden until Phase 5**. Terms: **UK GDPR, law of
+    England & Wales**. Existing installs see onboarding once with their saved city
+    filled in. Test onboarding with Settings → tap the version 5 times → Reset
+    onboarding, never by deleting the app.
+12. OpenStreetMap Nominatim (usage policy checked 2026-11-21): city search runs only
+    on Search (search-as-you-type is forbidden), max 1 request/second for the whole
+    app, results cached, app identified via `appendUserAgent` in
+    `capacitor.config.json`, "© OpenStreetMap contributors" shown with results and in
+    Settings, "Use my location" rounded to ~1 km. Fine for launch with a moderate
+    number of users; see Phase 4 for making it switchable.
 
 ## Phase 1: Native shell (Capacitor)
 
@@ -131,8 +146,9 @@ Shown once on first launch; answers stored on the device. Add a hidden
   usage stats?" Yes / No with equal weight. Analytics stays off unless Yes.
 - **Screen 3, Companion:** explain the daily buddy messages, preview one, then trigger
   the OS notification permission prompt. Never fire the OS prompt cold.
-- **Settings screen:** city, notification time, messages per day (0–3, default 1),
-  analytics on/off, privacy policy, terms, restore purchase, app version
+- **Settings screen:** city, companion moments (Morning / Before sunset / After dark,
+  each on/off; default Morning only), analytics on/off, privacy policy, terms,
+  restore purchase (from Phase 5), app version
 - **Privacy policy + terms:** a public Notion page in Mikael's name (decided), linked
   from Settings and the store listings. Draft the text; the human reviews it and
   publishes it in Notion, then gives us the link.
@@ -174,8 +190,9 @@ The heart of the product: a randomised "buddy", not a robot.
 - Milestones replace the normal line on their day: solstices, day after winter
   solstice, equinoxes, clocks forward/back (detect from the city's time zone),
   first sunset after 5pm, one hour gained since the winter solstice
-- Randomness rules: random moment + random line, no repeated line within 14 days,
-  jitter send time by a few minutes, respect messages-per-day setting
+- Randomness rules: random line, no repeated line within 14 days, jitter send time
+  by a few minutes. Send one message for each moment the user switched on in
+  Settings (`AppSettings.get().moments`), only if notification permission is granted
 - Scheduling: local notifications for the next ~2–3 weeks, rescheduled every time the
   app opens or the city changes. iOS limits pending local notifications (about 64;
   verify), so stay well under it.
@@ -218,8 +235,17 @@ can be created and shared from a real phone.
 Ask the human to create the Firebase project and the Apple push key (APNs .p8) and
 upload it to Firebase. Check current docs for the Capacitor Firebase plugins.
 
-- Analytics: only initialised after consent. Key events: onboarding_complete,
-  city_selected, notification_opt_in, paywall_view, unlock_purchased, app_open
+- Analytics: only initialised after consent (`AppSettings.analyticsAllowed()`); check
+  the current Firebase docs for keeping collection off by default until then. Switch off
+  Google Signals, ads personalisation and data sharing; set retention to 2 months.
+  Turning it off in Settings must stop collection, reset the analytics ID and ask
+  Google to delete that ID's data (as the drafted privacy policy promises). ICO
+  suggests asking again after about 6 months. Key events: onboarding_complete,
+  city_selected (never the city itself), notification_opt_in, paywall_view,
+  unlock_purchased, app_open
+- City search: put the Nominatim address in Remote Config so we can switch geocoding
+  provider without an app update (the OpenStreetMap policy asks for this; a small
+  proxy of our own is their preferred option)
 - Remote Config: companion message library + feature flags + paywall copy
 - Cloud Messaging: campaign pushes ("Solstice tonight") sent from the Firebase console
 

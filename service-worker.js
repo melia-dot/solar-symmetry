@@ -27,6 +27,8 @@ const urlsToCache = [
   'src/scripts/pull-to-refresh.js',
   'src/scripts/sw-update.js',
   'src/clients/geocoding.js',
+  'src/clients/town-search.js',
+  'src/data/towns.json',
   'src/clients/twilight.js',
   'src/vendor/suncalc.js',
   'src/vendor/tz-lookup.js',

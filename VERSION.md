@@ -21,6 +21,54 @@ Solar Symmetry uses **Semantic Versioning** (MAJOR.MINOR.PATCH):
 
 ## Version History
 
+### 1.8.1 (2026-11-21)
+- Town suggestions: exact name matches first, then places in your own country (the country of your saved city, or your phone's region before you've picked one), then the rest of the world. "South" in the UK now suggests Southend, Southampton, Southport, South Shields and Southall before South Tangerang. The last suggestion is kept for the biggest match abroad, so "Lon" in the US still shows London
+- Big cities now match only their modern names in their country's two main languages and English ("Göteborg", "München", "Wien", "København", "Bruxelles"); old, historical, colloquial and untagged names are gone, so "Skåne" no longer suggests Albany, New York. Built from GeoNames' language-tagged names (`alternateNamesV2.txt`, see `scripts/build-towns.mjs`)
+- Compare Cities: "Jump to today ↓" only shows once both cities are chosen and the month on screen includes today
+
+### 1.8.0 (2026-11-21)
+- City suggestions while typing are back, in every search box (Symmetry, Compare Cities, welcome screens, Settings): "South" already suggests places, "Southp" shows the Southports, biggest first. They come from a list of ~172,000 towns (every place with 1,000+ people, from GeoNames, CC BY 4.0) inside the app (`src/data/towns.json`, ~7 MB; rebuilt with `scripts/build-towns.mjs`): instant, offline, and nothing typed leaves the phone. Accents and punctuation don't matter ("malmo", "st helens"), and big cities also match their local names ("Göteborg", "München", "Wien"). Typing ", us" or ", England" after the name narrows it down
+- Enter picks the top suggestion. Smaller places not in the list: "Search all places for …" under the suggestions (or the Search button on the welcome screens and in Settings) asks OpenStreetMap as before, which doesn't allow search-as-you-type
+- Credit "Town list by GeoNames (CC BY 4.0)" under the suggestions and in Settings
+- Compare Cities has "Jump to today ↓" too (when the month includes today)
+- City boxes no longer spell-check or autocorrect town names
+
+### 1.7.7 (2026-11-21)
+- Fixed: "Light returns after work" could be up to 6 days late (Southport said Feb 7; sunset first passes 5pm on Feb 5). It now checks every day instead of once a week, and uses the same sunset time the day list shows, so the tile and the list always agree. Days left are counted in calendar days, so a clock change can't add one
+- Day cards: the golden lines are labelled "Golden am" and "Golden pm". On phones up to 400px wide (iPhone SE to iPhone 13/14) they have no camera icon, so they still fit on one line
+
+### 1.7.6 (2026-11-21)
+- Launch screen shortened to about 0.8 seconds
+
+### 1.7.5 (2026-11-21)
+- Launch screen shortened to about 1 second (1.5 seconds felt too long)
+
+### 1.7.4 (2026-11-21)
+- The launch screen now stays for about 1.5 seconds before fading into the app, instead of flashing past (it still hides by itself after 3 seconds if anything goes wrong)
+
+### 1.7.3 (2026-11-21)
+- Top bar: only the tabs and the gear stay fixed; the city search and the month heading scroll with the page. The version moved from the top to the very bottom of the page (small, centred; still in Settings)
+- Place names show the town, not the council district ("Southport", not "Sefton"): search and "Use my location" now use the most local place OpenStreetMap returns. A city saved before 1.7.3 keeps its old name until it's picked again
+- Today tile fits on small phones (iPhone SE): each label sits above its big time, so "Same light on" is fully visible next to Today
+- Day list: Daybreak and Dark by are the big times on every card; Sunrise, Sunset and the golden hours ("Golden 07:49–08:49") are small, one line each. Sunrise and sunset have different icons. A date and its mirror sit in one row with the same height and the same background; today's row is highlighted (today gold, its mirror outlined in gold)
+- The whole month (1st to last) is part of the normal page scroll; no more sideways-scrolling box on small phones. New "Jump to today ↓" link above the list scrolls smoothly to today's row (shown when the month includes today)
+
+### 1.7.2 (2026-11-21)
+- Today tile: the two big times are now **Daybreak** (civil dawn: light enough to see outside) and **Dark by** (civil dusk), for today and its "Same light on" date. Sunrise, sunset and daylight stay on the tile, smaller, underneath. Near the poles it says "Light all night" or "Dark all day" where there's no civil dawn/dusk
+- Home screen order: Today tile, then "Light after work", then the month (e.g. November) with its day list
+- Mirror-date matching unchanged
+
+### 1.7.1 (2026-11-21)
+- Fixed: after "Turn on messages" the welcome screens could start again from screen 1 instead of opening the app. On iPhone, waiting for a native plugin (notifications, location, in-app browser) never finished, so the notification and "Use my location" buttons hung; now they work
+- Onboarding is now saved (done, with your chosen moments) before the phone asks about notifications, so it always ends in the app, whether you tap Allow or Don't Allow
+- Pull-to-refresh no longer works on top of the welcome screens or Settings, and a plain tap can no longer count as a pull (both could reload the app)
+
+### 1.7.0 (2026-11-21)
+- Welcome screens on first launch (Phase 2): pick your city (search or "Use my location"), an optional Yes / No for anonymous usage stats (off unless you say Yes), and the companion messages with a preview and the choice of Morning / Before sunset / After dark (default Morning only). The phone only asks about notifications after "Turn on messages"
+- New Settings screen (gear icon): city, companion moments (each one ticked is one message a day), usage stats on/off, privacy policy and terms (links coming), OpenStreetMap credit, version. Tapping the version 5 times shows "Reset onboarding" for testing
+- City search now runs when you press Search instead of while you type, as OpenStreetMap's usage policy requires; results credit OpenStreetMap. "Use my location" rounds your position to about 1 km before looking up the town
+- The app now identifies itself to OpenStreetMap ("SolarSymmetryApp" in its User-Agent)
+
 ### 1.6.2 (2026-11-21)
 - Final app icon "Coast" (Phase 1b): sunrise with sunbeams over the sea and a Skåne-style rapeseed field, replacing "First light" (too pale and drab at home-screen size). New icon and launch screen on iPhone and Android, launch background cream `#fff6d8`
 - Colours re-tuned to match: sky blue, sun gold, cream, sea blue, rapeseed yellow and green; headings in sea blue, body text `#1f2d4a`; buttons, the active tab and today's date are gold with dark text (all checked against WCAG AA). No purple, plum, pink or deep orange left

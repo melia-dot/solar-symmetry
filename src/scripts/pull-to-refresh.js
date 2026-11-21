@@ -35,9 +35,14 @@ class PullToRefresh {
     }
     
     handleTouchStart(e) {
+        this.isDragging = false;
+        // Never on top of the welcome screens or Settings: swiping or tapping
+        // there must not reload the app (v1.7.0 sent onboarding back to screen 1)
+        if (document.body.classList.contains('overlay-open')) return;
         // Only allow pull-to-refresh when scrolled to top
         if (window.scrollY === 0) {
             this.startY = e.touches[0].clientY;
+            this.currentY = this.startY; // a plain tap is never a pull
             this.isDragging = true;
         }
     }

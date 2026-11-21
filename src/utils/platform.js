@@ -34,13 +34,63 @@ const capacitorCoreReady = isNativeApp()
  * blank flash in between. (The launch screen also hides by itself after 3s,
  * see capacitor.config.json, in case anything here fails.)
  */
+const MIN_LAUNCH_SCREEN_MS = 800; // the launch artwork stays at least this long (Mikael, v1.7.6)
+
 function onAppReady() {
     if (!capacitorCoreReady) return;
 
-    // Two frames: the browser has actually painted the first screen
+    // Two frames: the browser has actually painted the first screen. Then wait
+    // until the launch screen has been up for MIN_LAUNCH_SCREEN_MS (counted from
+    // when the page started loading), so it doesn't just flash past.
     requestAnimationFrame(() => requestAnimationFrame(() => {
-        capacitorCoreReady
-            .then(() => window.Capacitor.registerPlugin('SplashScreen').hide({ fadeOutDuration: 300 }))
-            .catch((error) => console.warn('[platform] could not hide the launch screen:', error));
+        const wait = Math.max(0, MIN_LAUNCH_SCREEN_MS - performance.now());
+        setTimeout(() => {
+            capacitorCoreReady
+                .then(() => window.Capacitor.registerPlugin('SplashScreen').hide({ fadeOutDuration: 300 }))
+                .catch((error) => console.warn('[platform] could not hide the launch screen:', error));
+        }, wait);
     }));
+}
+
+/**
+ * Native app only: a Capacitor plugin by its registered name ('Geolocation',
+ * 'LocalNotifications', 'Browser', ...), or null on the web. No build step:
+ * registerPlugin gives a proxy that talks to the plugin's native code.
+ *
+ * The proxy answers EVERY property as a plugin method, including `then`. So
+ * returning it from this async function made `await nativePlugin(...)` call
+ * "LocalNotifications.then()" on the phone, which doesn't exist, and the await
+ * never finished (v1.7.0: notification and location buttons hung). We hand
+ * back a wrapper that has no `then`, so it can be awaited safely.
+ * @returns {Promise<Object|null>}
+ */
+const nativePlugins = new Map();
+async function nativePlugin(name) {
+    if (!capacitorCoreReady) return null;
+    await capacitorCoreReady;
+    if (!nativePlugins.has(name)) {
+        const plugin = window.Capacitor.registerPlugin(name);
+        nativePlugins.set(name, new Proxy({}, {
+            get: (_, prop) => (prop === 'then' ? undefined : plugin[prop]),
+        }));
+    }
+    return nativePlugins.get(name);
+}
+
+/**
+ * Open a web page (privacy policy, terms, OpenStreetMap credit). In the app it
+ * opens in an in-app browser sheet (Capacitor Browser: SFSafariViewController
+ * on iOS, Custom Tabs on Android), so the user stays in SolarSym.
+ */
+async function openExternalLink(url) {
+    try {
+        const Browser = await nativePlugin('Browser');
+        if (Browser) {
+            await Browser.open({ url, presentationStyle: 'popover' });
+            return;
+        }
+    } catch (error) {
+        console.warn('[platform] in-app browser failed, opening normally:', error);
+    }
+    window.open(url, '_blank', 'noopener');
 }

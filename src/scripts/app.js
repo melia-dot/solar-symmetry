@@ -30,6 +30,11 @@ class SolarSymmetryApp {
         this.city1 = null;
         this.city2 = null;
         
+        // Town suggestions while typing (list inside the app; see town-search.js).
+        // Loaded a moment after start so the first letters typed get instant answers
+        this.towns = TownSearch.shared;
+        setTimeout(() => this.towns.load().catch(() => {}), 1500);
+
         this.initializeElements();
         this.bindEvents();
         this.initializeApp();
@@ -85,6 +90,8 @@ class SolarSymmetryApp {
             prevMonth: document.getElementById('prevMonth'),
             nextMonth: document.getElementById('nextMonth'),
             goldenHourToggle: document.getElementById('goldenHourToggle'),
+            jumpToToday: document.getElementById('jumpToToday'),
+            jumpToTodayCities: document.getElementById('jumpToTodayCities'),
             lightAfterWorkCard: document.getElementById('lightAfterWorkCard'),
             lightAfterWorkTitle: document.getElementById('lightAfterWorkTitle'),
             lightAfterWorkMessage: document.getElementById('lightAfterWorkMessage'),
@@ -124,6 +131,12 @@ class SolarSymmetryApp {
         if (isNativeApp()) {
             this.elements.mobileAppBtn.classList.add('hidden');
         }
+
+        // Settings (gear icon)
+        this.settingsView = new SettingsView(this);
+        document.getElementById('settingsBtn').addEventListener('click', () => {
+            this.settingsView.open();
+        });
         
         // Symmetry view - Location search
         this.elements.locationInput.addEventListener('input', (e) => {
@@ -207,6 +220,10 @@ class SolarSymmetryApp {
         this.elements.goldenHourToggle.addEventListener('click', () => {
             this.toggleGoldenHour();
         });
+
+        // "Jump to today": scroll the page down to today's row
+        this.elements.jumpToToday.addEventListener('click', () => this.scrollToToday(this.elements.currentDates));
+        this.elements.jumpToTodayCities.addEventListener('click', () => this.scrollToToday(this.elements.city1Dates));
 
         // Keyboard navigation for months
         document.addEventListener('keydown', (e) => {
@@ -296,6 +313,13 @@ class SolarSymmetryApp {
         // Load saved locations from localStorage
         this.loadSavedLocations();
 
+        // First launch: the welcome screens go on top straight away, before the
+        // launch screen fades, so the app never flashes up underneath first.
+        // Someone who already has a saved city sees it filled in on screen 1.
+        if (Onboarding.shouldShow()) {
+            new Onboarding(this);
+        }
+
         // Start in symmetry view (this is the only place the month loads on startup)
         const loading = this.switchToView('symmetry');
 
@@ -373,6 +397,18 @@ class SolarSymmetryApp {
      */
     handleLocationKeydown(e) {
         const dropdown = this.elements.locationDropdown;
+
+        // Enter / the keyboard's Search key: the highlighted place, else the top
+        // suggestion for what's typed, else an OpenStreetMap search
+        if (e.key === 'Enter' && this.selectedLocationIndex < 0) {
+            e.preventDefault();
+            if (this.currentLocations.length > 0 && dropdown.dataset.query === e.target.value) {
+                this.selectLocation(this.currentLocations[0]);
+            } else {
+                this.runLocationSearch();
+            }
+            return;
+        }
         
         if (dropdown.classList.contains('hidden') || this.currentLocations.length === 0) {
             return;
@@ -430,29 +466,83 @@ class SolarSymmetryApp {
     /**
      * Handle location search input
      */
-    handleLocationSearch(query) {
-        if (query.length < 2) {
+    async handleLocationSearch(query) {
+        if (query.trim().length < 2) {
             this.hideLocationDropdown();
             return;
         }
 
-        this.geocoding.searchWithDebounce(query, (results) => {
+        // Suggestions from the town list while typing; "Search for …" under
+        // them asks OpenStreetMap for smaller places
+        const suggestions = await this.towns.search(query, { near: this.currentLocation }).catch(() => []);
+        if (this.elements.locationInput.value !== query) return; // typed on since
+        this.showLocationDropdown(suggestions, query);
+    }
+
+    /** Run the symmetry-view search for what's typed (one request per search) */
+    async runLocationSearch() {
+        const query = this.elements.locationInput.value;
+        if (query.trim().length < 2) return;
+        this.showSearching(this.elements.locationDropdown);
+        const results = await this.geocoding.searchLocations(query);
+        // Ignore a slow answer if the user has typed something else since
+        if (this.elements.locationInput.value === query) {
             this.showLocationDropdown(results);
+        }
+    }
+
+    /** Dropdown row offering an OpenStreetMap search for the typed text */
+    appendSearchHint(dropdown, query, onSearch) {
+        const hint = document.createElement('button');
+        hint.type = 'button';
+        hint.className = 'search-hint';
+        hint.textContent = `Search all places for “${query.trim()}”`;
+        hint.addEventListener('click', (e) => {
+            e.stopPropagation();
+            onSearch();
         });
+        dropdown.appendChild(hint);
+    }
+
+    showSearching(dropdown) {
+        dropdown.innerHTML = '<div class="search-hint is-busy">Searching…</div>';
+        dropdown.classList.remove('hidden');
+    }
+
+    /** Credit under the list (both licences require it): the town list
+     *  (GeoNames) for suggestions, OpenStreetMap for search results */
+    appendSearchCredit(dropdown, fromTownList = false) {
+        const source = fromTownList ? TownSearch : GeocodingClient;
+        const credit = document.createElement('a');
+        credit.className = 'search-credit';
+        credit.href = source.ATTRIBUTION_URL;
+        credit.textContent = source.ATTRIBUTION;
+        credit.addEventListener('click', (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            openExternalLink(source.ATTRIBUTION_URL);
+        });
+        dropdown.appendChild(credit);
     }
 
     /**
      * Show location search dropdown
      */
-    showLocationDropdown(locations) {
+    /**
+     * @param {Array} locations
+     * @param {string|null} suggestionsFor - what was typed, when these are
+     *   town-list suggestions (null: OpenStreetMap search results)
+     */
+    showLocationDropdown(locations, suggestionsFor = null) {
         const dropdown = this.elements.locationDropdown;
         dropdown.innerHTML = '';
+        dropdown.dataset.query = this.elements.locationInput.value;
         
         this.selectedLocationIndex = -1;
         this.currentLocations = locations;
 
-        if (locations.length === 0) {
-            dropdown.innerHTML = '<div class="location-option">No locations found</div>';
+        if (locations.length === 0 && suggestionsFor === null) {
+            dropdown.innerHTML = '<div class="search-hint is-busy">No places found. Check the spelling, or try a bigger town nearby.</div>';
         } else {
             locations.forEach((location, index) => {
                 const option = document.createElement('div');
@@ -471,6 +561,10 @@ class SolarSymmetryApp {
             });
         }
 
+        if (suggestionsFor !== null) {
+            this.appendSearchHint(dropdown, suggestionsFor, () => this.runLocationSearch());
+        }
+        if (locations.length > 0) this.appendSearchCredit(dropdown, suggestionsFor !== null);
         dropdown.classList.remove('hidden');
     }
 
@@ -511,15 +605,30 @@ class SolarSymmetryApp {
     /**
      * Handle city search input
      */
-    handleCitySearch(query, cityNumber) {
-        if (query.length < 2) {
+    async handleCitySearch(query, cityNumber) {
+        if (query.trim().length < 2) {
             this.hideCityDropdown(cityNumber);
             return;
         }
 
-        this.geocoding.searchWithDebounce(query, (results) => {
+        // Suggestions from the town list while typing (as in the Symmetry view)
+        const input = cityNumber === 1 ? this.elements.city1Input : this.elements.city2Input;
+        const suggestions = await this.towns.search(query, { near: this.currentLocation }).catch(() => []);
+        if (input.value !== query) return; // typed on since
+        this.showCityDropdown(suggestions, cityNumber, query);
+    }
+
+    /** Run the Compare Cities search for one input */
+    async runCitySearch(cityNumber) {
+        const input = cityNumber === 1 ? this.elements.city1Input : this.elements.city2Input;
+        const dropdown = cityNumber === 1 ? this.elements.city1Dropdown : this.elements.city2Dropdown;
+        const query = input.value;
+        if (query.trim().length < 2) return;
+        this.showSearching(dropdown);
+        const results = await this.geocoding.searchLocations(query);
+        if (input.value === query) {
             this.showCityDropdown(results, cityNumber);
-        });
+        }
     }
 
     /**
@@ -529,6 +638,19 @@ class SolarSymmetryApp {
         const dropdown = cityNumber === 1 ? this.elements.city1Dropdown : this.elements.city2Dropdown;
         const selectedIndex = cityNumber === 1 ? this.city1SelectedIndex : this.city2SelectedIndex;
         const locations = cityNumber === 1 ? this.city1Locations : this.city2Locations;
+
+        // Enter / Search key: the highlighted place, else the top suggestion,
+        // else an OpenStreetMap search
+        if (e.key === 'Enter' && selectedIndex < 0) {
+            e.preventDefault();
+            if (locations.length > 0 && dropdown.dataset.query === e.target.value) {
+                this.selectCity(locations[0], cityNumber);
+                e.target.blur();
+            } else {
+                this.runCitySearch(cityNumber);
+            }
+            return;
+        }
         
         if (dropdown.classList.contains('hidden') || locations.length === 0) {
             return;
@@ -596,9 +718,11 @@ class SolarSymmetryApp {
     /**
      * Show city search dropdown
      */
-    showCityDropdown(locations, cityNumber) {
+    showCityDropdown(locations, cityNumber, suggestionsFor = null) {
         const dropdown = cityNumber === 1 ? this.elements.city1Dropdown : this.elements.city2Dropdown;
+        const input = cityNumber === 1 ? this.elements.city1Input : this.elements.city2Input;
         dropdown.innerHTML = '';
+        dropdown.dataset.query = input.value;
         
         this.setCitySelectedIndex(cityNumber, -1);
         
@@ -608,8 +732,8 @@ class SolarSymmetryApp {
             this.city2Locations = locations;
         }
 
-        if (locations.length === 0) {
-            dropdown.innerHTML = '<div class="location-option">No locations found</div>';
+        if (locations.length === 0 && suggestionsFor === null) {
+            dropdown.innerHTML = '<div class="search-hint is-busy">No places found. Check the spelling, or try a bigger town nearby.</div>';
         } else {
             locations.forEach((location, index) => {
                 const option = document.createElement('div');
@@ -628,6 +752,10 @@ class SolarSymmetryApp {
             });
         }
 
+        if (suggestionsFor !== null) {
+            this.appendSearchHint(dropdown, suggestionsFor, () => this.runCitySearch(cityNumber));
+        }
+        if (locations.length > 0) this.appendSearchCredit(dropdown, suggestionsFor !== null);
         dropdown.classList.remove('hidden');
     }
 
@@ -744,7 +872,7 @@ class SolarSymmetryApp {
         }
         
         // Just toggle visibility of existing golden hour elements
-        const goldenHourElements = document.querySelectorAll('.twilight-time.golden-hour');
+        const goldenHourElements = document.querySelectorAll('.date-item .golden-hour');
         goldenHourElements.forEach((element, index) => {
             if (this.showGoldenHour) {
                 element.classList.remove('hidden');
@@ -766,6 +894,19 @@ class SolarSymmetryApp {
     }
     
     /**
+     * Light after work: is sunset after 5pm on this day? Uses the sunset time
+     * exactly as the day list shows it (HH:MM in the city's time zone), so the
+     * tile and the day list always agree: "17:01" counts, "17:00" doesn't.
+     * Midnight sun ("Up all day") counts as light; polar night doesn't.
+     */
+    sunsetAfterWork(data) {
+        if (!data || !data.sunset) return false;
+        if (data.sunset === 'Up all day') return true;
+        const match = /^(\d{1,2}):(\d{2})$/.exec(data.sunset);
+        return !!match && Number(match[1]) * 60 + Number(match[2]) > 17 * 60;
+    }
+
+    /**
      * Calculate and display light after work countdown
      */
     async updateLightAfterWorkTimer() {
@@ -773,91 +914,56 @@ class SolarSymmetryApp {
             this.elements.lightAfterWorkCard.classList.add('hidden');
             return;
         }
-        
+
         const today = new Date();
-        const targetTime = '17:00'; // 5pm
         const location = this.currentLocation;
 
         try {
-            // Get today's sunset
-            const todayData = await this.twilight.getTwilightTimes(
-                today,
-                location.lat,
-                location.lng
-            );
+            const todayData = await this.twilight.getTwilightTimes(today, location.lat, location.lng);
 
             // Location changed while waiting: don't show stale data
             if (this.currentLocation !== location) return;
 
-            const todaySunsetTime = todayData.sunset;
-            
-            // Check if we currently have light after 5pm
-            const sunsetHour = parseInt(todaySunsetTime.split(':')[0]);
-            const sunsetMinute = parseInt(todaySunsetTime.split(':')[1]);
-            const sunsetTotalMinutes = sunsetHour * 60 + sunsetMinute;
-            const targetMinutes = 17 * 60; // 5pm
-            
-            if (sunsetTotalMinutes > targetMinutes) {
-                // We currently have light after work!
+            if (this.sunsetAfterWork(todayData)) {
                 this.showLightAfterWorkCountdown(today, todayData, true);
             } else {
-                // Find when light returns after work
-                this.findWhenLightReturns(targetMinutes, location);
+                this.findWhenLightReturns(location);
             }
-            
         } catch (error) {
             console.error('Failed to calculate light after work:', error);
             this.elements.lightAfterWorkCard.classList.add('hidden');
         }
     }
-    
+
     /**
-     * Find when sunset will be after target time
+     * Find the first day sunset is after 5pm. Checks every single day (the sun
+     * times are calculated on the phone, so a year of days is instant); it used
+     * to jump a week at a time and could land up to 6 days late.
      */
-    async findWhenLightReturns(targetMinutes, location = this.currentLocation) {
+    async findWhenLightReturns(location = this.currentLocation) {
         const today = new Date();
-        const searchLimit = 365; // Search up to 1 year ahead
 
-        for (let daysAhead = 1; daysAhead < searchLimit; daysAhead++) {
-            const futureDate = new Date(today);
-            futureDate.setDate(today.getDate() + daysAhead);
-
-            const futureData = await this.twilight.getTwilightTimes(
-                futureDate,
-                location.lat,
-                location.lng
-            );
+        for (let daysAhead = 1; daysAhead <= 366; daysAhead++) {
+            const futureDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + daysAhead);
+            const futureData = await this.twilight.getTwilightTimes(futureDate, location.lat, location.lng);
 
             // Location changed while searching: stop, the new search owns the card
             if (this.currentLocation !== location) return;
 
-            const sunsetTime = futureData.sunset;
-            const sunsetHour = parseInt(sunsetTime.split(':')[0]);
-            const sunsetMinute = parseInt(sunsetTime.split(':')[1]);
-            const sunsetTotalMinutes = sunsetHour * 60 + sunsetMinute;
-            
-            if (sunsetTotalMinutes > targetMinutes) {
-                // Found it!
-                this.showLightAfterWorkCountdown(futureDate, futureData, false);
+            if (this.sunsetAfterWork(futureData)) {
+                this.showLightAfterWorkCountdown(futureDate, futureData, false, daysAhead);
                 return;
             }
-            
-            // Check every 7 days for efficiency
-            if (daysAhead < 30) {
-                daysAhead += 6; // Will increment by 1 in loop, so effectively +7
-            } else {
-                daysAhead += 13; // Check every 2 weeks after a month
-            }
         }
-        
-        // If we didn't find it, hide the card
+
+        // Never after 5pm within a year: hide the card
         this.elements.lightAfterWorkCard.classList.add('hidden');
     }
-    
+
     /**
      * Display light after work countdown
      */
-    showLightAfterWorkCountdown(targetDate, twilightData, hasLightNow) {
+    showLightAfterWorkCountdown(targetDate, twilightData, hasLightNow, daysUntil = 0) {
         this.elements.lightAfterWorkCard.classList.remove('hidden');
         
         if (hasLightNow) {
@@ -867,13 +973,10 @@ class SolarSymmetryApp {
             this.elements.lightAfterWorkCountdown.textContent = 'Enjoy the daylight';
             this.elements.lightAfterWorkCard.classList.add('has-light');
         } else {
-            // Countdown to light return
-            const today = new Date();
-            const daysUntil = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
-            
+            // Countdown to light return (whole calendar days, so a clock change can't add one)
             this.elements.lightAfterWorkTitle.textContent = 'Light Returns After Work';
             this.elements.lightAfterWorkMessage.textContent = 'Sunset will be after 5pm on ' + this.dateCalc.formatDate(targetDate);
-            this.elements.lightAfterWorkCountdown.textContent = daysUntil + ' days';
+            this.elements.lightAfterWorkCountdown.textContent = daysUntil === 1 ? '1 day' : daysUntil + ' days';
             this.elements.lightAfterWorkCard.classList.remove('has-light');
             
             // Animate countdown
@@ -948,11 +1051,37 @@ class SolarSymmetryApp {
             return '<div class="hero-loading">Couldn\'t load</div>';
         }
         const daylight = this.formatDaylight(data);
+        const { daybreak, darkBy } = this.lightTimes(data);
+        // Headline: when it's light enough to see outside (civil dawn) and when
+        // it's dark again (civil dusk). Sunrise / sunset stay, smaller, below.
         return `
-            <div class="hero-row"><i data-lucide="sunrise"></i><span>Sunrise</span><strong>${data.sunrise}</strong></div>
-            <div class="hero-row"><i data-lucide="sunset"></i><span>Sunset</span><strong>${data.sunset}</strong></div>
-            ${daylight ? `<div class="hero-row hero-daylight"><i data-lucide="sun"></i><span>Daylight</span><strong>${daylight}</strong></div>` : ''}
+            <div class="hero-main">
+                <div class="hero-row hero-big"><span>Daybreak</span><strong>${daybreak}</strong></div>
+                <div class="hero-row hero-big"><span>Dark by</span><strong>${darkBy}</strong></div>
+            </div>
+            <div class="hero-small">
+                <div class="hero-row"><span>Sunrise</span><strong>${data.sunrise}</strong></div>
+                <div class="hero-row"><span>Sunset</span><strong>${data.sunset}</strong></div>
+                ${daylight ? `<div class="hero-row"><span>Daylight</span><strong>${daylight}</strong></div>` : ''}
+            </div>
         `;
+    }
+
+    /**
+     * Daybreak = civil dawn, Dark by = civil dusk (SunCalc dawn / dusk: the sun
+     * 6° below the horizon). Near the poles there may be none: then it either
+     * never gets dark (light summer nights) or never gets light (polar night).
+     */
+    lightTimes(data) {
+        if (data.dawnISO && data.duskISO) {
+            return { daybreak: data.dawn, darkBy: data.dusk };
+        }
+        const neverDark = data.sunriseISO || data.sunset === 'Up all day';
+        const none = neverDark ? 'Light all night' : 'Dark all day';
+        return {
+            daybreak: data.dawnISO ? data.dawn : none,
+            darkBy: data.duskISO ? data.dusk : none,
+        };
     }
 
     /**
@@ -1191,7 +1320,7 @@ class SolarSymmetryApp {
 
         const newCard = column === 'current'
             ? this.createDateElement(item.current, item.currentTwilight, item.isToday)
-            : this.createDateElement(item.mirrored, item.mirroredTwilight, false);
+            : this.createDateElement(item.mirrored, item.mirroredTwilight, false, item.isToday);
 
         if (!window.anime) {
             newCard.style.opacity = '';
@@ -1226,7 +1355,7 @@ class SolarSymmetryApp {
                 <span class="load-status-text"></span>
                 <button type="button" class="load-status-retry">Retry</button>
             `;
-            container.parentElement.insertBefore(status, container);
+            container.parentElement.querySelector('.column-header').appendChild(status);
             this.columnStatus[column] = status;
         }
 
@@ -1370,6 +1499,8 @@ class SolarSymmetryApp {
     renderCurrentColumn(monthData) {
         const container = this.elements.currentDates;
         container.innerHTML = '';
+        // "Jump to today" only when this month has today in it
+        this.elements.jumpToToday.classList.toggle('hidden', !monthData.some(item => item.isToday));
 
         monthData.forEach(item => {
             const dateElement = this.createDateElement(
@@ -1385,6 +1516,19 @@ class SolarSymmetryApp {
     }
 
     /**
+     * Smoothly scroll the page so today's row sits just under the top bar
+     * @param {Element} column - the left column of the view on screen
+     */
+    scrollToToday(column) {
+        const card = column.querySelector('.date-item.today');
+        if (!card) return;
+        const header = document.querySelector('.location-header');
+        const offset = (header ? header.getBoundingClientRect().height : 0) + 12;
+        const top = card.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    }
+
+    /**
      * Render mirrored dates column (symmetry view)
      */
     renderMirroredColumn(monthData) {
@@ -1393,9 +1537,10 @@ class SolarSymmetryApp {
 
         monthData.forEach(item => {
             const dateElement = this.createDateElement(
-                item.mirrored, 
-                item.mirroredTwilight, 
-                false
+                item.mirrored,
+                item.mirroredTwilight,
+                false,
+                item.isToday
             );
             container.appendChild(dateElement);
         });
@@ -1410,6 +1555,7 @@ class SolarSymmetryApp {
     renderCity1Column(citiesData) {
         const container = this.elements.city1Dates;
         container.innerHTML = '';
+        this.updateCitiesJumpLink(citiesData);
 
         citiesData.forEach(item => {
             const dateElement = this.createDateElement(
@@ -1422,6 +1568,15 @@ class SolarSymmetryApp {
 
         // Animate all cards with stagger
         this.animateCardEntrance(container);
+    }
+
+    /**
+     * Compare Cities "Jump to today": only once both cities are chosen and the
+     * month on screen includes today
+     */
+    updateCitiesJumpLink(citiesData = []) {
+        const show = !!(this.city1 && this.city2) && citiesData.some(item => item.isToday);
+        this.elements.jumpToTodayCities.classList.toggle('hidden', !show);
     }
 
     /**
@@ -1445,111 +1600,51 @@ class SolarSymmetryApp {
     }
 
     /**
-     * Create a date element with all twilight and sun times
+     * One day card: Daybreak / Dark by big (as on the Today tile), then sunrise,
+     * sunset and the two golden hours small, one line each.
+     * @param {boolean} isToday - today's card (gold)
+     * @param {boolean} inTodayRow - the mirror next to today's card (gold outline)
      */
-    createDateElement(date, twilightData, isToday = false) {
+    createDateElement(date, twilightData, isToday = false, inTodayRow = false) {
         const element = document.createElement('div');
-        element.className = `date-item ${isToday ? 'today' : ''}`;
+        element.className = `date-item${isToday ? ' today' : ''}${inTodayRow ? ' today-row' : ''}`;
         element.style.opacity = '0';
         element.style.transform = 'translateY(20px)';
 
         const dateHeader = document.createElement('div');
         dateHeader.className = 'date-header';
         dateHeader.textContent = this.dateCalc.formatDate(date);
+        element.appendChild(dateHeader);
 
-        const twilightTimes = document.createElement('div');
-        twilightTimes.className = 'twilight-times';
-
+        const body = document.createElement('div');
         if (twilightData && !twilightData.error) {
-            // Dawn (Civil Twilight Begin)
-            const dawnTime = document.createElement('div');
-            dawnTime.className = 'twilight-time';
-            dawnTime.innerHTML = `
-                <i data-lucide="sunrise" class="time-icon"></i>
-                <div>
-                    <div class="time-label">Dawn</div>
-                    <div>${twilightData.dawn}</div>
+            const { daybreak, darkBy } = this.lightTimes(twilightData);
+            const span = (from, to) => `${from || 'N/A'}–${to || 'N/A'}`;
+            const golden = this.showGoldenHour ? '' : ' hidden';
+            body.innerHTML = `
+                <div class="day-main">
+                    <div class="day-row day-big"><span>Daybreak</span><strong>${daybreak}</strong></div>
+                    <div class="day-row day-big"><span>Dark by</span><strong>${darkBy}</strong></div>
+                </div>
+                <div class="day-small">
+                    <div class="day-row"><i data-lucide="sunrise"></i><span>Sunrise</span><strong>${twilightData.sunrise}</strong></div>
+                    <div class="day-row"><i data-lucide="sunset"></i><span>Sunset</span><strong>${twilightData.sunset}</strong></div>
+                    <div class="day-row golden-hour${golden}"><i data-lucide="camera"></i><span>Golden am</span><strong>${span(twilightData.goldenHourMorningStart, twilightData.goldenHourMorningEnd)}</strong></div>
+                    <div class="day-row golden-hour${golden}"><i data-lucide="camera"></i><span>Golden pm</span><strong>${span(twilightData.goldenHourEveningStart, twilightData.goldenHourEveningEnd)}</strong></div>
                 </div>
             `;
-            
-            // Golden Hour Morning (if enabled)
-            const goldenHourMorning = document.createElement('div');
-            goldenHourMorning.className = `twilight-time golden-hour ${this.showGoldenHour ? '' : 'hidden'}`;
-            goldenHourMorning.innerHTML = `
-                <i data-lucide="camera" class="time-icon"></i>
-                <div>
-                    <div class="time-label">Golden AM</div>
-                    <div>${twilightData.goldenHourMorningStart || 'N/A'} – ${twilightData.goldenHourMorningEnd || 'N/A'}</div>
-                </div>
-            `;
-
-            // Sunrise
-            const sunriseTime = document.createElement('div');
-            sunriseTime.className = 'twilight-time';
-            sunriseTime.innerHTML = `
-                <i data-lucide="sun" class="time-icon"></i>
-                <div>
-                    <div class="time-label">Sunrise</div>
-                    <div>${twilightData.sunrise}</div>
-                </div>
-            `;
-
-            // Sunset
-            const sunsetTime = document.createElement('div');
-            sunsetTime.className = 'twilight-time';
-            sunsetTime.innerHTML = `
-                <i data-lucide="sun" class="time-icon"></i>
-                <div>
-                    <div class="time-label">Sunset</div>
-                    <div>${twilightData.sunset}</div>
-                </div>
-            `;
-            
-            // Golden Hour Evening (if enabled)
-            const goldenHourEvening = document.createElement('div');
-            goldenHourEvening.className = `twilight-time golden-hour ${this.showGoldenHour ? '' : 'hidden'}`;
-            goldenHourEvening.innerHTML = `
-                <i data-lucide="camera" class="time-icon"></i>
-                <div>
-                    <div class="time-label">Golden PM</div>
-                    <div>${twilightData.goldenHourEveningStart || 'N/A'} – ${twilightData.goldenHourEveningEnd || 'N/A'}</div>
-                </div>
-            `;
-
-            // Dusk (Civil Twilight End)
-            const duskTime = document.createElement('div');
-            duskTime.className = 'twilight-time';
-            duskTime.innerHTML = `
-                <i data-lucide="sunset" class="time-icon"></i>
-                <div>
-                    <div class="time-label">Dusk</div>
-                    <div>${twilightData.dusk}</div>
-                </div>
-            `;
-
-            twilightTimes.appendChild(dawnTime);
-            twilightTimes.appendChild(goldenHourMorning);
-            twilightTimes.appendChild(sunriseTime);
-            twilightTimes.appendChild(sunsetTime);
-            twilightTimes.appendChild(goldenHourEvening);
-            twilightTimes.appendChild(duskTime);
-            
-            // Re-initialize Lucide icons for dynamically added content
             if (window.lucide) {
                 window.lucide.createIcons();
             }
-        } else if (twilightData && twilightData.error) {
-            twilightTimes.innerHTML = '<div class="twilight-time error">API Error</div>';
         } else {
-            twilightTimes.innerHTML = '<div class="twilight-time">Loading...</div>';
+            body.className = 'day-status';
+            body.textContent = twilightData && twilightData.error ? 'Couldn\'t load' : 'Loading…';
         }
+        element.appendChild(body);
 
-        element.appendChild(dateHeader);
-        element.appendChild(twilightTimes);
-        
         return element;
     }
-    
+
     /**
      * Animate card entrance with stagger effect
      */
@@ -1583,7 +1678,7 @@ class SolarSymmetryApp {
         
         // Add subtle pulse to golden hour times if visible
         const goldenHourTimes = Array.from(cards).flatMap(card =>
-            Array.from(card.querySelectorAll('.twilight-time.golden-hour:not(.hidden)'))
+            Array.from(card.querySelectorAll('.golden-hour:not(.hidden)'))
         );
         if (goldenHourTimes.length > 0) {
             setTimeout(() => {
@@ -1609,6 +1704,7 @@ class SolarSymmetryApp {
      */
     renderSymmetryEmptyState() {
         this.clearColumnStatus();
+        this.elements.jumpToToday.classList.add('hidden');
         this.elements.todayHero.classList.add('hidden');
 
         const currentContainer = this.elements.currentDates;
@@ -1661,6 +1757,7 @@ class SolarSymmetryApp {
             setTimeout(() => window.lucide.createIcons(), 0);
         }
         
+        this.elements.jumpToTodayCities.classList.add('hidden');
         city1Container.innerHTML = '';
         city2Container.innerHTML = '';
         city1Container.appendChild(city1Empty);
@@ -1743,6 +1840,8 @@ class SolarSymmetryApp {
             this.elements.city2Input.focus();
         }
         
+        this.updateCitiesJumpLink();
+
         // Refresh the cities view if needed
         if (this.currentView === 'cities') {
             this.renderCitiesEmptyState();
