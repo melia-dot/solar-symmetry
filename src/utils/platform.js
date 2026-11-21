@@ -34,7 +34,7 @@ const capacitorCoreReady = isNativeApp()
  * blank flash in between. (The launch screen also hides by itself after 3s,
  * see capacitor.config.json, in case anything here fails.)
  */
-const MIN_LAUNCH_SCREEN_MS = 1000; // the launch artwork stays at least this long (Mikael, v1.7.5: 1.5s was too long)
+const MIN_LAUNCH_SCREEN_MS = 800; // the launch artwork stays at least this long (Mikael, v1.7.6)
 
 function onAppReady() {
     if (!capacitorCoreReady) return;

@@ -21,6 +21,9 @@ Solar Symmetry uses **Semantic Versioning** (MAJOR.MINOR.PATCH):
 
 ## Version History
 
+### 1.7.6 (2026-11-21)
+- Launch screen shortened to about 0.8 seconds
+
 ### 1.7.5 (2026-11-21)
 - Launch screen shortened to about 1 second (1.5 seconds felt too long)
 
