@@ -47,6 +47,8 @@ apps are the product, and the website no longer has to keep working.
    can stay until there's a reason to remove them.
 9. Privacy policy + terms: **a public Notion page in Mikael's name** (decided
    2026-11-21), not GitHub Pages.
+10. Phase 1b result (2026-11-21): "Coast" icon, launch screen and palette (v1.6.2)
+    approved on the human's iPhone SE and merged to `main`.
 
 ## Phase 1: Native shell (Capacitor)
 
@@ -147,7 +149,9 @@ changed in Settings; analytics never runs without Yes.
 Moved here from Phase 1b (decided 2026-11-21). Uses the Phase 1b colour tokens in
 `src/styles/main.css`.
 
-- After local sunset, switch to a dark warm theme (night/plum background, cream text)
+- After local sunset, switch to a dark theme: a dark night/sea-blue background from the
+  Coast palette (deep sea blue, built from sea `#2a63b0` and navy `#1f2d4a`; no plum),
+  cream text
 - Also respect the phone's dark mode setting. Phase 1 locked the iOS app to light
   mode (`UIUserInterfaceStyle` in `ios/App/App/Info.plist`); undo that here
 - Keep it calm and soft: no harsh contrast; check text contrast (WCAG AA)
