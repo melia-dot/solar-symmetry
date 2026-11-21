@@ -2,9 +2,11 @@
  * City picker: search for a city or "Use my location". Used by the welcome
  * screen (onboarding) and by Settings → City.
  *
- * Searches run on the Search button / keyboard Search key only (OpenStreetMap
- * doesn't allow search-as-you-type; see src/clients/geocoding.js). Location
- * permission is asked only when the user taps "Use my location".
+ * Suggestions appear while typing, from the town list inside the app
+ * (src/clients/town-search.js). The Search button / keyboard Search key asks
+ * OpenStreetMap, for smaller places (it doesn't allow search-as-you-type; see
+ * src/clients/geocoding.js). Location permission is asked only when the user
+ * taps "Use my location".
  *
  *   const picker = new CityPicker(element, {
  *       geocoding,                 // a GeocodingClient
@@ -33,7 +35,7 @@ class CityPicker {
             <div class="cp-search">
                 <form class="cp-form" role="search">
                     <input type="text" class="cp-input" placeholder="Search for your city…"
-                        autocomplete="off" autocapitalize="words" enterkeyhint="search"
+                        autocomplete="off" autocorrect="off" spellcheck="false" autocapitalize="words" enterkeyhint="search"
                         aria-label="City">
                     <button type="submit" class="cp-search-btn">Search</button>
                 </form>
@@ -63,9 +65,10 @@ class CityPicker {
             this.search();
         });
         this.el.input.addEventListener('input', () => {
-            // Old results no longer match what's typed
-            this.el.results.innerHTML = '';
+            // Old results no longer match what's typed: suggest from the town list
+            this.searchId++;
             this.setStatus('');
+            this.suggest(this.el.input.value);
         });
         this.el.locate.addEventListener('click', () => this.useMyLocation());
         this.el.change.addEventListener('click', () => {
@@ -114,13 +117,35 @@ class CityPicker {
         this.setBusy(false);
         if (id !== this.searchId) return; // a newer search has started
 
-        this.el.results.innerHTML = '';
         if (results.length === 0) {
+            this.el.results.innerHTML = '';
             this.setStatus('No places found. Check the spelling, try a bigger town nearby, or check your internet connection.', true);
             return;
         }
         this.setStatus('');
-        results.forEach((location) => {
+        this.showResults(results, GeocodingClient);
+    }
+
+    /** Town-list suggestions for what's typed (instant, no internet needed) */
+    async suggest(query) {
+        const id = this.searchId;
+        const towns = query.trim().length >= 2
+            ? await TownSearch.shared.search(query).catch(() => [])
+            : [];
+        if (id !== this.searchId) return; // typed on, or a search started
+        if (towns.length === 0) {
+            this.el.results.innerHTML = '';
+            if (query.trim().length >= 2) this.setStatus('Not in the list? Press Search to look further.');
+            return;
+        }
+        this.setStatus('');
+        this.showResults(towns, TownSearch);
+    }
+
+    /** One button per place, then the credit for where the list came from */
+    showResults(locations, source) {
+        this.el.results.innerHTML = '';
+        locations.forEach((location) => {
             const row = document.createElement('button');
             row.type = 'button';
             row.className = 'cp-result';
@@ -131,11 +156,11 @@ class CityPicker {
         });
         const credit = document.createElement('a');
         credit.className = 'search-credit';
-        credit.href = GeocodingClient.ATTRIBUTION_URL;
-        credit.textContent = GeocodingClient.ATTRIBUTION;
+        credit.href = source.ATTRIBUTION_URL;
+        credit.textContent = source.ATTRIBUTION;
         credit.addEventListener('click', (e) => {
             e.preventDefault();
-            openExternalLink(GeocodingClient.ATTRIBUTION_URL);
+            openExternalLink(source.ATTRIBUTION_URL);
         });
         this.el.results.appendChild(credit);
     }

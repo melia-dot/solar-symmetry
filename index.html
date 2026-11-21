@@ -47,7 +47,7 @@
                 <!-- Symmetry View Location Selector -->
                 <div id="symmetryLocationSelector" class="location-selector">
                     <div class="input-wrapper">
-                        <input type="text" id="locationInput" placeholder="Search for your city…" autocomplete="off" enterkeyhint="search">
+                        <input type="text" id="locationInput" placeholder="Search for your city…" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
                         <button class="clear-btn hidden" id="locationClearBtn" aria-label="Clear location">×</button>
                     </div>
                     <div id="locationDropdown" class="location-dropdown hidden"></div>
@@ -57,14 +57,14 @@
                 <div id="citiesLocationSelector" class="cities-selector hidden">
                     <div class="city-selector">
                         <div class="input-wrapper">
-                            <input type="text" id="city1Input" placeholder="Search first city…" autocomplete="off" enterkeyhint="search">
+                            <input type="text" id="city1Input" placeholder="Search first city…" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
                             <button class="clear-btn hidden" id="city1ClearBtn" aria-label="Clear city 1">×</button>
                         </div>
                         <div id="city1Dropdown" class="location-dropdown hidden"></div>
                     </div>
                     <div class="city-selector">
                         <div class="input-wrapper">
-                            <input type="text" id="city2Input" placeholder="Search second city…" autocomplete="off" enterkeyhint="search">
+                            <input type="text" id="city2Input" placeholder="Search second city…" autocomplete="off" autocorrect="off" spellcheck="false" enterkeyhint="search">
                             <button class="clear-btn hidden" id="city2ClearBtn" aria-label="Clear city 2">×</button>
                         </div>
                         <div id="city2Dropdown" class="location-dropdown hidden"></div>
@@ -163,6 +163,7 @@
 
             <!-- Cities Compare View Container -->
             <div id="citiesContainer" class="comparison-container hidden">
+                <button type="button" id="jumpToTodayCities" class="jump-today hidden">Jump to today ↓</button>
                 <div class="dates-grid">
                     <!-- City 1 Column -->
                     <div class="column city1-column">
@@ -255,6 +256,7 @@
     <script src="src/scripts/pull-to-refresh.js"></script>
     <script src="src/utils/date-calculations.js"></script>
     <script src="src/clients/geocoding.js"></script>
+    <script src="src/clients/town-search.js"></script>
     <script src="src/vendor/suncalc.js"></script>
     <script src="src/vendor/tz-lookup.js"></script>
     <script src="src/clients/twilight.js"></script>

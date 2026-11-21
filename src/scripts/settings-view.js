@@ -78,6 +78,9 @@ class SettingsView {
                         <button type="button" class="settings-row" data-link="osm">
                             <span>${GeocodingClient.ATTRIBUTION}</span><span class="row-end"><i data-lucide="chevron-right"></i></span>
                         </button>
+                        <button type="button" class="settings-row" data-link="geonames">
+                            <span>${TownSearch.ATTRIBUTION}</span><span class="row-end"><i data-lucide="chevron-right"></i></span>
+                        </button>
                         <button type="button" class="settings-row settings-version">
                             <span>Version</span><span class="row-end">${window.APP_VERSION || ''}</span>
                         </button>
@@ -127,8 +130,9 @@ class SettingsView {
         // Links
         root.querySelectorAll('[data-link]').forEach((row) => {
             const key = row.dataset.link;
-            const url = key === 'osm' ? GeocodingClient.ATTRIBUTION_URL : LEGAL_LINKS[key];
-            if (key !== 'osm') {
+            const credits = { osm: GeocodingClient.ATTRIBUTION_URL, geonames: TownSearch.ATTRIBUTION_URL };
+            const url = credits[key] || LEGAL_LINKS[key];
+            if (!credits[key]) {
                 row.querySelector('.row-end').innerHTML = url ? '<i data-lucide="chevron-right"></i>' : 'Coming soon';
                 row.disabled = !url;
             }

@@ -21,6 +21,13 @@ Solar Symmetry uses **Semantic Versioning** (MAJOR.MINOR.PATCH):
 
 ## Version History
 
+### 1.8.0 (2026-11-21)
+- City suggestions while typing are back, in every search box (Symmetry, Compare Cities, welcome screens, Settings): "South" already suggests places, "Southp" shows the Southports, biggest first. They come from a list of ~172,000 towns (every place with 1,000+ people, from GeoNames, CC BY 4.0) inside the app (`src/data/towns.json`, ~7 MB; rebuilt with `scripts/build-towns.mjs`): instant, offline, and nothing typed leaves the phone. Accents and punctuation don't matter ("malmo", "st helens"), and big cities also match their local names ("Göteborg", "München", "Wien"). Typing ", us" or ", England" after the name narrows it down
+- Enter picks the top suggestion. Smaller places not in the list: "Search all places for …" under the suggestions (or the Search button on the welcome screens and in Settings) asks OpenStreetMap as before, which doesn't allow search-as-you-type
+- Credit "Town list by GeoNames (CC BY 4.0)" under the suggestions and in Settings
+- Compare Cities has "Jump to today ↓" too (when the month includes today)
+- City boxes no longer spell-check or autocorrect town names
+
 ### 1.7.7 (2026-11-21)
 - Fixed: "Light returns after work" could be up to 6 days late (Southport said Feb 7; sunset first passes 5pm on Feb 5). It now checks every day instead of once a week, and uses the same sunset time the day list shows, so the tile and the list always agree. Days left are counted in calendar days, so a clock change can't add one
 - Day cards: the golden lines are labelled "Golden am" and "Golden pm". On phones up to 400px wide (iPhone SE to iPhone 13/14) they have no camera icon, so they still fit on one line

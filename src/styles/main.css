@@ -2307,3 +2307,10 @@ body.overlay-open {
         padding: 1rem;
     }
 }
+
+/* v1.8.0: "Search all places for …" under the town suggestions */
+.location-option + .search-hint {
+    border-top: 1px solid var(--surface-muted);
+    font-weight: 500;
+    font-size: 0.9rem;
+}

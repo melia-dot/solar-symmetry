@@ -30,6 +30,11 @@ class SolarSymmetryApp {
         this.city1 = null;
         this.city2 = null;
         
+        // Town suggestions while typing (list inside the app; see town-search.js).
+        // Loaded a moment after start so the first letters typed get instant answers
+        this.towns = TownSearch.shared;
+        setTimeout(() => this.towns.load().catch(() => {}), 1500);
+
         this.initializeElements();
         this.bindEvents();
         this.initializeApp();
@@ -86,6 +91,7 @@ class SolarSymmetryApp {
             nextMonth: document.getElementById('nextMonth'),
             goldenHourToggle: document.getElementById('goldenHourToggle'),
             jumpToToday: document.getElementById('jumpToToday'),
+            jumpToTodayCities: document.getElementById('jumpToTodayCities'),
             lightAfterWorkCard: document.getElementById('lightAfterWorkCard'),
             lightAfterWorkTitle: document.getElementById('lightAfterWorkTitle'),
             lightAfterWorkMessage: document.getElementById('lightAfterWorkMessage'),
@@ -216,7 +222,8 @@ class SolarSymmetryApp {
         });
 
         // "Jump to today": scroll the page down to today's row
-        this.elements.jumpToToday.addEventListener('click', () => this.scrollToToday());
+        this.elements.jumpToToday.addEventListener('click', () => this.scrollToToday(this.elements.currentDates));
+        this.elements.jumpToTodayCities.addEventListener('click', () => this.scrollToToday(this.elements.city1Dates));
 
         // Keyboard navigation for months
         document.addEventListener('keydown', (e) => {
@@ -391,11 +398,15 @@ class SolarSymmetryApp {
     handleLocationKeydown(e) {
         const dropdown = this.elements.locationDropdown;
 
-        // Enter / the keyboard's Search key runs the search (OpenStreetMap
-        // doesn't allow search-as-you-type), unless a result is highlighted
+        // Enter / the keyboard's Search key: the highlighted place, else the top
+        // suggestion for what's typed, else an OpenStreetMap search
         if (e.key === 'Enter' && this.selectedLocationIndex < 0) {
             e.preventDefault();
-            this.runLocationSearch();
+            if (this.currentLocations.length > 0 && dropdown.dataset.query === e.target.value) {
+                this.selectLocation(this.currentLocations[0]);
+            } else {
+                this.runLocationSearch();
+            }
             return;
         }
         
@@ -455,16 +466,17 @@ class SolarSymmetryApp {
     /**
      * Handle location search input
      */
-    handleLocationSearch(query) {
+    async handleLocationSearch(query) {
         if (query.trim().length < 2) {
             this.hideLocationDropdown();
             return;
         }
 
-        // Typing only offers the search; it runs on Enter or a tap
-        this.currentLocations = [];
-        this.selectedLocationIndex = -1;
-        this.showSearchHint(this.elements.locationDropdown, query, () => this.runLocationSearch());
+        // Suggestions from the town list while typing; "Search for …" under
+        // them asks OpenStreetMap for smaller places
+        const suggestions = await this.towns.search(query).catch(() => []);
+        if (this.elements.locationInput.value !== query) return; // typed on since
+        this.showLocationDropdown(suggestions, query);
     }
 
     /** Run the symmetry-view search for what's typed (one request per search) */
@@ -479,19 +491,17 @@ class SolarSymmetryApp {
         }
     }
 
-    /** Dropdown row offering to search for the typed text */
-    showSearchHint(dropdown, query, onSearch) {
-        dropdown.innerHTML = '';
+    /** Dropdown row offering an OpenStreetMap search for the typed text */
+    appendSearchHint(dropdown, query, onSearch) {
         const hint = document.createElement('button');
         hint.type = 'button';
         hint.className = 'search-hint';
-        hint.textContent = `Search for “${query.trim()}”`;
+        hint.textContent = `Search all places for “${query.trim()}”`;
         hint.addEventListener('click', (e) => {
             e.stopPropagation();
             onSearch();
         });
         dropdown.appendChild(hint);
-        dropdown.classList.remove('hidden');
     }
 
     showSearching(dropdown) {
@@ -499,16 +509,18 @@ class SolarSymmetryApp {
         dropdown.classList.remove('hidden');
     }
 
-    /** OpenStreetMap credit under search results (required by its licence) */
-    appendSearchCredit(dropdown) {
+    /** Credit under the list (both licences require it): the town list
+     *  (GeoNames) for suggestions, OpenStreetMap for search results */
+    appendSearchCredit(dropdown, fromTownList = false) {
+        const source = fromTownList ? TownSearch : GeocodingClient;
         const credit = document.createElement('a');
         credit.className = 'search-credit';
-        credit.href = GeocodingClient.ATTRIBUTION_URL;
-        credit.textContent = GeocodingClient.ATTRIBUTION;
+        credit.href = source.ATTRIBUTION_URL;
+        credit.textContent = source.ATTRIBUTION;
         credit.addEventListener('click', (e) => {
             e.preventDefault();
             e.stopPropagation();
-            openExternalLink(GeocodingClient.ATTRIBUTION_URL);
+            openExternalLink(source.ATTRIBUTION_URL);
         });
         dropdown.appendChild(credit);
     }
@@ -516,14 +528,20 @@ class SolarSymmetryApp {
     /**
      * Show location search dropdown
      */
-    showLocationDropdown(locations) {
+    /**
+     * @param {Array} locations
+     * @param {string|null} suggestionsFor - what was typed, when these are
+     *   town-list suggestions (null: OpenStreetMap search results)
+     */
+    showLocationDropdown(locations, suggestionsFor = null) {
         const dropdown = this.elements.locationDropdown;
         dropdown.innerHTML = '';
+        dropdown.dataset.query = this.elements.locationInput.value;
         
         this.selectedLocationIndex = -1;
         this.currentLocations = locations;
 
-        if (locations.length === 0) {
+        if (locations.length === 0 && suggestionsFor === null) {
             dropdown.innerHTML = '<div class="search-hint is-busy">No places found. Check the spelling, or try a bigger town nearby.</div>';
         } else {
             locations.forEach((location, index) => {
@@ -543,7 +561,10 @@ class SolarSymmetryApp {
             });
         }
 
-        this.appendSearchCredit(dropdown);
+        if (suggestionsFor !== null) {
+            this.appendSearchHint(dropdown, suggestionsFor, () => this.runLocationSearch());
+        }
+        if (locations.length > 0) this.appendSearchCredit(dropdown, suggestionsFor !== null);
         dropdown.classList.remove('hidden');
     }
 
@@ -584,17 +605,17 @@ class SolarSymmetryApp {
     /**
      * Handle city search input
      */
-    handleCitySearch(query, cityNumber) {
+    async handleCitySearch(query, cityNumber) {
         if (query.trim().length < 2) {
             this.hideCityDropdown(cityNumber);
             return;
         }
 
-        // Typing only offers the search; it runs on Enter or a tap
-        const dropdown = cityNumber === 1 ? this.elements.city1Dropdown : this.elements.city2Dropdown;
-        this.setCitySelectedIndex(cityNumber, -1);
-        if (cityNumber === 1) this.city1Locations = []; else this.city2Locations = [];
-        this.showSearchHint(dropdown, query, () => this.runCitySearch(cityNumber));
+        // Suggestions from the town list while typing (as in the Symmetry view)
+        const input = cityNumber === 1 ? this.elements.city1Input : this.elements.city2Input;
+        const suggestions = await this.towns.search(query).catch(() => []);
+        if (input.value !== query) return; // typed on since
+        this.showCityDropdown(suggestions, cityNumber, query);
     }
 
     /** Run the Compare Cities search for one input */
@@ -618,10 +639,16 @@ class SolarSymmetryApp {
         const selectedIndex = cityNumber === 1 ? this.city1SelectedIndex : this.city2SelectedIndex;
         const locations = cityNumber === 1 ? this.city1Locations : this.city2Locations;
 
-        // Enter / Search key runs the search unless a result is highlighted
+        // Enter / Search key: the highlighted place, else the top suggestion,
+        // else an OpenStreetMap search
         if (e.key === 'Enter' && selectedIndex < 0) {
             e.preventDefault();
-            this.runCitySearch(cityNumber);
+            if (locations.length > 0 && dropdown.dataset.query === e.target.value) {
+                this.selectCity(locations[0], cityNumber);
+                e.target.blur();
+            } else {
+                this.runCitySearch(cityNumber);
+            }
             return;
         }
         
@@ -691,9 +718,11 @@ class SolarSymmetryApp {
     /**
      * Show city search dropdown
      */
-    showCityDropdown(locations, cityNumber) {
+    showCityDropdown(locations, cityNumber, suggestionsFor = null) {
         const dropdown = cityNumber === 1 ? this.elements.city1Dropdown : this.elements.city2Dropdown;
+        const input = cityNumber === 1 ? this.elements.city1Input : this.elements.city2Input;
         dropdown.innerHTML = '';
+        dropdown.dataset.query = input.value;
         
         this.setCitySelectedIndex(cityNumber, -1);
         
@@ -703,7 +732,7 @@ class SolarSymmetryApp {
             this.city2Locations = locations;
         }
 
-        if (locations.length === 0) {
+        if (locations.length === 0 && suggestionsFor === null) {
             dropdown.innerHTML = '<div class="search-hint is-busy">No places found. Check the spelling, or try a bigger town nearby.</div>';
         } else {
             locations.forEach((location, index) => {
@@ -723,7 +752,10 @@ class SolarSymmetryApp {
             });
         }
 
-        this.appendSearchCredit(dropdown);
+        if (suggestionsFor !== null) {
+            this.appendSearchHint(dropdown, suggestionsFor, () => this.runCitySearch(cityNumber));
+        }
+        if (locations.length > 0) this.appendSearchCredit(dropdown, suggestionsFor !== null);
         dropdown.classList.remove('hidden');
     }
 
@@ -1485,9 +1517,10 @@ class SolarSymmetryApp {
 
     /**
      * Smoothly scroll the page so today's row sits just under the top bar
+     * @param {Element} column - the left column of the view on screen
      */
-    scrollToToday() {
-        const card = this.elements.currentDates.querySelector('.date-item.today');
+    scrollToToday(column) {
+        const card = column.querySelector('.date-item.today');
         if (!card) return;
         const header = document.querySelector('.location-header');
         const offset = (header ? header.getBoundingClientRect().height : 0) + 12;
@@ -1522,6 +1555,8 @@ class SolarSymmetryApp {
     renderCity1Column(citiesData) {
         const container = this.elements.city1Dates;
         container.innerHTML = '';
+        // "Jump to today" only when this month has today in it
+        this.elements.jumpToTodayCities.classList.toggle('hidden', !citiesData.some(item => item.isToday));
 
         citiesData.forEach(item => {
             const dateElement = this.createDateElement(
@@ -1714,6 +1749,7 @@ class SolarSymmetryApp {
             setTimeout(() => window.lucide.createIcons(), 0);
         }
         
+        this.elements.jumpToTodayCities.classList.add('hidden');
         city1Container.innerHTML = '';
         city2Container.innerHTML = '';
         city1Container.appendChild(city1Empty);
