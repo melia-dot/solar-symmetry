@@ -77,7 +77,12 @@ body {
     background: var(--bg-frosted);
     backdrop-filter: blur(20px);
     -webkit-backdrop-filter: blur(20px);
-    padding: 1.5rem 3rem;
+    padding: 0.75rem 3rem;
+}
+
+/* City search: under the top bar, scrolls away with the page */
+.location-bar {
+    margin: 0 auto 2rem;
 }
 
 .location-selector {
@@ -193,7 +198,6 @@ body {
     display: flex;
     justify-content: center;
     gap: 0.5rem;
-    margin-bottom: 2rem;
 }
 
 .view-btn {
@@ -289,11 +293,8 @@ body {
     width: 100%;
 }
 
-/* Month Navigation */
+/* Month Navigation (scrolls with the page; only the top bar is fixed) */
 .month-navigation {
-    position: sticky;
-    top: 100px;
-    z-index: 10;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -360,21 +361,36 @@ body {
 
 .dates-grid {
     display: grid;
-    grid-template-columns: 1fr 1fr;
-    min-height: 600px;
-}
-
-.column {
+    grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+    grid-auto-flow: row dense;   /* each column's cards fill its own rows in order */
+    column-gap: 1.5rem;
+    row-gap: 1rem;
     padding: 3rem;
 }
 
-.current-column {
-    background: var(--surface);
+/* The two columns and their lists don't draw boxes: every card sits straight in
+   the grid above, so a date and its mirror share a row and the same height. */
+.dates-grid .column,
+.dates-grid .dates-list {
+    display: contents;
 }
 
-.mirrored-column,
-.city2-column {
-    background: var(--surface-alt);
+.dates-grid .column-header {
+    grid-row: 1;
+}
+
+.current-column .column-header,
+.city1-column .column-header,
+.current-column .date-item,
+.city1-column .date-item {
+    grid-column: 1;
+}
+
+.mirrored-column .column-header,
+.city2-column .column-header,
+.mirrored-column .date-item,
+.city2-column .date-item {
+    grid-column: 2;
 }
 
 .column-header {
@@ -395,20 +411,18 @@ body {
     color: var(--accent-text);
 }
 
-.dates-list {
-    display: flex;
-    flex-direction: column;
-    gap: 1rem;
-}
 
-/* "Couldn't load N dates" line under a column header */
+/* "Couldn't load N dates" line, inside the column header */
 .load-status {
     display: flex;
     align-items: center;
     justify-content: center;
     flex-wrap: wrap;
     gap: 0.5rem;
-    margin: -1rem 0 1rem;
+    margin: 0.5rem 0 0;
+    text-transform: none;
+    letter-spacing: normal;
+    font-weight: 400;
     font-size: 0.8rem;
     color: var(--text-muted);
 }
@@ -443,10 +457,10 @@ body {
     transition: all 0.2s ease;
 }
 
-.date-item:hover {
-    background: var(--surface-hover);
-    transform: translateY(-2px);
-    border-left: 3px solid var(--accent-line);
+@media (hover: hover) {
+    .date-item:hover {
+        background: var(--surface-hover);
+    }
 }
 
 .date-item.today {
@@ -692,23 +706,13 @@ body {
         min-width: 250px;
     }
     
-    .comparison-container {
-        overflow-x: auto;
-        overflow-y: hidden;
-        -webkit-overflow-scrolling: touch;
-    }
-    
     .dates-grid {
-        grid-template-columns: minmax(180px, 1fr) minmax(180px, 1fr);
-        min-width: 360px;
-    }
-    
-    .column {
-        padding: 1.5rem 1rem;
+        padding: 1.25rem 0.75rem;
+        column-gap: 0.5rem;
+        row-gap: 0.5rem;
     }
     
     .month-navigation {
-        top: 80px;
         gap: 1.5rem;
         padding: 1.5rem;
         margin-bottom: 2rem;
@@ -756,7 +760,6 @@ body {
     }
     
     .month-navigation {
-        top: 70px;
         padding: 1rem;
         margin-bottom: 1.5rem;
     }
@@ -1080,40 +1083,34 @@ body {
     }
 }
 
-/* Extra small phones (iPhone SE) */
-@media (max-width: 380px) {
+/* Small phones (iPhone SE, 375pt wide): tighter page edges so the Today tile
+   and both day-list columns fit side by side with nothing cut off */
+@media (max-width: 400px) {
+    .location-header {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
+    .main-content {
+        padding-left: 1rem;
+        padding-right: 1rem;
+    }
+
     .dates-grid {
-        grid-template-columns: minmax(160px, 1fr) minmax(160px, 1fr);
-        min-width: 320px;
+        padding: 1rem 0.5rem;
     }
-    
-    .column {
-        padding: 1rem 0.75rem;
-    }
-    
+
     .column-header {
         font-size: 0.7rem;
-        margin-bottom: 1.5rem;
+        margin-bottom: 0.75rem;
     }
-    
+
     .date-item {
-        padding: 1rem 0.75rem;
+        padding: 0.75rem 0.6rem;
     }
-    
+
     .date-header {
         font-size: 1rem;
-    }
-    
-    .twilight-times {
-        font-size: 0.75rem;
-    }
-    
-    .time-icon {
-        font-size: 0.625rem;
-    }
-    
-    .time-label {
-        font-size: 0.625rem;
     }
 }
 
@@ -2096,4 +2093,207 @@ body.overlay-open {
 /* The hidden "Reset onboarding" row is last; don't leave a line under Version */
 .settings-version:has(+ .settings-reset.hidden) {
     border-bottom: none;
+}
+
+/* =================================================================
+   v1.7.3: day cards, jump to today, version at the bottom
+   ================================================================= */
+
+/* Day card: Daybreak / Dark by big (as on the Today tile), then sunrise,
+   sunset and golden hours small, one line each, never wrapping */
+.date-item {
+    min-width: 0;
+}
+
+.day-main {
+    display: flex;
+    flex-direction: column;
+    gap: 0.25rem;
+}
+
+.day-row {
+    display: grid;
+    grid-template-columns: auto 1fr;
+    align-items: baseline;
+    column-gap: 0.4rem;
+    white-space: nowrap;
+}
+
+.day-row strong {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
+.day-big span {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+.day-big strong {
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--text);
+}
+
+.day-small {
+    display: flex;
+    flex-direction: column;
+    gap: 0.15rem;
+    margin-top: 0.6rem;
+    padding-top: 0.5rem;
+    border-top: 1px solid rgba(31, 45, 74, 0.12);
+    font-size: 0.75rem;
+    color: var(--text-muted);
+}
+
+.day-small .day-row {
+    grid-template-columns: 12px auto 1fr;
+    column-gap: 0.3rem;
+    align-items: center;
+}
+
+.day-small strong {
+    font-weight: 600;
+}
+
+.day-small svg {
+    width: 12px;
+    height: 12px;
+    color: var(--accent-icon);
+}
+
+.day-small .golden-hour.hidden {
+    display: none;
+}
+
+.day-status {
+    font-size: 0.8rem;
+    color: var(--text-muted);
+}
+
+/* Today's card (gold) and its mirror (gold outline): the row stands out */
+.date-item.today .day-big span,
+.date-item.today .day-small {
+    color: var(--on-accent-muted);
+}
+
+.date-item.today .day-big strong {
+    color: var(--on-accent);
+}
+
+.date-item.today .day-small svg {
+    color: var(--on-accent-icon);
+}
+
+.date-item.today-row {
+    background: var(--cream);
+    box-shadow: inset 0 0 0 2px var(--accent);
+}
+
+@media (max-width: 400px) {
+    .day-big span {
+        font-size: 0.75rem;
+    }
+
+    .day-big strong {
+        font-size: 1.05rem;
+    }
+
+    .day-small {
+        font-size: 0.7rem;
+    }
+
+    .day-small .day-row {
+        grid-template-columns: 11px auto 1fr;
+        column-gap: 0.25rem;
+    }
+
+    .day-small svg {
+        width: 11px;
+        height: 11px;
+    }
+}
+
+/* "Jump to today" just above the day list */
+.jump-today {
+    display: block;
+    margin: 1rem auto -1.5rem;
+    min-height: 44px;
+    padding: 0 1rem;
+    border: none;
+    background: transparent;
+    color: var(--accent-text);
+    font: inherit;
+    font-size: 0.9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.jump-today.hidden {
+    display: none;
+}
+
+@media (max-width: 768px) {
+    .jump-today {
+        margin-bottom: -0.5rem;
+    }
+}
+
+/* App version: small and centred at the very bottom of the page */
+.app-footer {
+    padding-top: 2rem;
+    text-align: center;
+}
+
+.app-footer .app-version {
+    display: inline-block;
+}
+
+/* Today tile on small phones: label above each big time, so "Same light on"
+   fits next to Today with nothing cut off */
+@media (max-width: 480px) {
+    .today-hero {
+        padding: 1rem;
+    }
+
+    .hero-pair {
+        gap: 0.5rem;
+    }
+
+    .hero-day {
+        padding: 0.75rem;
+        min-width: 0;
+    }
+
+    .hero-label {
+        font-size: 0.68rem;
+        letter-spacing: 0.04em;
+    }
+
+    .hero-date {
+        margin-bottom: 0.75rem;
+    }
+
+    .hero-big {
+        grid-template-columns: 1fr;
+        row-gap: 0;
+    }
+
+    .hero-big span {
+        font-size: 0.75rem;
+    }
+
+    .hero-big strong {
+        font-size: 1.3rem;
+        line-height: 1.2;
+    }
+
+    .hero-small .hero-row {
+        white-space: nowrap;
+    }
+
+    .hero-message {
+        margin: 3.5rem -1rem -1rem;
+        padding: 1rem;
+    }
 }

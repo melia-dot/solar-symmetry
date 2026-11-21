@@ -85,6 +85,7 @@ class SolarSymmetryApp {
             prevMonth: document.getElementById('prevMonth'),
             nextMonth: document.getElementById('nextMonth'),
             goldenHourToggle: document.getElementById('goldenHourToggle'),
+            jumpToToday: document.getElementById('jumpToToday'),
             lightAfterWorkCard: document.getElementById('lightAfterWorkCard'),
             lightAfterWorkTitle: document.getElementById('lightAfterWorkTitle'),
             lightAfterWorkMessage: document.getElementById('lightAfterWorkMessage'),
@@ -213,6 +214,9 @@ class SolarSymmetryApp {
         this.elements.goldenHourToggle.addEventListener('click', () => {
             this.toggleGoldenHour();
         });
+
+        // "Jump to today": scroll the page down to today's row
+        this.elements.jumpToToday.addEventListener('click', () => this.scrollToToday());
 
         // Keyboard navigation for months
         document.addEventListener('keydown', (e) => {
@@ -836,7 +840,7 @@ class SolarSymmetryApp {
         }
         
         // Just toggle visibility of existing golden hour elements
-        const goldenHourElements = document.querySelectorAll('.twilight-time.golden-hour');
+        const goldenHourElements = document.querySelectorAll('.date-item .golden-hour');
         goldenHourElements.forEach((element, index) => {
             if (this.showGoldenHour) {
                 element.classList.remove('hidden');
@@ -1309,7 +1313,7 @@ class SolarSymmetryApp {
 
         const newCard = column === 'current'
             ? this.createDateElement(item.current, item.currentTwilight, item.isToday)
-            : this.createDateElement(item.mirrored, item.mirroredTwilight, false);
+            : this.createDateElement(item.mirrored, item.mirroredTwilight, false, item.isToday);
 
         if (!window.anime) {
             newCard.style.opacity = '';
@@ -1344,7 +1348,7 @@ class SolarSymmetryApp {
                 <span class="load-status-text"></span>
                 <button type="button" class="load-status-retry">Retry</button>
             `;
-            container.parentElement.insertBefore(status, container);
+            container.parentElement.querySelector('.column-header').appendChild(status);
             this.columnStatus[column] = status;
         }
 
@@ -1488,6 +1492,8 @@ class SolarSymmetryApp {
     renderCurrentColumn(monthData) {
         const container = this.elements.currentDates;
         container.innerHTML = '';
+        // "Jump to today" only when this month has today in it
+        this.elements.jumpToToday.classList.toggle('hidden', !monthData.some(item => item.isToday));
 
         monthData.forEach(item => {
             const dateElement = this.createDateElement(
@@ -1503,6 +1509,18 @@ class SolarSymmetryApp {
     }
 
     /**
+     * Smoothly scroll the page so today's row sits just under the top bar
+     */
+    scrollToToday() {
+        const card = this.elements.currentDates.querySelector('.date-item.today');
+        if (!card) return;
+        const header = document.querySelector('.location-header');
+        const offset = (header ? header.getBoundingClientRect().height : 0) + 12;
+        const top = card.getBoundingClientRect().top + window.scrollY - offset;
+        window.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+    }
+
+    /**
      * Render mirrored dates column (symmetry view)
      */
     renderMirroredColumn(monthData) {
@@ -1511,9 +1529,10 @@ class SolarSymmetryApp {
 
         monthData.forEach(item => {
             const dateElement = this.createDateElement(
-                item.mirrored, 
-                item.mirroredTwilight, 
-                false
+                item.mirrored,
+                item.mirroredTwilight,
+                false,
+                item.isToday
             );
             container.appendChild(dateElement);
         });
@@ -1563,111 +1582,51 @@ class SolarSymmetryApp {
     }
 
     /**
-     * Create a date element with all twilight and sun times
+     * One day card: Daybreak / Dark by big (as on the Today tile), then sunrise,
+     * sunset and the two golden hours small, one line each.
+     * @param {boolean} isToday - today's card (gold)
+     * @param {boolean} inTodayRow - the mirror next to today's card (gold outline)
      */
-    createDateElement(date, twilightData, isToday = false) {
+    createDateElement(date, twilightData, isToday = false, inTodayRow = false) {
         const element = document.createElement('div');
-        element.className = `date-item ${isToday ? 'today' : ''}`;
+        element.className = `date-item${isToday ? ' today' : ''}${inTodayRow ? ' today-row' : ''}`;
         element.style.opacity = '0';
         element.style.transform = 'translateY(20px)';
 
         const dateHeader = document.createElement('div');
         dateHeader.className = 'date-header';
         dateHeader.textContent = this.dateCalc.formatDate(date);
+        element.appendChild(dateHeader);
 
-        const twilightTimes = document.createElement('div');
-        twilightTimes.className = 'twilight-times';
-
+        const body = document.createElement('div');
         if (twilightData && !twilightData.error) {
-            // Dawn (Civil Twilight Begin)
-            const dawnTime = document.createElement('div');
-            dawnTime.className = 'twilight-time';
-            dawnTime.innerHTML = `
-                <i data-lucide="sunrise" class="time-icon"></i>
-                <div>
-                    <div class="time-label">Dawn</div>
-                    <div>${twilightData.dawn}</div>
+            const { daybreak, darkBy } = this.lightTimes(twilightData);
+            const span = (from, to) => `${from || 'N/A'}–${to || 'N/A'}`;
+            const golden = this.showGoldenHour ? '' : ' hidden';
+            body.innerHTML = `
+                <div class="day-main">
+                    <div class="day-row day-big"><span>Daybreak</span><strong>${daybreak}</strong></div>
+                    <div class="day-row day-big"><span>Dark by</span><strong>${darkBy}</strong></div>
+                </div>
+                <div class="day-small">
+                    <div class="day-row"><i data-lucide="sunrise"></i><span>Sunrise</span><strong>${twilightData.sunrise}</strong></div>
+                    <div class="day-row"><i data-lucide="sunset"></i><span>Sunset</span><strong>${twilightData.sunset}</strong></div>
+                    <div class="day-row golden-hour${golden}"><i data-lucide="camera"></i><span>Golden</span><strong>${span(twilightData.goldenHourMorningStart, twilightData.goldenHourMorningEnd)}</strong></div>
+                    <div class="day-row golden-hour${golden}"><i data-lucide="camera"></i><span>Golden</span><strong>${span(twilightData.goldenHourEveningStart, twilightData.goldenHourEveningEnd)}</strong></div>
                 </div>
             `;
-            
-            // Golden Hour Morning (if enabled)
-            const goldenHourMorning = document.createElement('div');
-            goldenHourMorning.className = `twilight-time golden-hour ${this.showGoldenHour ? '' : 'hidden'}`;
-            goldenHourMorning.innerHTML = `
-                <i data-lucide="camera" class="time-icon"></i>
-                <div>
-                    <div class="time-label">Golden AM</div>
-                    <div>${twilightData.goldenHourMorningStart || 'N/A'} – ${twilightData.goldenHourMorningEnd || 'N/A'}</div>
-                </div>
-            `;
-
-            // Sunrise
-            const sunriseTime = document.createElement('div');
-            sunriseTime.className = 'twilight-time';
-            sunriseTime.innerHTML = `
-                <i data-lucide="sun" class="time-icon"></i>
-                <div>
-                    <div class="time-label">Sunrise</div>
-                    <div>${twilightData.sunrise}</div>
-                </div>
-            `;
-
-            // Sunset
-            const sunsetTime = document.createElement('div');
-            sunsetTime.className = 'twilight-time';
-            sunsetTime.innerHTML = `
-                <i data-lucide="sun" class="time-icon"></i>
-                <div>
-                    <div class="time-label">Sunset</div>
-                    <div>${twilightData.sunset}</div>
-                </div>
-            `;
-            
-            // Golden Hour Evening (if enabled)
-            const goldenHourEvening = document.createElement('div');
-            goldenHourEvening.className = `twilight-time golden-hour ${this.showGoldenHour ? '' : 'hidden'}`;
-            goldenHourEvening.innerHTML = `
-                <i data-lucide="camera" class="time-icon"></i>
-                <div>
-                    <div class="time-label">Golden PM</div>
-                    <div>${twilightData.goldenHourEveningStart || 'N/A'} – ${twilightData.goldenHourEveningEnd || 'N/A'}</div>
-                </div>
-            `;
-
-            // Dusk (Civil Twilight End)
-            const duskTime = document.createElement('div');
-            duskTime.className = 'twilight-time';
-            duskTime.innerHTML = `
-                <i data-lucide="sunset" class="time-icon"></i>
-                <div>
-                    <div class="time-label">Dusk</div>
-                    <div>${twilightData.dusk}</div>
-                </div>
-            `;
-
-            twilightTimes.appendChild(dawnTime);
-            twilightTimes.appendChild(goldenHourMorning);
-            twilightTimes.appendChild(sunriseTime);
-            twilightTimes.appendChild(sunsetTime);
-            twilightTimes.appendChild(goldenHourEvening);
-            twilightTimes.appendChild(duskTime);
-            
-            // Re-initialize Lucide icons for dynamically added content
             if (window.lucide) {
                 window.lucide.createIcons();
             }
-        } else if (twilightData && twilightData.error) {
-            twilightTimes.innerHTML = '<div class="twilight-time error">API Error</div>';
         } else {
-            twilightTimes.innerHTML = '<div class="twilight-time">Loading...</div>';
+            body.className = 'day-status';
+            body.textContent = twilightData && twilightData.error ? 'Couldn\'t load' : 'Loading…';
         }
+        element.appendChild(body);
 
-        element.appendChild(dateHeader);
-        element.appendChild(twilightTimes);
-        
         return element;
     }
-    
+
     /**
      * Animate card entrance with stagger effect
      */
@@ -1701,7 +1660,7 @@ class SolarSymmetryApp {
         
         // Add subtle pulse to golden hour times if visible
         const goldenHourTimes = Array.from(cards).flatMap(card =>
-            Array.from(card.querySelectorAll('.twilight-time.golden-hour:not(.hidden)'))
+            Array.from(card.querySelectorAll('.golden-hour:not(.hidden)'))
         );
         if (goldenHourTimes.length > 0) {
             setTimeout(() => {
@@ -1727,6 +1686,7 @@ class SolarSymmetryApp {
      */
     renderSymmetryEmptyState() {
         this.clearColumnStatus();
+        this.elements.jumpToToday.classList.add('hidden');
         this.elements.todayHero.classList.add('hidden');
 
         const currentContainer = this.elements.currentDates;

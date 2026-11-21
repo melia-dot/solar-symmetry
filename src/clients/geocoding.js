@@ -90,15 +90,14 @@ class GeocodingClient {
         // Try to build a nice display name
         const parts = [];
 
-        // Add city/town/village
-        if (address.city) {
-            parts.push(address.city);
-        } else if (address.town) {
-            parts.push(address.town);
-        } else if (address.village) {
-            parts.push(address.village);
-        } else if (address.municipality) {
-            parts.push(address.municipality);
+        // The most local place name. OpenStreetMap often puts the council
+        // district in "city" (Southport is town "Southport", city "Sefton"), so
+        // the place itself comes first, then the smallest settlement type.
+        const place = GeocodingClient.PLACE_TYPES.includes(item.addresstype) && item.name;
+        const local = place || address.hamlet || address.village || address.town
+            || address.city || address.municipality;
+        if (local) {
+            parts.push(local);
         }
 
         // Add state/region
@@ -122,8 +121,8 @@ class GeocodingClient {
     }
 
     /**
-     * Reverse geocoding: town name for a position. Asks for town/city level
-     * only (zoom 10), so no street address is ever looked up.
+     * Reverse geocoding: town name for a position. Asks for town level only
+     * (zoom 12), so no street address is ever looked up.
      * @returns {Promise<string|null>} - Location name, or null if it failed
      */
     async reverseGeocode(lat, lng) {
@@ -133,7 +132,7 @@ class GeocodingClient {
             url.searchParams.set('lon', lng.toString());
             url.searchParams.set('format', 'json');
             url.searchParams.set('addressdetails', '1');
-            url.searchParams.set('zoom', '10');
+            url.searchParams.set('zoom', '12'); // town level (10 gives the council district)
 
             const response = await fetch(url.toString());
 
@@ -231,6 +230,10 @@ class GeocodingClient {
         });
     }
 }
+
+/** Result types that are a place people live in (Nominatim "addresstype") */
+GeocodingClient.PLACE_TYPES = ['city', 'town', 'village', 'hamlet', 'suburb', 'quarter',
+    'neighbourhood', 'borough', 'municipality', 'island'];
 
 /** OpenStreetMap credit, required wherever search results are shown */
 GeocodingClient.ATTRIBUTION = 'Search by © OpenStreetMap contributors';

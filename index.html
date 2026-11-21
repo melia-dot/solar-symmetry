@@ -16,7 +16,7 @@
 </head>
 <body>
     <div class="app-container">
-        <!-- Fixed Location Header -->
+        <!-- Top bar: only the tabs and the gear stay fixed -->
         <header class="location-header">
             <!-- View Toggle -->
             <div class="view-toggle">
@@ -38,38 +38,40 @@
                     <i data-lucide="settings"></i>
                 </button>
             </div>
-
-            <!-- Symmetry View Location Selector -->
-            <div id="symmetryLocationSelector" class="location-selector">
-                <div class="input-wrapper">
-                    <input type="text" id="locationInput" placeholder="Search for your city…" autocomplete="off" enterkeyhint="search">
-                    <button class="clear-btn hidden" id="locationClearBtn" aria-label="Clear location">×</button>
-                </div>
-                <div id="locationDropdown" class="location-dropdown hidden"></div>
-                <div id="appVersion" class="app-version"></div>
-            </div>
-
-            <!-- Cities Compare View Location Selectors -->
-            <div id="citiesLocationSelector" class="cities-selector hidden">
-                <div class="city-selector">
-                    <div class="input-wrapper">
-                        <input type="text" id="city1Input" placeholder="Search first city…" autocomplete="off" enterkeyhint="search">
-                        <button class="clear-btn hidden" id="city1ClearBtn" aria-label="Clear city 1">×</button>
-                    </div>
-                    <div id="city1Dropdown" class="location-dropdown hidden"></div>
-                </div>
-                <div class="city-selector">
-                    <div class="input-wrapper">
-                        <input type="text" id="city2Input" placeholder="Search second city…" autocomplete="off" enterkeyhint="search">
-                        <button class="clear-btn hidden" id="city2ClearBtn" aria-label="Clear city 2">×</button>
-                    </div>
-                    <div id="city2Dropdown" class="location-dropdown hidden"></div>
-                </div>
-            </div>
         </header>
 
         <!-- Main Content -->
         <main class="main-content">
+            <!-- City search: scrolls away with the page -->
+            <div class="location-bar">
+                <!-- Symmetry View Location Selector -->
+                <div id="symmetryLocationSelector" class="location-selector">
+                    <div class="input-wrapper">
+                        <input type="text" id="locationInput" placeholder="Search for your city…" autocomplete="off" enterkeyhint="search">
+                        <button class="clear-btn hidden" id="locationClearBtn" aria-label="Clear location">×</button>
+                    </div>
+                    <div id="locationDropdown" class="location-dropdown hidden"></div>
+                </div>
+
+                <!-- Cities Compare View Location Selectors -->
+                <div id="citiesLocationSelector" class="cities-selector hidden">
+                    <div class="city-selector">
+                        <div class="input-wrapper">
+                            <input type="text" id="city1Input" placeholder="Search first city…" autocomplete="off" enterkeyhint="search">
+                            <button class="clear-btn hidden" id="city1ClearBtn" aria-label="Clear city 1">×</button>
+                        </div>
+                        <div id="city1Dropdown" class="location-dropdown hidden"></div>
+                    </div>
+                    <div class="city-selector">
+                        <div class="input-wrapper">
+                            <input type="text" id="city2Input" placeholder="Search second city…" autocomplete="off" enterkeyhint="search">
+                            <button class="clear-btn hidden" id="city2ClearBtn" aria-label="Clear city 2">×</button>
+                        </div>
+                        <div id="city2Dropdown" class="location-dropdown hidden"></div>
+                    </div>
+                </div>
+            </div>
+
             <!-- Today Hero: today vs. its mirror date in the chosen city -->
             <section id="todayHero" class="today-hero hidden" aria-live="polite">
                 <div class="hero-title">
@@ -139,6 +141,7 @@
             
             <!-- Symmetry View Container -->
             <div id="symmetryContainer" class="comparison-container">
+                <button type="button" id="jumpToToday" class="jump-today hidden">Jump to today ↓</button>
                 <div class="dates-grid">
                     <!-- Current Month Column -->
                     <div class="column current-column">
@@ -238,6 +241,10 @@
                 <p>Calculating light...</p>
                 <small>Dawn · Sunrise · Sunset · Dusk</small>
             </div>
+            <!-- App version: small, at the very bottom (also in Settings) -->
+            <footer class="app-footer">
+                <div id="appVersion" class="app-version"></div>
+            </footer>
         </main>
     </div>
 

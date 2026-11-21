@@ -21,6 +21,13 @@ Solar Symmetry uses **Semantic Versioning** (MAJOR.MINOR.PATCH):
 
 ## Version History
 
+### 1.7.3 (2026-11-21)
+- Top bar: only the tabs and the gear stay fixed; the city search and the month heading scroll with the page. The version moved from the top to the very bottom of the page (small, centred; still in Settings)
+- Place names show the town, not the council district ("Southport", not "Sefton"): search and "Use my location" now use the most local place OpenStreetMap returns. A city saved before 1.7.3 keeps its old name until it's picked again
+- Today tile fits on small phones (iPhone SE): each label sits above its big time, so "Same light on" is fully visible next to Today
+- Day list: Daybreak and Dark by are the big times on every card; Sunrise, Sunset and the golden hours ("Golden 07:49–08:49") are small, one line each. Sunrise and sunset have different icons. A date and its mirror sit in one row with the same height and the same background; today's row is highlighted (today gold, its mirror outlined in gold)
+- The whole month (1st to last) is part of the normal page scroll; no more sideways-scrolling box on small phones. New "Jump to today ↓" link above the list scrolls smoothly to today's row (shown when the month includes today)
+
 ### 1.7.2 (2026-11-21)
 - Today tile: the two big times are now **Daybreak** (civil dawn: light enough to see outside) and **Dark by** (civil dusk), for today and its "Same light on" date. Sunrise, sunset and daylight stay on the tile, smaller, underneath. Near the poles it says "Light all night" or "Dark all day" where there's no civil dawn/dusk
 - Home screen order: Today tile, then "Light after work", then the month (e.g. November) with its day list
