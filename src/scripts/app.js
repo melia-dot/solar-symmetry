@@ -474,7 +474,7 @@ class SolarSymmetryApp {
 
         // Suggestions from the town list while typing; "Search for …" under
         // them asks OpenStreetMap for smaller places
-        const suggestions = await this.towns.search(query).catch(() => []);
+        const suggestions = await this.towns.search(query, { near: this.currentLocation }).catch(() => []);
         if (this.elements.locationInput.value !== query) return; // typed on since
         this.showLocationDropdown(suggestions, query);
     }
@@ -613,7 +613,7 @@ class SolarSymmetryApp {
 
         // Suggestions from the town list while typing (as in the Symmetry view)
         const input = cityNumber === 1 ? this.elements.city1Input : this.elements.city2Input;
-        const suggestions = await this.towns.search(query).catch(() => []);
+        const suggestions = await this.towns.search(query, { near: this.currentLocation }).catch(() => []);
         if (input.value !== query) return; // typed on since
         this.showCityDropdown(suggestions, cityNumber, query);
     }
@@ -1555,8 +1555,7 @@ class SolarSymmetryApp {
     renderCity1Column(citiesData) {
         const container = this.elements.city1Dates;
         container.innerHTML = '';
-        // "Jump to today" only when this month has today in it
-        this.elements.jumpToTodayCities.classList.toggle('hidden', !citiesData.some(item => item.isToday));
+        this.updateCitiesJumpLink(citiesData);
 
         citiesData.forEach(item => {
             const dateElement = this.createDateElement(
@@ -1569,6 +1568,15 @@ class SolarSymmetryApp {
 
         // Animate all cards with stagger
         this.animateCardEntrance(container);
+    }
+
+    /**
+     * Compare Cities "Jump to today": only once both cities are chosen and the
+     * month on screen includes today
+     */
+    updateCitiesJumpLink(citiesData = []) {
+        const show = !!(this.city1 && this.city2) && citiesData.some(item => item.isToday);
+        this.elements.jumpToTodayCities.classList.toggle('hidden', !show);
     }
 
     /**
@@ -1832,6 +1840,8 @@ class SolarSymmetryApp {
             this.elements.city2Input.focus();
         }
         
+        this.updateCitiesJumpLink();
+
         // Refresh the cities view if needed
         if (this.currentView === 'cities') {
             this.renderCitiesEmptyState();

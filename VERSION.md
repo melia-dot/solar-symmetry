@@ -21,6 +21,11 @@ Solar Symmetry uses **Semantic Versioning** (MAJOR.MINOR.PATCH):
 
 ## Version History
 
+### 1.8.1 (2026-11-21)
+- Town suggestions: exact name matches first, then places in your own country (the country of your saved city, or your phone's region before you've picked one), then the rest of the world. "South" in the UK now suggests Southend, Southampton, Southport, South Shields and Southall before South Tangerang. The last suggestion is kept for the biggest match abroad, so "Lon" in the US still shows London
+- Big cities now match only their modern names in their country's two main languages and English ("Göteborg", "München", "Wien", "København", "Bruxelles"); old, historical, colloquial and untagged names are gone, so "Skåne" no longer suggests Albany, New York. Built from GeoNames' language-tagged names (`alternateNamesV2.txt`, see `scripts/build-towns.mjs`)
+- Compare Cities: "Jump to today ↓" only shows once both cities are chosen and the month on screen includes today
+
 ### 1.8.0 (2026-11-21)
 - City suggestions while typing are back, in every search box (Symmetry, Compare Cities, welcome screens, Settings): "South" already suggests places, "Southp" shows the Southports, biggest first. They come from a list of ~172,000 towns (every place with 1,000+ people, from GeoNames, CC BY 4.0) inside the app (`src/data/towns.json`, ~7 MB; rebuilt with `scripts/build-towns.mjs`): instant, offline, and nothing typed leaves the phone. Accents and punctuation don't matter ("malmo", "st helens"), and big cities also match their local names ("Göteborg", "München", "Wien"). Typing ", us" or ", England" after the name narrows it down
 - Enter picks the top suggestion. Smaller places not in the list: "Search all places for …" under the suggestions (or the Search button on the welcome screens and in Settings) asks OpenStreetMap as before, which doesn't allow search-as-you-type

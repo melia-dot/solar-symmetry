@@ -130,7 +130,7 @@ class CityPicker {
     async suggest(query) {
         const id = this.searchId;
         const towns = query.trim().length >= 2
-            ? await TownSearch.shared.search(query).catch(() => [])
+            ? await TownSearch.shared.search(query, { near: this.current }).catch(() => [])
             : [];
         if (id !== this.searchId) return; // typed on, or a search started
         if (towns.length === 0) {

@@ -16,7 +16,8 @@
  * "st helens" finds St. Helens), knows big cities' other names ("göteborg"
  * finds Gothenburg), matches the start of the name or of any word
  * in it ("york" finds New York, after names starting with York), and takes an
- * optional ", region or country" ("southport, us"). Biggest places first.
+ * optional ", region or country" ("southport, us"). Places in the user's own
+ * country come first, then the rest of the world, biggest first.
  */
 class TownSearch {
     constructor(url = 'src/data/towns.json') {
@@ -62,10 +63,19 @@ class TownSearch {
     }
 
     /**
-     * Up to `limit` places for what's typed (at least 2 letters), biggest first
+     * Up to `limit` places for what's typed (at least 2 letters)
+     *
+     * Order: places with exactly the name typed; then places in the user's own
+     * country (from `near`, the saved city, else the phone's region setting);
+     * then the rest of the world. Bigger places first within each group. The
+     * last slot is kept for the biggest match abroad, so "lon" in the US still
+     * shows London.
+     *
+     * @param {Object} [options]
+     * @param {Object} [options.near] - the user's saved city ({ name: 'Southport, England, United Kingdom' })
      * @returns {Promise<Array>} same shape as GeocodingClient.searchLocations
      */
-    async search(query, limit = 6) {
+    async search(query, { near = null, limit = 6 } = {}) {
         const [placePart, ...rest] = String(query || '').split(',');
         const q = TownSearch.fold(placePart);
         if (q.length < 2) return [];
@@ -74,50 +84,79 @@ class TownSearch {
         // ", England" / ", US": only places whose region or country starts with it
         const where = TownSearch.fold(rest.join(' '));
         const whereCountry = TownSearch.COUNTRY_ALIASES[where];
-        const inPlace = (row) => {
+        const inPlace = (fields) => {
             if (!where) return true;
-            const f = row.split('\t');
-            const region = f[2] === '' ? '' : this.regionKeys[f[2]];
-            const country = this.countryKeys[f[3]];
+            const region = fields[2] === '' ? '' : this.regionKeys[fields[2]];
+            const country = this.countryKeys[fields[3]];
             return region.startsWith(where) || country.startsWith(where)
                 || (whereCountry !== undefined && country === whereCountry);
         };
+        const home = this.countryKeys.indexOf(TownSearch.fold(TownSearch.homeCountry(near)));
 
         // The list is biggest first, so the first `limit` hits of each kind are
-        // the biggest of that kind
-        const starts = [];  // the name starts with what's typed
-        const others = [];  // another name does ("göteborg" -> Gothenburg)
-        const words = [];   // a later word in the name does ("york" -> New York)
+        // the biggest of that kind. Kinds: the name starts with what's typed;
+        // another (local) name does ("göteborg" -> Gothenburg); a later word in
+        // the name does ("york" -> New York). Each at home and abroad.
+        const found = { start: [[], []], other: [[], []], word: [[], []] };
         const wordStart = ` ${q}`;
         const otherStart = `|${q}`;
         for (let i = 0; i < this.names.length; i++) {
             const name = this.names[i];
-            const list = name.startsWith(q) ? starts
-                : this.others[i].includes(otherStart) ? others
-                : name.includes(wordStart) ? words
+            const kind = name.startsWith(q) ? 'start'
+                : this.others[i].includes(otherStart) ? 'other'
+                : name.includes(wordStart) ? 'word'
                 : null;
-            if (!list || list.length >= limit || !inPlace(this.rows[i])) continue;
-            list.push(this.toLocation(i));
-            if (starts.length >= limit && others.length >= limit && words.length >= limit) break;
+            if (!kind) continue;
+            const fields = this.rows[i].split('\t');
+            const atHome = Number(fields[3]) === home ? 0 : 1;
+            const list = found[kind][atHome];
+            if (list.length >= limit || !inPlace(fields)) continue;
+            const town = this.toLocation(i);
+            town.exact = name === q;
+            town.viaOtherName = kind === 'other';
+            list.push(town);
         }
 
         // A match on another name ranks as if the place were 20 times smaller:
-        // "münch" puts Munich first, but "so" doesn't put Seoul ("Soul") first.
-        // The exact name typed comes first ("york": York before New York City)
-        const rank = (town) => {
-            if (others.includes(town)) return town.population / 20;
-            return town.population * (TownSearch.fold(town.name.split(',')[0]) === q ? 1000 : 1);
-        };
-        const ranked = starts.concat(others).sort((a, b) => rank(b) - rank(a)).concat(words);
+        // "münch" puts Munich first, but "so" doesn't put Seoul first
+        const rank = (town) => town.population / (town.viaOtherName ? 20 : 1);
+        const group = (side) => found.start[side].concat(found.other[side])
+            .sort((a, b) => rank(b) - rank(a))
+            .concat(found.word[side]);
+        const atHome = group(0);
+        const abroad = group(1);
+        const exact = atHome.concat(abroad).filter((town) => town.exact);
+        const homeRest = atHome.filter((town) => !town.exact);
+        const abroadRest = abroad.filter((town) => !town.exact);
+        const homeSlots = abroadRest.length > 0 ? limit - 1 : limit;
+        const ordered = exact.concat(homeRest.slice(0, Math.max(0, homeSlots - exact.length)), abroadRest, homeRest);
 
         // "St Helens" and "St. Helens" in the same region: keep the biggest
         const seen = new Set();
-        return ranked.filter((town) => {
+        return ordered.filter((town) => {
             const same = TownSearch.fold(town.name);
             if (seen.has(same)) return false;
             seen.add(same);
+            delete town.exact;
+            delete town.viaOtherName;
             return true;
         }).slice(0, limit);
+    }
+
+    /**
+     * The user's country name: from their saved city ("…, United Kingdom"),
+     * else from the phone's region setting (en-GB -> United Kingdom), else null
+     */
+    static homeCountry(near) {
+        if (near && near.name && near.name.includes(',')) {
+            return near.name.slice(near.name.lastIndexOf(',') + 1).trim();
+        }
+        try {
+            const region = new Intl.Locale(navigator.language).maximize().region;
+            return region ? new Intl.DisplayNames(['en'], { type: 'region' }).of(region) : null;
+        } catch (error) {
+            return null;
+        }
     }
 
     toLocation(i) {
