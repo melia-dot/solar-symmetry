@@ -2,7 +2,8 @@
 
 Goal: ship Solar Symmetry to the Apple App Store and Google Play as a small
 commercial app. Free core, one-time £1.99 unlock for the "Companion" features.
-The web PWA (GitHub Pages) must keep working throughout.
+The web version (PWA on GitHub Pages) is **retired** (decided 2026-11-21): the native
+apps are the product, and the website no longer has to keep working.
 
 ## Where we are (v1.4.0)
 
@@ -20,8 +21,6 @@ The web PWA (GitHub Pages) must keep working throughout.
   (Capacitor, plugin READMEs, Firebase, Apple, Google) before using anything, and
   say so if unsure.
 - Work on a branch per phase. Don't push to `main` without asking: `main` deploys live.
-- The web build must keep working. Native-only features go behind a platform check
-  (`Capacitor.isNativePlatform()` or equivalent; verify in current docs).
 - Stop and ask the human at every step that needs their accounts, money, or a decision.
 - The human is a product manager, not a developer: explain choices briefly in plain words.
 
@@ -42,6 +41,11 @@ The web PWA (GitHub Pages) must keep working throughout.
 7. Phase 2 (decided 2026-11-20): onboarding + Settings in the **native app only**; the
    website stays as it is. Privacy policy / terms use a **`[CONTACT EMAIL]` placeholder**
    until the human chooses a public address.
+8. Web version **retired** (decided 2026-11-21). No need to keep the website working
+   or to put new features behind a platform check. Existing `isNativeApp()` checks
+   can stay until there's a reason to remove them.
+9. Privacy policy + terms: **a public Notion page in Mikael's name** (decided
+   2026-11-21), not GitHub Pages.
 
 ## Phase 1: Native shell (Capacitor)
 
@@ -92,9 +96,7 @@ orange/charcoal-on-white look no longer matches it. Let the icon lead.
 **4. Month list + Compare Cities**
 - Softer cards on the cream background; today's card highlighted in amber, not orange
 
-**5. Evening mode (nice to have)**
-- After local sunset, switch to a dark warm theme (night/plum background, cream text).
-  Also respect the phone's dark mode setting. Ask the human before building if unsure.
+**5. Evening mode:** moved to Phase 1c, after Phase 2 (decided 2026-11-21).
 
 **Ground rules:** CSS-first, no new libraries; keep it calm and soft (the audience
 dislikes winter darkness and may be anxious: no harsh contrast, no alarming reds).
@@ -116,8 +118,9 @@ Shown once on first launch; answers stored on the device. Add a hidden
   the OS notification permission prompt. Never fire the OS prompt cold.
 - **Settings screen:** city, notification time, messages per day (0–3, default 1),
   analytics on/off, privacy policy, terms, restore purchase, app version
-- **Privacy policy + terms:** simple pages on GitHub Pages, linked from Settings and
-  the store listings. Draft them; the human reviews.
+- **Privacy policy + terms:** a public Notion page in Mikael's name (decided), linked
+  from Settings and the store listings. Draft the text; the human reviews it and
+  publishes it in Notion, then gives us the link.
 
 UK GDPR / PECR notes: consent must be active, optional and changeable. No pre-ticked
 boxes, no "by using this app you agree". Check the ICO's current guidance on analytics
@@ -125,6 +128,20 @@ boxes, no "by using this app you agree". Check the ICO's current guidance on ana
 
 **Done when:** a fresh install walks through the 3 screens once; all choices can be
 changed in Settings; analytics never runs without Yes.
+
+## Phase 1c: Evening mode
+
+Moved here from Phase 1b (decided 2026-11-21). Uses the Phase 1b colour tokens in
+`src/styles/main.css`.
+
+- After local sunset, switch to a dark warm theme (night/plum background, cream text)
+- Also respect the phone's dark mode setting. Phase 1 locked the iOS app to light
+  mode (`UIUserInterfaceStyle` in `ios/App/App/Info.plist`); undo that here
+- Keep it calm and soft: no harsh contrast; check text contrast (WCAG AA)
+- Bump the minor version; show before/after screenshots
+
+**Done when:** the app turns warm and dark after sunset (and with phone dark mode on),
+and back again in the morning, with readable text everywhere.
 
 ## Phase 3: Companion notifications (on device, no backend)
 
