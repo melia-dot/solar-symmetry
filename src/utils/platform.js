@@ -49,6 +49,12 @@ function onAppReady() {
  * Native app only: a Capacitor plugin by its registered name ('Geolocation',
  * 'LocalNotifications', 'Browser', ...), or null on the web. No build step:
  * registerPlugin gives a proxy that talks to the plugin's native code.
+ *
+ * The proxy answers EVERY property as a plugin method, including `then`. So
+ * returning it from this async function made `await nativePlugin(...)` call
+ * "LocalNotifications.then()" on the phone, which doesn't exist, and the await
+ * never finished (v1.7.0: notification and location buttons hung). We hand
+ * back a wrapper that has no `then`, so it can be awaited safely.
  * @returns {Promise<Object|null>}
  */
 const nativePlugins = new Map();
@@ -56,7 +62,10 @@ async function nativePlugin(name) {
     if (!capacitorCoreReady) return null;
     await capacitorCoreReady;
     if (!nativePlugins.has(name)) {
-        nativePlugins.set(name, window.Capacitor.registerPlugin(name));
+        const plugin = window.Capacitor.registerPlugin(name);
+        nativePlugins.set(name, new Proxy({}, {
+            get: (_, prop) => (prop === 'then' ? undefined : plugin[prop]),
+        }));
     }
     return nativePlugins.get(name);
 }

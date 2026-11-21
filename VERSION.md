@@ -21,6 +21,11 @@ Solar Symmetry uses **Semantic Versioning** (MAJOR.MINOR.PATCH):
 
 ## Version History
 
+### 1.7.1 (2026-11-21)
+- Fixed: after "Turn on messages" the welcome screens could start again from screen 1 instead of opening the app. On iPhone, waiting for a native plugin (notifications, location, in-app browser) never finished, so the notification and "Use my location" buttons hung; now they work
+- Onboarding is now saved (done, with your chosen moments) before the phone asks about notifications, so it always ends in the app, whether you tap Allow or Don't Allow
+- Pull-to-refresh no longer works on top of the welcome screens or Settings, and a plain tap can no longer count as a pull (both could reload the app)
+
 ### 1.7.0 (2026-11-21)
 - Welcome screens on first launch (Phase 2): pick your city (search or "Use my location"), an optional Yes / No for anonymous usage stats (off unless you say Yes), and the companion messages with a preview and the choice of Morning / Before sunset / After dark (default Morning only). The phone only asks about notifications after "Turn on messages"
 - New Settings screen (gear icon): city, companion moments (each one ticked is one message a day), usage stats on/off, privacy policy and terms (links coming), OpenStreetMap credit, version. Tapping the version 5 times shows "Reset onboarding" for testing

@@ -162,16 +162,27 @@ class Onboarding {
     async turnOnMessages() {
         const button = this.root.querySelector('.ob-notify');
         button.disabled = true;
+        // Save first: onboarding is done and the ticked moments are kept, even
+        // if the app is paused, reloaded or closed while the phone's prompt is up
+        this.save(true);
         // The OS prompt appears now, straight after the user asked for messages
         const permission = await CompanionNotifications.request();
+        // Don't Allow: no messages (they can turn them on later in Settings)
         this.finish(permission === 'granted' || permission === 'unavailable');
     }
 
     /** @param {boolean} messagesOn - keep the ticked moments, or none if false */
-    finish(messagesOn) {
+    save(messagesOn) {
         const moments = {};
         AppSettings.MOMENTS.forEach((m) => { moments[m] = messagesOn && !!this.moments[m]; });
         AppSettings.update({ onboardingDone: true, moments });
+    }
+
+    /** @param {boolean} messagesOn - keep the ticked moments, or none if false */
+    finish(messagesOn) {
+        if (this.finished) return;
+        this.finished = true;
+        this.save(messagesOn);
 
         this.root.classList.add('is-leaving');
         const remove = () => {
