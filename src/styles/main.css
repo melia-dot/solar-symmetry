@@ -2212,6 +2212,16 @@ body.overlay-open {
         width: 11px;
         height: 11px;
     }
+
+    /* "Golden am 07:11–08:04" only fits a small phone's card on one line
+       without the camera icon (the label already says what it is) */
+    .day-small .day-row.golden-hour {
+        grid-template-columns: auto 1fr;
+    }
+
+    .day-small .golden-hour svg {
+        display: none;
+    }
 }
 
 /* "Jump to today" just above the day list */

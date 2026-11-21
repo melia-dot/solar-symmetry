@@ -862,6 +862,19 @@ class SolarSymmetryApp {
     }
     
     /**
+     * Light after work: is sunset after 5pm on this day? Uses the sunset time
+     * exactly as the day list shows it (HH:MM in the city's time zone), so the
+     * tile and the day list always agree: "17:01" counts, "17:00" doesn't.
+     * Midnight sun ("Up all day") counts as light; polar night doesn't.
+     */
+    sunsetAfterWork(data) {
+        if (!data || !data.sunset) return false;
+        if (data.sunset === 'Up all day') return true;
+        const match = /^(\d{1,2}):(\d{2})$/.exec(data.sunset);
+        return !!match && Number(match[1]) * 60 + Number(match[2]) > 17 * 60;
+    }
+
+    /**
      * Calculate and display light after work countdown
      */
     async updateLightAfterWorkTimer() {
@@ -869,91 +882,56 @@ class SolarSymmetryApp {
             this.elements.lightAfterWorkCard.classList.add('hidden');
             return;
         }
-        
+
         const today = new Date();
-        const targetTime = '17:00'; // 5pm
         const location = this.currentLocation;
 
         try {
-            // Get today's sunset
-            const todayData = await this.twilight.getTwilightTimes(
-                today,
-                location.lat,
-                location.lng
-            );
+            const todayData = await this.twilight.getTwilightTimes(today, location.lat, location.lng);
 
             // Location changed while waiting: don't show stale data
             if (this.currentLocation !== location) return;
 
-            const todaySunsetTime = todayData.sunset;
-            
-            // Check if we currently have light after 5pm
-            const sunsetHour = parseInt(todaySunsetTime.split(':')[0]);
-            const sunsetMinute = parseInt(todaySunsetTime.split(':')[1]);
-            const sunsetTotalMinutes = sunsetHour * 60 + sunsetMinute;
-            const targetMinutes = 17 * 60; // 5pm
-            
-            if (sunsetTotalMinutes > targetMinutes) {
-                // We currently have light after work!
+            if (this.sunsetAfterWork(todayData)) {
                 this.showLightAfterWorkCountdown(today, todayData, true);
             } else {
-                // Find when light returns after work
-                this.findWhenLightReturns(targetMinutes, location);
+                this.findWhenLightReturns(location);
             }
-            
         } catch (error) {
             console.error('Failed to calculate light after work:', error);
             this.elements.lightAfterWorkCard.classList.add('hidden');
         }
     }
-    
+
     /**
-     * Find when sunset will be after target time
+     * Find the first day sunset is after 5pm. Checks every single day (the sun
+     * times are calculated on the phone, so a year of days is instant); it used
+     * to jump a week at a time and could land up to 6 days late.
      */
-    async findWhenLightReturns(targetMinutes, location = this.currentLocation) {
+    async findWhenLightReturns(location = this.currentLocation) {
         const today = new Date();
-        const searchLimit = 365; // Search up to 1 year ahead
 
-        for (let daysAhead = 1; daysAhead < searchLimit; daysAhead++) {
-            const futureDate = new Date(today);
-            futureDate.setDate(today.getDate() + daysAhead);
-
-            const futureData = await this.twilight.getTwilightTimes(
-                futureDate,
-                location.lat,
-                location.lng
-            );
+        for (let daysAhead = 1; daysAhead <= 366; daysAhead++) {
+            const futureDate = new Date(today.getFullYear(), today.getMonth(), today.getDate() + daysAhead);
+            const futureData = await this.twilight.getTwilightTimes(futureDate, location.lat, location.lng);
 
             // Location changed while searching: stop, the new search owns the card
             if (this.currentLocation !== location) return;
 
-            const sunsetTime = futureData.sunset;
-            const sunsetHour = parseInt(sunsetTime.split(':')[0]);
-            const sunsetMinute = parseInt(sunsetTime.split(':')[1]);
-            const sunsetTotalMinutes = sunsetHour * 60 + sunsetMinute;
-            
-            if (sunsetTotalMinutes > targetMinutes) {
-                // Found it!
-                this.showLightAfterWorkCountdown(futureDate, futureData, false);
+            if (this.sunsetAfterWork(futureData)) {
+                this.showLightAfterWorkCountdown(futureDate, futureData, false, daysAhead);
                 return;
             }
-            
-            // Check every 7 days for efficiency
-            if (daysAhead < 30) {
-                daysAhead += 6; // Will increment by 1 in loop, so effectively +7
-            } else {
-                daysAhead += 13; // Check every 2 weeks after a month
-            }
         }
-        
-        // If we didn't find it, hide the card
+
+        // Never after 5pm within a year: hide the card
         this.elements.lightAfterWorkCard.classList.add('hidden');
     }
-    
+
     /**
      * Display light after work countdown
      */
-    showLightAfterWorkCountdown(targetDate, twilightData, hasLightNow) {
+    showLightAfterWorkCountdown(targetDate, twilightData, hasLightNow, daysUntil = 0) {
         this.elements.lightAfterWorkCard.classList.remove('hidden');
         
         if (hasLightNow) {
@@ -963,13 +941,10 @@ class SolarSymmetryApp {
             this.elements.lightAfterWorkCountdown.textContent = 'Enjoy the daylight';
             this.elements.lightAfterWorkCard.classList.add('has-light');
         } else {
-            // Countdown to light return
-            const today = new Date();
-            const daysUntil = Math.ceil((targetDate - today) / (1000 * 60 * 60 * 24));
-            
+            // Countdown to light return (whole calendar days, so a clock change can't add one)
             this.elements.lightAfterWorkTitle.textContent = 'Light Returns After Work';
             this.elements.lightAfterWorkMessage.textContent = 'Sunset will be after 5pm on ' + this.dateCalc.formatDate(targetDate);
-            this.elements.lightAfterWorkCountdown.textContent = daysUntil + ' days';
+            this.elements.lightAfterWorkCountdown.textContent = daysUntil === 1 ? '1 day' : daysUntil + ' days';
             this.elements.lightAfterWorkCard.classList.remove('has-light');
             
             // Animate countdown
@@ -1611,8 +1586,8 @@ class SolarSymmetryApp {
                 <div class="day-small">
                     <div class="day-row"><i data-lucide="sunrise"></i><span>Sunrise</span><strong>${twilightData.sunrise}</strong></div>
                     <div class="day-row"><i data-lucide="sunset"></i><span>Sunset</span><strong>${twilightData.sunset}</strong></div>
-                    <div class="day-row golden-hour${golden}"><i data-lucide="camera"></i><span>Golden</span><strong>${span(twilightData.goldenHourMorningStart, twilightData.goldenHourMorningEnd)}</strong></div>
-                    <div class="day-row golden-hour${golden}"><i data-lucide="camera"></i><span>Golden</span><strong>${span(twilightData.goldenHourEveningStart, twilightData.goldenHourEveningEnd)}</strong></div>
+                    <div class="day-row golden-hour${golden}"><i data-lucide="camera"></i><span>Golden am</span><strong>${span(twilightData.goldenHourMorningStart, twilightData.goldenHourMorningEnd)}</strong></div>
+                    <div class="day-row golden-hour${golden}"><i data-lucide="camera"></i><span>Golden pm</span><strong>${span(twilightData.goldenHourEveningStart, twilightData.goldenHourEveningEnd)}</strong></div>
                 </div>
             `;
             if (window.lucide) {
